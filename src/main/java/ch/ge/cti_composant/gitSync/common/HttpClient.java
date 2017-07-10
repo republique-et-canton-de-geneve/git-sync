@@ -1,12 +1,14 @@
 package ch.ge.cti_composant.gitSync.common;
 
 import org.apache.commons.lang.Validate;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -26,32 +28,38 @@ public class HttpClient {
 	private static final int TIMEOUT = 1500; // 1.5 secondes
 	private String url;
 	private List<NameValuePair> parameters;
+	private String method;
+	private String output;
 
 	/**
 	 * Constructeur.
 	 *
-	 * @param url l'URL à pinger.
+	 * @param url l'URL à atteindre.
 	 */
 
 	public HttpClient(String url) {
 		Validate.notNull(url);
 		this.url = url.trim();
+		this.parameters = new LinkedList<>();
+		this.method = "get";
 	}
 
 	/**
 	 * Constructeur.
 	 *
-	 * @param URL      l'URL à pinger.
+	 * @param URL l'URL à pinger.
 	 */
 
-	public HttpClient(String URL, LinkedList<NameValuePair> parameters) {
+	public HttpClient(String URL, String method, LinkedList<NameValuePair> parameters) {
 		this(URL);
 		this.parameters = new LinkedList<>(parameters);
+		this.method = method;
 	}
 
 
 	/**
 	 * Exécute la requête.
+	 *
 	 * @return bool Vrai si la requête s'est bien passée, sinon faux.
 	 */
 	public boolean execute() {
@@ -59,16 +67,26 @@ public class HttpClient {
 			// Construction de l'executor avec ou sans authentification.
 			Executor executor = Executor.newInstance();
 			// Building request
-			Request request = Request.Post(this.url + "?" + URLEncodedUtils.format(parameters, "utf-8"));
+			Request request;
+			String uri = this.url + "?" + URLEncodedUtils.format(parameters, "utf-8");
+			switch (method) {
+				case "post":
+					request = Request.Post(uri);
+				default:
+					request = Request.Get(uri);
+			}
+
 			Properties p = new Properties();
 			p.load(HttpClient.class.getResourceAsStream("/distribution.properties"));
 			request.addHeader("PRIVATE-TOKEN", p.getProperty("gitlab.account.token"));
 			request.connectTimeout(TIMEOUT);
 
 			Response response = executor.execute(request);
-			StatusLine statusLine = response.returnResponse().getStatusLine();
+			HttpResponse httpResponse = response.returnResponse();
+			StatusLine statusLine = httpResponse.getStatusLine();
 			int code = statusLine.getStatusCode();
-			if (code / 100 == 2){
+			this.output = EntityUtils.toString(httpResponse.getEntity());
+			if (code / 100 == 2) {
 				// Okay, good messages
 				log.info("Requête " + request.toString() + " exécutée avec succès.");
 				return true;
@@ -83,4 +101,7 @@ public class HttpClient {
 	}
 
 
+	public String getContent() {
+		return output;
+	}
 }

@@ -1,72 +1,49 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.common.HttpClient;
-import gina.api.GinaApiLdapBaseAble;
-import gina.api.GinaApiLdapBaseFactory;
-import gina.api.GinaException;
-import javafx.application.Application;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.apache.log4j.Logger;
+import org.gitlab.api.models.CreateGroupRequest;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Pattern;
 
 public class ImportGroupsFromLDAP implements Mission {
 	Logger log = Logger.getLogger(ImportGroupsFromLDAP.class.getName());
-	final private static String ADMIN_LDAP_GROUP = "***REMOVED***";
 
 	/**
 	 * Charge les rôles Gina, puis crée les groupes dans GitLab.
+	 * @implNote Le/s groupe/s considérés comme admins n'auront pas de groupe créé.
 	 */
 	@Override
-	public void start() {
-		log.info("Synchronisation : LDAP Groups to GitLab Groups");
-		Properties props = new Properties();
-		try {
-			// Chargement du fichier de properties
-			props.load(ImportGroupsFromLDAP.class.getResourceAsStream("/distribution.properties"));
-			GinaApiLdapBaseAble api = GinaApiLdapBaseFactory.getInstanceApplication();
-			Pattern groupRegexp = Pattern.compile(props.getProperty("ldap.regex.match-group"));
-			log.info("Recherche des groupes grâce au regexp suivant : " + props.getProperty("ldap.regex.match-group"));
-
-			// Parse des groupes
-			List<String> roles = api.getAppRoles("GESTREPO");
-
-			// Feedback user
-			log.info("Récupération des groupes terminée. Groupes détectés : ");
-			roles.forEach(role -> log.info(role + (isLDAPGroupAdmin(role) ? " *" : "")));
-			log.info("Groupe au total : " + roles.size());
-			log.info("(le groupe marqué par * est un groupe admin)");
-			log.info("======================================================");
-
-			// Envoi dans GitLab.
-			roles.stream()
-					.filter(role -> !isLDAPGroupAdmin(role)) // Les admins n'ont pas de groupe sur GitLab.
-					.forEach(role -> {
-				LinkedList<NameValuePair> params = new LinkedList<>();
-				params.add(new BasicNameValuePair("name", role));
-				params.add(new BasicNameValuePair("path", role));
-				params.add(new BasicNameValuePair("visibility", "public"));
-				params.add(new BasicNameValuePair("request_access_enabled", "false"));
-				HttpClient http = new HttpClient("***REMOVED***/api/v4/groups", params);
-				if (!http.execute()){
-					log.warn("Le message semble ne pas s'être envoyé correctement.");
+	public void start(LDAPTree ldapTree, Gitlab gitlab) {
+		log.info("Synchronisation : Groupes LDAP à groupes GitLab");
+		ldapTree.getGroups().forEach(ldapGroup -> {
+			if (isLDAPGroupAdmin(ldapGroup.getName())){
+				log.info("Groupe administrateur détecté, pas de création de groupe.");
+				// NOTE les utilisateurs administrateurs sont dans une mission à part. Donc rien n'est fait ici...
+			} else {
+				try	{
+					gitlab.getApi().getGroup(ldapGroup.getName());
+					log.debug("Le groupe " + ldapGroup.getName() + " existe. Rien ne sera fait.");
+				} catch (IOException e) {
+					log.info("Groupe inexistant sur GitLab détecté : " + ldapGroup.getName() + " ! Création en cours...");
+					// Création du groupe
+					CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
+					createGroupRequest.setVisibility("private");
+					try	{
+						gitlab.getApi().createGroup(createGroupRequest, gitlab.getApi().getUser());
+					} catch (IOException e2){
+						log.fatal("Impossible de créer le groupe " + ldapGroup.getName() + " : " + e2);
+					}
 				}
-				System.exit(0);
-			});
-		} catch (GinaException | RemoteException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			log.error("Impossible de trouver le fichier distribution.properties. Arrêt.");
-		}
+
+			}
+		});
+		log.info("Synchronisation terminée.");
 	}
 
-	private static boolean isLDAPGroupAdmin(String role){
-		return role.equals(ADMIN_LDAP_GROUP);
+	private static boolean isLDAPGroupAdmin(String role) {
+		return role.equals(MiscConstants.ADMIN_LDAP_GROUP);
 	}
 }
