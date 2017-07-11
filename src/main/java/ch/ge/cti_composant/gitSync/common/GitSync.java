@@ -1,6 +1,9 @@
 package ch.ge.cti_composant.gitSync.common;
 
-import ch.ge.cti_composant.gitSync.missions.DestroyTestGroups;
+import ch.ge.cti_composant.gitSync.missions.AddAuthorizedUsersToGroups;
+import ch.ge.cti_composant.gitSync.missions.CleanGroupsFromUnauthorizedUsers;
+import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLDAP;
+import ch.ge.cti_composant.gitSync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -32,11 +35,13 @@ public class GitSync {
 			init();
 
 			// Importe les groupes LDAP vers GitLab
-			//new ImportGroupsFromLDAP().start(ldapTree, gitlab);
-			// Synchronise les utilisateurs
-			//new SyncUsersWithLDAP().start(ldapTree, gitlab);
-			// Supprime les groupes de test
-			new DestroyTestGroups().start(ldapTree, gitlab);
+			new ImportGroupsFromLDAP().start(ldapTree, gitlab);
+			// Supprime les utilisateurs non autorisés
+			new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
+			// Ajoute ceux qui le sont (nouvelles perms)
+			new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+			// Ajoute les admins
+			new PromoteAdminUsers().start(ldapTree, gitlab);
 		} catch (IOException e) {
 			log.fatal("Erreur lors du chargement de l'arborescence LDAP/Gitlab. L'erreur était : " + e);
 		}

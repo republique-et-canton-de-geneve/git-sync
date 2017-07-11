@@ -57,11 +57,12 @@ public class LDAPTree implements AnnuaireTree {
 	}
 
 	public Map<String, LDAPUser> getUsers(LDAPGroup group){
-		return new HashMap<>(ldapTree.getOrDefault(ldapTree.get(group), new HashMap<>()));
+		return new HashMap<>(ldapTree.getOrDefault(group, new HashMap<>()));
 	}
 
 	public Map<String, LDAPUser> getUsers(String group){
 		return getUsers(new LDAPGroup(group));
 	}
+
 
 }

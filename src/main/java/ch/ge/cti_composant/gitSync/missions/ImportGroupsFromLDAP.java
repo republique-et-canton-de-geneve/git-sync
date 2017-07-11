@@ -37,7 +37,6 @@ public class ImportGroupsFromLDAP implements Mission {
 						log.fatal("Impossible de créer le groupe " + ldapGroup.getName() + " : " + e2);
 					}
 				}
-
 			}
 		});
 		log.info("Synchronisation terminée.");

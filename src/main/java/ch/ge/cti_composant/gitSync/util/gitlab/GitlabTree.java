@@ -1,6 +1,7 @@
 package ch.ge.cti_composant.gitSync.util.gitlab;
 
 import ch.ge.cti_composant.gitSync.util.AnnuaireTree;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import org.apache.log4j.Logger;
 import org.gitlab.api.GitlabAPI;
@@ -37,7 +38,7 @@ public class GitlabTree implements AnnuaireTree {
 		api.getGroups().forEach(gitlabGroup -> {
 			gitlabTree.put(gitlabGroup, new HashMap<>());
 			try {
-				api.getGroupMembers(gitlabGroup).forEach(user -> gitlabTree.get(gitlabGroup).put(user.getName(), user));
+				api.getGroupMembers(gitlabGroup).forEach(user -> gitlabTree.get(gitlabGroup).put(user.getUsername(), user));
 			} catch (IOException e){
 				log.error("Une erreur s'est produite lors de la synchronisation du groupe " + gitlabGroup.getName() + " : " + e);
 			}
@@ -49,6 +50,14 @@ public class GitlabTree implements AnnuaireTree {
 	}
 
 	public Map<String, GitlabUser> getUsers(GitlabGroup group){
-		return new HashMap<>(gitlabTree.getOrDefault(gitlabTree.get(group), new HashMap<>()));
+		return new HashMap<>(gitlabTree.getOrDefault(group, new HashMap<>()));
+	}
+
+	public Map<String, GitlabUser> getUsers(){
+		HashMap<String, GitlabUser> output = new HashMap<>();
+		gitlabTree.forEach((group, users) -> {
+			output.putAll(new HashMap<>(users));
+		});
+		return output;
 	}
 }
