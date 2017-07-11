@@ -9,8 +9,13 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class);
 
 	public static void main(String[] args){
-		log.info("Démarrage de l'utilitaire de synchronisation LDAP <=> Git.");
-		new GitSync().run(); // Boot
-		log.info("Synchronisation terminée. Bonne nuit...");
+		if (args.length != 1) {
+			log.fatal("Maximum un argument (arg1 : path distribution.properties)");
+		} else {
+			log.info("Démarrage de l'utilitaire de synchronisation LDAP <=> Git.");
+			new GitSync().run(args[0]); // Boot
+			log.info("Synchronisation terminée. Bonne nuit...");
+		}
+
 	}
 }
