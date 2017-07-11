@@ -11,6 +11,8 @@ import ch.ge.cti_composant.gitSync.util.gitlab.GitlabTree;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 
@@ -29,9 +31,9 @@ public class GitSync {
 		gitlab = new Gitlab(new GitlabTree(props.getProperty("gitlab.account.token")), MiscConstants.GITLAB_BASE_URL_API, props.getProperty("gitlab.account.token"));
 	}
 
-	public void run() {
+	public void run(String path) {
 		try {
-			props.load(GitSync.class.getResourceAsStream("/distribution.properties"));
+			props.load(Files.newInputStream(Paths.get(path)));
 			init();
 
 			// Importe les groupes LDAP vers GitLab
