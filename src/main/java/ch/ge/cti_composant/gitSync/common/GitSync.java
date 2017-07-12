@@ -28,7 +28,10 @@ public class GitSync {
 
 	private void init() throws IOException {
 		ldapTree = new LDAPTree();
-		gitlab = new Gitlab(new GitlabTree(props.getProperty("gitlab.account.token")), MiscConstants.GITLAB_BASE_URL_API, props.getProperty("gitlab.account.token"));
+		gitlab = new Gitlab(
+				new GitlabTree(props.getProperty("gitlab.account.token"), props.getProperty("gitlab.hostname")),
+				props.getProperty("gitlab.hostname"), props.getProperty("gitlab.account.token")
+		);
 	}
 
 	public void run(String path) {

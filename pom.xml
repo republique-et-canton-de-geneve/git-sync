@@ -20,18 +20,6 @@
     </scm>
 
     <dependencies>
-        <!-- Client used to call REST APIs -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>fluent-hc</artifactId>
-            <version>4.5.1</version>
-        </dependency>
-
         <!-- LDAP client -->
         <dependency>
             <groupId>ch.ge.cti.ct</groupId>
