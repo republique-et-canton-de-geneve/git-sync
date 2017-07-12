@@ -20,12 +20,14 @@ import java.util.Map;
 public class GitlabTree implements AnnuaireTree {
 	Logger log = Logger.getLogger(GitlabTree.class.getName());
 	String apiToken;
+	String hostname;
 
 	private Map<GitlabGroup, Map<String, GitlabUser>> gitlabTree;
 
-	public GitlabTree(String apiToken) throws IOException {
+	public GitlabTree(String apiToken, String hostname) throws IOException {
 		gitlabTree = new HashMap<>();
 		this.apiToken = apiToken;
+		this.hostname = hostname;
 		build();
 	}
 
@@ -34,7 +36,7 @@ public class GitlabTree implements AnnuaireTree {
 	 * @throws IOException Erreur
 	 */
 	public void build() throws IOException {
-		GitlabAPI api = GitlabAPI.connect(MiscConstants.GITLAB_BASE_URL_API, apiToken);
+		GitlabAPI api = GitlabAPI.connect(hostname, apiToken);
 		api.getGroups().forEach(gitlabGroup -> {
 			gitlabTree.put(gitlabGroup, new HashMap<>());
 			try {
