@@ -2,6 +2,7 @@ package ch.ge.cti_composant.gitSync.missions;
 
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.apache.log4j.Logger;
 import org.gitlab.api.GitlabAPI;
@@ -71,8 +72,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 					} else if (
 							!ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()) &&
-									(member.getUsername().equals(gitlab.getApi().getUser().getUsername()) ||
-									member.isAdmin())) {
+									(isUserAdmin(member, gitlab, ldapTree))) {
 						log.debug("L'utilisateur " + member.getUsername() + " est admin. Ignoré.");
 					} else {
 						log.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName() + ".");
@@ -85,5 +85,16 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		} else {
 			log.warn("Le groupe " + gitlabGroup.getName() + " n'est pas un groupe reconnu du LDAP.");
 		}
+	}
+
+	private boolean isUserAdmin(GitlabGroupMember member, Gitlab gitlab, LDAPTree ldapTree){
+		try{
+			return member.getUsername().equals(gitlab.getApi().getUser().getUsername()) ||
+					member.isAdmin() ||
+					ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(member.getUsername());
+		} catch (IOException e){
+			log.error("Erreur pendant l'évaluation des privilèges de l'utilisateur " + member.getUsername());
+		}
+		return false;
 	}
 }
