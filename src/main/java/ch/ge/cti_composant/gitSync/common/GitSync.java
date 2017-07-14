@@ -41,13 +41,13 @@ public class GitSync {
 			init();
 
 			// Importe les groupes LDAP vers GitLab
-			//new ImportGroupsFromLDAP().start(ldapTree, gitlab);
+			new ImportGroupsFromLDAP().start(ldapTree, gitlab);
 			// Supprime les utilisateurs non autorisés
-			//new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
+			new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
 			// Ajoute ceux qui le sont (nouvelles perms)
-			//new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+			new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
 			// Ajoute les admins
-			//new PromoteAdminUsers().start(ldapTree, gitlab);
+			new PromoteAdminUsers().start(ldapTree, gitlab);
 			// Ajoute les admins à tous les groupes
 			new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
 		} catch (IOException e) {
