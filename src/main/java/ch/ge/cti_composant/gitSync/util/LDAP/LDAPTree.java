@@ -1,6 +1,5 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
-import ch.ge.cti_composant.gitSync.util.AnnuaireTree;
 import gina.api.GinaApiLdapBaseAble;
 import gina.api.GinaApiLdapBaseFactory;
 import org.apache.log4j.Logger;
@@ -15,7 +14,7 @@ import java.util.Map;
 /**
  * Représente l'arbre des utilisateurs LDAP.
  */
-public class LDAPTree implements AnnuaireTree {
+public class LDAPTree {
 	// Logger
 	Logger log = Logger.getLogger(LDAPTree.class.getName());
 	// Carte
