@@ -1,9 +1,6 @@
 package ch.ge.cti_composant.gitSync.common;
 
-import ch.ge.cti_composant.gitSync.missions.AddAuthorizedUsersToGroups;
-import ch.ge.cti_composant.gitSync.missions.CleanGroupsFromUnauthorizedUsers;
-import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLDAP;
-import ch.ge.cti_composant.gitSync.missions.PromoteAdminUsers;
+import ch.ge.cti_composant.gitSync.missions.*;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -29,24 +26,30 @@ public class GitSync {
 	private void init() throws IOException {
 		ldapTree = new LDAPTree();
 		gitlab = new Gitlab(
-				new GitlabTree(props.getProperty("gitlab.account.token"), props.getProperty("gitlab.hostname")),
+				new GitlabTree(props.getProperty("gitlab.account.token"), props.getProperty("gitlab.hostname"), ldapTree),
 				props.getProperty("gitlab.hostname"), props.getProperty("gitlab.account.token")
 		);
 	}
 
+	/**
+	 * Exécute les missions.
+	 * @param path L'adresse du fichier contenant les réglages
+	 */
 	public void run(String path) {
 		try {
 			props.load(Files.newInputStream(Paths.get(path)));
 			init();
 
 			// Importe les groupes LDAP vers GitLab
-			new ImportGroupsFromLDAP().start(ldapTree, gitlab);
+			//new ImportGroupsFromLDAP().start(ldapTree, gitlab);
 			// Supprime les utilisateurs non autorisés
-			new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
+			//new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
 			// Ajoute ceux qui le sont (nouvelles perms)
-			new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+			//new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
 			// Ajoute les admins
-			new PromoteAdminUsers().start(ldapTree, gitlab);
+			//new PromoteAdminUsers().start(ldapTree, gitlab);
+			// Ajoute les admins à tous les groupes
+			new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
 		} catch (IOException e) {
 			log.fatal("Erreur lors du chargement de l'arborescence LDAP/Gitlab. L'erreur était : " + e);
 		}
