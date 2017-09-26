@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ReprÃ©sente l'arbre des utilisateurs LDAP.
+ * Représente l'arbre des utilisateurs LDAP.
  */
 public class LDAPTree {
 	// Logger
 	Logger log = Logger.getLogger(LDAPTree.class.getName());
 	// Carte
 	private Map<LDAPGroup, Map<String, LDAPUser>> ldapTree;
-	// Attributs Ã  rÃ©cupÃ©rer LDAP
+	// Attributs Ã  récupérer LDAP
 	private String[] attributes = {"cn"};
 
 	public LDAPTree() throws IOException {
@@ -36,13 +36,16 @@ public class LDAPTree {
 		try {
 			app.getAppRoles("GESTREPO").forEach(role -> ldapTree.put(new LDAPGroup(role), new HashMap<>()));
 			ldapTree.forEach((ldapGroup, ldapUsers) -> {
-				log.debug("RÃ©cupÃ©ration des utilisateurs pour le groupe LDAP " + ldapGroup.getName());
+				log.debug("Récupération des utilisateurs pour le groupe LDAP " + ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), attributes).forEach(user -> {
-						ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
+					    	if (user.containsKey("cn"))
+					    	{
+					    	    ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
+					    	}
 					});
 				} catch (RemoteException e) {
-					log.error("J'Ã©prouve certaines difficultÃ©s Ã  me connecter au vLDAP : " + e);
+					log.error("J'éprouve certaines difficultés Ã  me connecter au vLDAP : " + e);
 				}
 			});
 		} catch (IOException e) {

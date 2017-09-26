@@ -12,7 +12,7 @@ public class LDAPUser {
 	public LDAPUser(HashMap<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN.");
+			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN. - " + attributes);
 		}
 	}
 
