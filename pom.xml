@@ -11,7 +11,7 @@
 
     <groupId>ch.ge.cti.composant</groupId>
     <artifactId>gitSync</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <scm>
         <connection>***REMOVED***/PIRKLT/gitSync.git</connection>

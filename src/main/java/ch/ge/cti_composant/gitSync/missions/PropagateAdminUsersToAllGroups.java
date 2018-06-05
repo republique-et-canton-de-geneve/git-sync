@@ -29,16 +29,23 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 					.filter(admin -> ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(admin.getUsername()))
 					.collect(Collectors.toList());
 			for (GitlabGroup gitlabGroup : gitlab.getTree().getGroups()) {
-
-				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
-				for (GitlabUser admin : admins) {
-					if (!MissionUtils.isGitlabUserMemberOfGroup(members, admin.getUsername())) {
-						log.info("Ajout de " + admin.getUsername() + " à " + gitlabGroup.getName() + "...");
-						gitlab.getApi().addGroupMember(gitlabGroup, admin, GitlabAccessLevel.Master);
-					} else {
-						log.debug(admin.getUsername() + " est déjà membre du groupe " + gitlabGroup.getName());
-					}
-				}
+			    	
+			    	//
+			    	// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
+			    	//
+			    
+			    	if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
+			    	    
+        				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
+        				for (GitlabUser admin : admins) {
+        					if (!MissionUtils.isGitlabUserMemberOfGroup(members, admin.getUsername())) {
+        						log.info("Ajout de " + admin.getUsername() + " à " + gitlabGroup.getName() + "...");
+        						gitlab.getApi().addGroupMember(gitlabGroup, admin, GitlabAccessLevel.Master);
+        					} else {
+        						log.debug(admin.getUsername() + " est déjà membre du groupe " + gitlabGroup.getName());
+        					}
+        				}
+			    	}
 			}
 		} catch (IOException e) {
 			log.error("Une erreur est survenue lors de l'itération sur l'un des groupes. L'erreur était : " + e);
