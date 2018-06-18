@@ -136,6 +136,10 @@ public class MissionUtils {
 		return members.stream().filter(member -> member.getUsername().equals(user)).count() == 1;
 	}
 
+	public static GitlabUser getGitlabUser(GitlabAPI api, String username) {
+			return getAllGitlabUsers(api).get(username);
+	}
+
 	//</editor-fold>
 
 }

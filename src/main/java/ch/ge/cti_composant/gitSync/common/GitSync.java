@@ -50,6 +50,8 @@ public class GitSync {
 			new PromoteAdminUsers().start(ldapTree, gitlab);
 			// Ajoute les admins à tous les groupes
 			new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
+			// AJouter les droits de lecture au user Fisheye sur tous les groupes
+			new AddFisheyeUserToAllGroups().start(ldapTree, gitlab);
 		} catch (IOException e) {
 			log.fatal("Erreur lors du chargement de l'arborescence LDAP/Gitlab. L'erreur était : " + e);
 		}
