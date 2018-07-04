@@ -35,10 +35,17 @@ public class MissionUtils {
 	 */
 	public static boolean validateGitlabGroupOwnership(GitlabGroup gitlabGroup, GitlabAPI gitlabAPI) {
 		try {
-			GitlabGroupMember owner = gitlabAPI.getGroupMembers(gitlabGroup).stream()
+			for (GitlabGroupMember owner : gitlabAPI.getGroupMembers(gitlabGroup).stream()
 					.filter(gitlabGroupMember -> gitlabGroupMember.getAccessLevel() == GitlabAccessLevel.Owner)
-					.collect(Collectors.toList()).get(0);
-			return gitlabAPI.getUser().getUsername().equals(owner.getUsername());
+					.collect(Collectors.toList()))
+			{
+			    if (gitlabAPI.getUser().getUsername().equals(owner.getUsername()))
+			    {
+				return true;
+			    }
+			}
+			
+			return false;
 		} catch (IOException e) {
 			log.error("Impossible d'obtenir des informations sur le groupe " + gitlabGroup.getName() + ".");
 		}
