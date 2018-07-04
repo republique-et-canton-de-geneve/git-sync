@@ -2,6 +2,7 @@ package ch.ge.cti_composant.gitSync.missions;
 
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.apache.log4j.Logger;
@@ -46,12 +47,14 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					.filter(gitlabGroupMember -> !MissionUtils.isGitlabUserAdmin(gitlabGroupMember, gitlab.getApi(), ldapTree))
 					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 					.forEach(member -> {
-						log.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName() + ".");
-						try {
-							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
-						} catch (IOException e) {
-							log.error("Une erreur est survenue lors de la suppression du rôle " + gitlabGroup.getName() + " pour " + member.getUsername() + ".");
-						}
+					    	if (!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) {
+    						log.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName() + ".");
+    						try {
+    							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
+    						} catch (IOException e) {
+    							log.error("Une erreur est survenue lors de la suppression du rôle " + gitlabGroup.getName() + " pour " + member.getUsername() + ".");
+    						}
+					    }
 					});
 		} catch (IOException e) {
 			log.error("Une erreur est survenue lors de la détection du groupe " + gitlabGroup.getName() + " : " + e);

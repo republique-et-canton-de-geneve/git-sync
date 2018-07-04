@@ -5,4 +5,6 @@ package ch.ge.cti_composant.gitSync.util;
  */
 public interface MiscConstants {
 	String ADMIN_LDAP_GROUP = "***REMOVED***";
+    	public static final String FISHEYE_USERNAME = "***REMOVED***";
+
 }

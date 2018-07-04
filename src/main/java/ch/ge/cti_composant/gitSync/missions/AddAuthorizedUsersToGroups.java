@@ -31,17 +31,18 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 			for (GitlabGroup group : gitlab.getTree().getGroups()) {
 				List<GitlabGroupMember> memberList = gitlab.getApi().getGroupMembers(group.getId());
+				log.info("gestion des utilisateurs du groupe " + group.getName() + "...");
 
 				for (String username : ldapTree.getUsers(group.getName()).keySet()) {
 					boolean isUserAlreadyMemberOfGroup = memberList.stream()
 							.filter(member -> member.getUsername().equals(username)).count() == 1;
 
 					if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) { // L'utilisateur existe dans Gitlab et n'a pas été ajouté au groupe.
-						log.info("Ajout de l'utilisateur " + username + " au role " + group.getName() + "...");
+						log.info("Ajout de l'utilisateur " + username + " au groupe " + group.getName() + "...");
 						gitlab.getApi().addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
 
 					} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) { // L'utilisateur existe dans GitLab mais a déjà été ajouté au groupe.
-						log.info("L'utilisateur " + username + " est déjà ajouté au groupe GitLab.");
+						log.info("L'utilisateur " + username + " est déjà ajouté au groupe GitLab " + group.getName());
 
 					} else { // L'utilisateur n'existe pas.
 						log.debug("L'utilisateur " + username + " n'existe pas dans GitLab.");
