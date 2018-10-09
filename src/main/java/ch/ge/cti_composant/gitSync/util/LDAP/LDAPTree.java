@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Représente l'arbre des utilisateurs LDAP.
+ * Represente l'arbre des utilisateurs LDAP.
  */
 public class LDAPTree {
 	// Logger
 	Logger log = Logger.getLogger(LDAPTree.class.getName());
 	// Carte
 	private Map<LDAPGroup, Map<String, LDAPUser>> ldapTree;
-	// Attributs Ã  récupérer LDAP
+	// Attributs a recuperer LDAP
 	private String[] attributes = {"cn"};
 
 	public LDAPTree() throws IOException {
@@ -45,7 +45,7 @@ public class LDAPTree {
 					    	}
 					});
 				} catch (RemoteException e) {
-					log.error("J'éprouve certaines difficultés Ã  me connecter au vLDAP : " + e);
+					log.error("J'éprouve certaines difficultés à me connecter au vLDAP : " + e);
 				}
 			});
 		} catch (IOException e) {
