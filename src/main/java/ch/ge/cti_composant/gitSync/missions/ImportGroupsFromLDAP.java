@@ -7,6 +7,7 @@ import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.apache.log4j.Logger;
 import org.gitlab.api.models.CreateGroupRequest;
+import org.gitlab.api.models.GitlabVisibility;
 
 import java.io.IOException;
 
@@ -43,7 +44,7 @@ public class ImportGroupsFromLDAP implements Mission {
 	private void createGroup(LDAPGroup ldapGroup, Gitlab gitlab) {
 		// Création du groupe
 		CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
-		createGroupRequest.setVisibility("private");
+		createGroupRequest.setVisibility(GitlabVisibility.PRIVATE);
 		try {
 			gitlab.getApi().createGroup(createGroupRequest, gitlab.getApi().getUser());
 		} catch (IOException e) {
