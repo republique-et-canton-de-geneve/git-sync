@@ -19,7 +19,7 @@ import java.util.Properties;
 public class GitSync {
 	private Logger log = Logger.getLogger(GitSync.class.getName());
 	// Chargement des propriétés
-	Properties props = new Properties();
+	public static Properties props = new Properties();
 	private LDAPTree ldapTree;
 	private Gitlab gitlab;
 
