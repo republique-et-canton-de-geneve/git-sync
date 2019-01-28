@@ -1,15 +1,18 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
-import gina.api.GinaApiLdapBaseAble;
-import gina.api.GinaApiLdapBaseFactory;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import ch.ge.cti_composant.gitSync.common.GitSync;
+import gina.api.GinaApiLdapBaseAble;
+import gina.impl.GinaLdapFactory;
+import gina.impl.util.GinaLdapConfiguration;
 
 /**
  * Represente l'arbre des utilisateurs LDAP.
@@ -32,7 +35,14 @@ public class LDAPTree {
 	 */
 	public void build() throws IOException {
 		this.ldapTree = new HashMap<>();
-		GinaApiLdapBaseAble app = GinaApiLdapBaseFactory.getInstanceApplication();
+		GinaLdapConfiguration conf = new GinaLdapConfiguration(GitSync.props.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"), 
+			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"), 
+			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_USER"), 
+			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"), 
+			                                               GinaLdapConfiguration.Type.APPLICATION, 
+			                                               3000);
+		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
+		
 		try {
 			app.getAppRoles("GESTREPO").forEach(role -> ldapTree.put(new LDAPGroup(role), new HashMap<>()));
 			ldapTree.forEach((ldapGroup, ldapUsers) -> {
