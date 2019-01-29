@@ -1,23 +1,25 @@
 package ch.ge.cti_composant.gitSync.util.gitlab;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import org.apache.log4j.Logger;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabUser;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabGroup;
+import org.gitlab.api.models.GitlabUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.ge.cti_composant.gitSync.util.MissionUtils;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+
 /**
  * Représente l'arborescence GitLab restreinte aux éléments venant du LDAP.
  */
 public class GitlabTree {
-	Logger log = Logger.getLogger(GitlabTree.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabTree.class);
 	String apiToken;
 	String hostname;
 
@@ -47,7 +49,7 @@ public class GitlabTree {
 					try {
 						api.getGroupMembers(gitlabGroup).forEach(user -> gitlabTree.get(gitlabGroup).put(user.getUsername(), user));
 					} catch (IOException e) {
-						log.error("Une erreur s'est produite lors de la synchronisation du groupe " + gitlabGroup.getName() + " : " + e);
+						LOGGER.error("Une erreur s'est produite lors de la synchronisation du groupe " + gitlabGroup.getName() + " : " + e);
 					}
 				});
 	}

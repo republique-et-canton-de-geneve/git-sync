@@ -1,27 +1,29 @@
 package ch.ge.cti_composant.gitSync.util;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser;
-import org.apache.log4j.Logger;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabAccessLevel;
+import org.gitlab.api.models.GitlabGroup;
+import org.gitlab.api.models.GitlabGroupMember;
+import org.gitlab.api.models.GitlabUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser;
+
 /**
  * Cette classe contient les utilitaires principaux pour les missions.
  */
 public class MissionUtils {
 
-	static Logger log = Logger.getLogger(MissionUtils.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(MissionUtils.class);
 
 	//<editor-fold desc="Méthodes concernant les groupes">
 
@@ -47,7 +49,7 @@ public class MissionUtils {
 			
 			return false;
 		} catch (IOException e) {
-			log.error("Impossible d'obtenir des informations sur le groupe " + gitlabGroup.getName() + ".");
+			LOGGER.error("Impossible d'obtenir des informations sur le groupe " + gitlabGroup.getName() + ".");
 		}
 		return false;
 	}
@@ -73,10 +75,10 @@ public class MissionUtils {
 	public static boolean validateGitlabGroupExistence(LDAPGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			log.debug("Le groupe LDAP " + ldapGroup.getName() + " existe dans gitlab...");
+			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " existe dans gitlab...");
 			return true;
 		} catch (IOException e) {
-			log.debug("Le groupe LDAP " + ldapGroup.getName() + " n'existe pas dans GitLab.");
+			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " n'existe pas dans GitLab.");
 		}
 		return false;
 	}
@@ -123,7 +125,7 @@ public class MissionUtils {
 			boolean isLDAPAdmin = ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(user.getUsername());
 			return isLDAPAdmin || isTechnicalAccount || isTrivialAdmin;
 		} catch (IOException e) {
-			log.error("Erreur pendant l'évaluation des privilèges de l'utilisateur " + user.getUsername());
+			LOGGER.error("Erreur pendant l'évaluation des privilèges de l'utilisateur " + user.getUsername());
 		}
 		return false;
 	}
@@ -134,7 +136,7 @@ public class MissionUtils {
 			api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 			return allUsers;
 		} catch (IOException e) {
-			log.error("Impossible de récupérer tous les utilisateurs. L'erreur était : " + e);
+			LOGGER.error("Impossible de récupérer tous les utilisateurs. L'erreur était : " + e);
 		}
 		return new HashMap<>();
 	}
