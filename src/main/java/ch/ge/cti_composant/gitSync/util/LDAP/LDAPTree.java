@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.common.GitSync;
 import gina.api.GinaApiLdapBaseAble;
@@ -19,7 +20,7 @@ import gina.impl.util.GinaLdapConfiguration;
  */
 public class LDAPTree {
 	// Logger
-	Logger log = Logger.getLogger(LDAPTree.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LDAPTree.class);
 	// Carte
 	private Map<LDAPGroup, Map<String, LDAPUser>> ldapTree;
 	// Attributs a recuperer LDAP
@@ -46,20 +47,21 @@ public class LDAPTree {
 		try {
 			app.getAppRoles("GESTREPO").forEach(role -> ldapTree.put(new LDAPGroup(role), new HashMap<>()));
 			ldapTree.forEach((ldapGroup, ldapUsers) -> {
-				log.debug("Récupération des utilisateurs pour le groupe LDAP " + ldapGroup.getName());
+				LOGGER.info("Récupération des utilisateurs pour le groupe LDAP " + ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), attributes).forEach(user -> {
 					    	if (user.containsKey("cn"))
 					    	{
+					    	    LOGGER.info("\t" + user.get("cn"));
 					    	    ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
 					    	}
 					});
 				} catch (RemoteException e) {
-					log.error("J'éprouve certaines difficultés à me connecter au vLDAP : " + e);
+					LOGGER.error("J'éprouve certaines difficultés à me connecter au vLDAP : " + e);
 				}
 			});
 		} catch (IOException e) {
-			log.error("Impossible de lancer la recherche LDAP car le fichier distribution.properties est introuvable. " + e);
+			LOGGER.error("Impossible de lancer la recherche LDAP car le fichier distribution.properties est introuvable. " + e);
 			throw e;
 		}
 	}

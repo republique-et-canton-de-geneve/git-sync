@@ -1,15 +1,17 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.MiscConstants;
-import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+
 import org.gitlab.api.models.CreateGroupRequest;
 import org.gitlab.api.models.GitlabVisibility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
+import ch.ge.cti_composant.gitSync.util.MissionUtils;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 
 /**
  * Classe responsable de la crÃ©ation des groupes GitLab selon le LDAP.
@@ -18,7 +20,7 @@ import java.io.IOException;
  * Le sens de synchronisation est donc TOUJOURS LDAP (groupes existants) -> GitLab.
  */
 public class ImportGroupsFromLDAP implements Mission {
-	Logger log = Logger.getLogger(ImportGroupsFromLDAP.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
 
 	/**
 	 * CrÃ©e les groupes dans GitLab.
@@ -27,18 +29,18 @@ public class ImportGroupsFromLDAP implements Mission {
 	 */
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		log.info("Synchronisation : Groupes LDAP Ã  groupes GitLab");
+		LOGGER.info("Synchronisation : Groupes LDAP à groupes GitLab");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLDAPGroupAdmin(ldapGroup.getName()))
 				.forEach(ldapGroup -> {
 					if (MissionUtils.validateGitlabGroupExistence(ldapGroup, gitlab.getApi())) {
-						log.debug("Le groupe " + ldapGroup.getName() + " existe. Rien ne sera fait.");
+						LOGGER.info("Le groupe " + ldapGroup.getName() + " existe : rien ne sera fait");
 					} else {
-						log.info("Groupe inexistant sur GitLab dÃ©tectÃ© : " + ldapGroup.getName() + " ! CrÃ©ation en cours...");
+						LOGGER.info("Groupe inexistant sur GitLab détecté : " + ldapGroup.getName() + " ! Création en cours...");
 						createGroup(ldapGroup, gitlab);
 					}
 				});
-		log.info("Synchronisation terminÃ©e.");
+		LOGGER.info("Synchronisation terminée");
 	}
 
 	private void createGroup(LDAPGroup ldapGroup, Gitlab gitlab) {
@@ -48,7 +50,7 @@ public class ImportGroupsFromLDAP implements Mission {
 		try {
 			gitlab.getApi().createGroup(createGroupRequest, gitlab.getApi().getUser());
 		} catch (IOException e) {
-			log.fatal("Impossible de crÃ©er le groupe " + ldapGroup.getName() + " : " + e);
+			LOGGER.error("Impossible de créer le groupe " + ldapGroup.getName() + " : " + e);
 		}
 	}
 

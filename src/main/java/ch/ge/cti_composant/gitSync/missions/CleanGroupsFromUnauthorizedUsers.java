@@ -1,14 +1,16 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import java.io.IOException;
+
+import org.gitlab.api.models.GitlabGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
-import org.apache.log4j.Logger;
-import org.gitlab.api.models.GitlabGroup;
-
-import java.io.IOException;
 
 /**
  * Classe responsable de la suppression des droits "en trop" sur GitLab.
@@ -17,7 +19,7 @@ import java.io.IOException;
  * quel type de groupe ou de projet.
  */
 public class CleanGroupsFromUnauthorizedUsers implements Mission {
-	Logger log = Logger.getLogger(ImportGroupsFromLDAP.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
 
 	/**
 	 * Synchronise les utilisateurs existants Gitlab sur le LDAP.
@@ -27,15 +29,15 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	 */
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		log.info("Synchronisation : synchronisation des utilisateurs avec le LDAP.");
+		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le LDAP");
 		// Pour chaque groupe...
 		gitlab.getTree().getGroups()
 				.forEach(gitlabGroup -> {
-					log.info("Synchronisation du groupe " + gitlabGroup.getName() + " en cours.");
+					LOGGER.info("Synchronisation du groupe " + gitlabGroup.getName() + " en cours");
 					handleGroup(gitlabGroup, ldapTree, gitlab);
 				});
 
-		log.info("Synchronisation terminÃ©e.");
+		LOGGER.info("Synchronisation terminée");
 	}
 
 	private void handleGroup(GitlabGroup gitlabGroup, LDAPTree ldapTree, Gitlab gitlab) {
@@ -48,16 +50,16 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 					.forEach(member -> {
 					    	if (!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) {
-    						log.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rÃ´le " + gitlabGroup.getName() + ".");
+    						LOGGER.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName());
     						try {
     							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
     						} catch (IOException e) {
-    							log.error("Une erreur est survenue lors de la suppression du rÃ´le " + gitlabGroup.getName() + " pour " + member.getUsername() + ".");
+    							LOGGER.error("Une erreur est survenue lors de la suppression du rôle " + gitlabGroup.getName() + " pour " + member.getUsername() );
     						}
 					    }
 					});
 		} catch (IOException e) {
-			log.error("Une erreur est survenue lors de la dÃ©tection du groupe " + gitlabGroup.getName() + " : " + e);
+			LOGGER.error("Une erreur est survenue lors de la détection du groupe " + gitlabGroup.getName() + " : " + e);
 		}
 
 	}
