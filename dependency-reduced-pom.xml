@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.ge.cti.composant</groupId>
   <artifactId>gitSync</artifactId>
-  <version>1.0.7-SNAPSHOT</version>
+  <version>1.0.7</version>
   <scm>
     <connection>***REMOVED***/PIRKLT/gitSync.git</connection>
     <developerConnection>scm:svn:***REMOVED***/PIRKLT/gitSync.git</developerConnection>
