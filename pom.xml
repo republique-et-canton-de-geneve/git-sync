@@ -13,12 +13,12 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>1.0.8-SNAPSHOT</version>
+	<version>1.0.8</version>
 
 	<scm>
-		<connection>https://argon.ceti.etat-ge.ch/gitlab/PIRKLT/gitSync.git</connection>
-		<developerConnection>scm:svn:https://argon.ceti.etat-ge.ch/gitlab/PIRKLT/gitSync.git</developerConnection>
-		<url>https://argon.ceti.etat-ge.ch/gitlab/PIRKLT/gitSync.git</url>
+		<connection>scm:git:https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</connection>
+		<developerConnection>scm:git:https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
+		<url>https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</url>
 	</scm>
 
 	<dependencies>
