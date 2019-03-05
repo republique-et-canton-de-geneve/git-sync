@@ -41,7 +41,7 @@ public class LDAPTree {
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_USER"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"), 
 			                                               GinaLdapConfiguration.Type.APPLICATION, 
-			                                               3000);
+			                                               Integer.valueOf(GitSync.props.getProperty("timeout-search-ldap")));
 		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
 		
 		try {
