@@ -19,8 +19,11 @@ import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
  * Représente l'arborescence GitLab restreinte aux éléments venant du LDAP.
  */
 public class GitlabTree {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabTree.class);
+
 	String apiToken;
+
 	String hostname;
 
 	private Map<GitlabGroup, Map<String, GitlabUser>> gitlabTree;
@@ -49,7 +52,7 @@ public class GitlabTree {
 					try {
 						api.getGroupMembers(gitlabGroup).forEach(user -> gitlabTree.get(gitlabGroup).put(user.getUsername(), user));
 					} catch (IOException e) {
-						LOGGER.error("Une erreur s'est produite lors de la synchronisation du groupe " + gitlabGroup.getName() + " : " + e);
+						LOGGER.error("Une erreur s'est produite lors de la synchronisation du groupe [{}] : {}", gitlabGroup.getName(), e);
 					}
 				});
 	}
@@ -69,4 +72,5 @@ public class GitlabTree {
 		});
 		return output;
 	}
+
 }

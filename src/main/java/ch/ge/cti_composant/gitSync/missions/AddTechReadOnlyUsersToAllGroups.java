@@ -28,38 +28,29 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 	    addUser(ldapTree, gitlab, MiscConstants.MWFL_USERNAME);
 	}
 	
-	private void addUser(LDAPTree ldapTree, Gitlab gitlab, String username)
-	{
+	private void addUser(LDAPTree ldapTree, Gitlab gitlab, String username)	{
 		try {
-		    	GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
-		    	
-		    	if (user != null)
-		    	{
-		    	    for (GitlabGroup gitlabGroup : gitlab.getTree().getGroups()) {
-			    	
-			    	//
-			    	// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
-			    	//
-			    
-			    	if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
-			    	    
-           				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
-           				
-        				if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-            					LOGGER.info("Ajout de " + username + " à " + gitlabGroup.getName() + "...");
-            					gitlab.getApi().addGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
-        				} else {
-            					LOGGER.info(username + " est déjà membre du groupe " + gitlabGroup.getName());
-        				}
-			    	}
-		    	    }
-		    	}
-		    	else
-		    	{
-		    	    LOGGER.info(username + " is not a Gitlab user");
-		    	}
+			GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
+
+			if (user != null) {
+				for (GitlabGroup gitlabGroup : gitlab.getTree().getGroups()) {
+					// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
+					if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
+						List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
+						if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
+							LOGGER.info("Ajout de [{}] a [{}]", username, gitlabGroup.getName());
+							gitlab.getApi().addGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
+						} else {
+							LOGGER.info("[{}] est deja membre du groupe [{}]", username, gitlabGroup.getName());
+						}
+					}
+				}
+			} else {
+				LOGGER.info("[{}] is not a GitLab user", username);
+			}
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de l'itération sur l'un des groupes. L'erreur était : " + e);
+			LOGGER.error("Une erreur est survenue lors de l'iteration sur l'un des groupes. L'erreur est : " + e);
 		}
 	}
+
 }
