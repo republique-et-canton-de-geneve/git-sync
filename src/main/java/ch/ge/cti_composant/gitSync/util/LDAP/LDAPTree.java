@@ -40,14 +40,15 @@ public class LDAPTree {
 	/**
 	 * Remplit l'arbre LDAP de groupes, puis d'utilisateurs.
 	 */
-	public void build() throws IOException {
+	private void build() throws IOException {
 		ldapTree = new HashMap<>();
-		GinaLdapConfiguration conf = new GinaLdapConfiguration(GitSync.props.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"), 
-			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"), 
-			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_USER"), 
-			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"), 
-			                                               GinaLdapConfiguration.Type.APPLICATION, 
-			                                               Integer.valueOf(GitSync.props.getProperty("timeout-search-ldap")));
+		GinaLdapConfiguration conf = new GinaLdapConfiguration(
+				GitSync.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"),
+			    GitSync.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"),
+			    GitSync.getProperty("ct-gina-ldap-client.LDAP_USER"),
+			    GitSync.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"),
+			    GinaLdapConfiguration.Type.APPLICATION,
+			    Integer.valueOf(GitSync.getProperty("timeout-search-ldap")));
 		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
 		
 		try {
