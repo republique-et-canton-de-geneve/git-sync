@@ -17,7 +17,9 @@ public class LDAPGroup {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o.getClass() == getClass()) {
+		if (o == null) {
+			return false;
+		} else if (o.getClass() == getClass()) {
 			LDAPGroup group = (LDAPGroup) o;
 			return group.name.equals(name);
 		} else {

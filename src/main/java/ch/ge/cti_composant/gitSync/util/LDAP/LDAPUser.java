@@ -42,7 +42,9 @@ public class LDAPUser {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o.getClass() == getClass()) {
+		if (o == null) {
+			return false;
+		} else if (o.getClass() == getClass()) {
 			LDAPUser user = (LDAPUser) o;
 			return attributes.get("cn").equals(user.attributes.get("cn"));
 		} else {
