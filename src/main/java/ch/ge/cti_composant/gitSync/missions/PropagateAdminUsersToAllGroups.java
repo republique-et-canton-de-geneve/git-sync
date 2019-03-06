@@ -20,6 +20,7 @@ import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
  * Ajoute les admins Ã  tous les groupes.
  */
 public class PropagateAdminUsersToAllGroups implements Mission {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropagateAdminUsersToAllGroups.class);
 
 	@Override
@@ -31,26 +32,22 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 					.filter(admin -> ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(admin.getUsername()))
 					.collect(Collectors.toList());
 			for (GitlabGroup gitlabGroup : gitlab.getTree().getGroups()) {
-			    	
-			    	//
-			    	// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
-			    	//
-			    
-			    	if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
-			    	    
-        				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
-        				for (GitlabUser admin : admins) {
-        					if (!MissionUtils.isGitlabUserMemberOfGroup(members, admin.getUsername())) {
-        						LOGGER.info("Ajout de " + admin.getUsername() + " à " + gitlabGroup.getName());
-        						gitlab.getApi().addGroupMember(gitlabGroup, admin, GitlabAccessLevel.Master);
-        					} else {
-        						LOGGER.info(admin.getUsername() + " est déjà  membre du groupe " + gitlabGroup.getName());
-        					}
-        				}
-			    	}
+		    	// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
+		    	if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
+	   				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
+	   				for (GitlabUser admin : admins) {
+	   					if (!MissionUtils.isGitlabUserMemberOfGroup(members, admin.getUsername())) {
+							LOGGER.info("Ajout de [{}] a [{}]", admin.getUsername(), gitlabGroup.getName());
+							gitlab.getApi().addGroupMember(gitlabGroup, admin, GitlabAccessLevel.Master);
+						} else {
+							LOGGER.info("L'utilisateur [{}] est deja membre du groupe [{}]" , admin.getUsername(), gitlabGroup.getName());
+						}
+					}
+		    	}
 			}
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de l'itÃ©ration sur l'un des groupes : " + e);
+			LOGGER.error("Une erreur est survenue lors de l'iteration sur l'un des groupes : {}", e);
 		}
 	}
+
 }
