@@ -25,7 +25,7 @@ public class LDAPTree {
 	/**
 	 * Carte.
 	 */
-	private Map<LDAPGroup, Map<String, LDAPUser>> ldapTree;
+	private Map<LDAPGroup, Map<String, LDAPUser>> tree;
 
 	/**
 	 * Attributs LDAP a recuperer.
@@ -33,7 +33,7 @@ public class LDAPTree {
 	private String[] attributes = {"cn"};
 
 	public LDAPTree() throws IOException {
-		ldapTree = new HashMap<>();
+		tree = new HashMap<>();
 		build();
 	}
 
@@ -41,7 +41,7 @@ public class LDAPTree {
 	 * Remplit l'arbre LDAP de groupes, puis d'utilisateurs.
 	 */
 	private void build() throws IOException {
-		ldapTree = new HashMap<>();
+		tree = new HashMap<>();
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(
 				GitSync.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"),
 			    GitSync.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"),
@@ -52,8 +52,8 @@ public class LDAPTree {
 		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
 		
 		try {
-			app.getAppRoles("GESTREPO").forEach(role -> ldapTree.put(new LDAPGroup(role), new HashMap<>()));
-			ldapTree.forEach((ldapGroup, ldapUsers) -> {
+			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LDAPGroup(role), new HashMap<>()));
+			tree.forEach((ldapGroup, ldapUsers) -> {
 				LOGGER.info("Recuperation des utilisateurs pour le groupe LDAP [{}]", ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), attributes)
@@ -74,11 +74,11 @@ public class LDAPTree {
 	}
 
 	public List<LDAPGroup> getGroups(){
-		return new ArrayList<>(ldapTree.keySet());
+		return new ArrayList<>(tree.keySet());
 	}
 
 	public Map<String, LDAPUser> getUsers(LDAPGroup group){
-		return new HashMap<>(ldapTree.getOrDefault(group, new HashMap<>()));
+		return new HashMap<>(tree.getOrDefault(group, new HashMap<>()));
 	}
 
 	public Map<String, LDAPUser> getUsers(String group){
