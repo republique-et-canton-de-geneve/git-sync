@@ -8,7 +8,9 @@ import java.util.Objects;
  * Représente le contexte Gitlab total
  */
 public class Gitlab {
+
 	private GitlabTree tree;
+
 	private GitlabAPI api;
 
 	public Gitlab(GitlabTree tree, String URL, String apiKey){
@@ -23,4 +25,5 @@ public class Gitlab {
 	public GitlabAPI getApi() {
 		return api;
 	}
+
 }

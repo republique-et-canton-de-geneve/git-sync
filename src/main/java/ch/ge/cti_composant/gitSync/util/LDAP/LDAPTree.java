@@ -19,11 +19,17 @@ import gina.impl.util.GinaLdapConfiguration;
  * Represente l'arbre des utilisateurs LDAP.
  */
 public class LDAPTree {
-	// Logger
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(LDAPTree.class);
-	// Carte
+
+	/**
+	 * Carte.
+	 */
 	private Map<LDAPGroup, Map<String, LDAPUser>> ldapTree;
-	// Attributs a recuperer LDAP
+
+	/**
+	 * Attributs LDAP a recuperer.
+	 */
 	private String[] attributes = {"cn"};
 
 	public LDAPTree() throws IOException {
@@ -35,7 +41,7 @@ public class LDAPTree {
 	 * Remplit l'arbre LDAP de groupes, puis d'utilisateurs.
 	 */
 	public void build() throws IOException {
-		this.ldapTree = new HashMap<>();
+		ldapTree = new HashMap<>();
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(GitSync.props.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_USER"), 
@@ -47,21 +53,21 @@ public class LDAPTree {
 		try {
 			app.getAppRoles("GESTREPO").forEach(role -> ldapTree.put(new LDAPGroup(role), new HashMap<>()));
 			ldapTree.forEach((ldapGroup, ldapUsers) -> {
-				LOGGER.info("Récupération des utilisateurs pour le groupe LDAP " + ldapGroup.getName());
+				LOGGER.info("Recuperation des utilisateurs pour le groupe LDAP [{}]", ldapGroup.getName());
 				try {
-					app.getUsers("GESTREPO", ldapGroup.getName(), attributes).forEach(user -> {
-					    	if (user.containsKey("cn"))
-					    	{
-					    	    LOGGER.info("\t" + user.get("cn"));
-					    	    ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
-					    	}
-					});
+					app.getUsers("GESTREPO", ldapGroup.getName(), attributes)
+							.forEach(user -> {
+								if (user.containsKey("cn")) {
+									LOGGER.info("\t{}", user.get("cn"));
+									ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
+								}
+							});
 				} catch (RemoteException e) {
-					LOGGER.error("J'éprouve certaines difficultés à me connecter au vLDAP : " + e);
+					LOGGER.error("J'eprouve certaines difficultes a me connecter au vLDAP : {}", e);
 				}
 			});
 		} catch (IOException e) {
-			LOGGER.error("Impossible de lancer la recherche LDAP car le fichier distribution.properties est introuvable. " + e);
+			LOGGER.error("Impossible de lancer la recherche LDAP car le fichier distribution.properties est introuvable : {}", e);
 			throw e;
 		}
 	}
@@ -77,6 +83,5 @@ public class LDAPTree {
 	public Map<String, LDAPUser> getUsers(String group){
 		return getUsers(new LDAPGroup(group));
 	}
-
 
 }

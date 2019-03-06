@@ -19,6 +19,7 @@ import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
  * Ajoute les utilisateurs en admin si ils sont dans le groupe LDAP.
  */
 public class PromoteAdminUsers implements Mission {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(PromoteAdminUsers.class);
 
 	@Override
@@ -32,25 +33,26 @@ public class PromoteAdminUsers implements Mission {
 				boolean doesUserExist = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
 
 				if (doesUserExist && !allUsers.get(username).isAdmin()) {
-					LOGGER.info("Ajout de l'utilisateur " + username + " en admin");
+					LOGGER.info("Ajout de l'utilisateur [{}] en admin", username);
 					try {
 						gitlab.getApi().updateUser(
 								allUsers.get(username).getId(), allUsers.get(username).getEmail(), null,
 								null, null, null, null, null, null,
 								null, null, null, null, true, null);
 					} catch (IOException e) {
-						LOGGER.error("Impossible d'ajouter " + username + " en administrateur");
+						LOGGER.error("Impossible d'ajouter [{}] en administrateur", username);
 					}
 				} else if (doesUserExist &&  MissionUtils.isGitlabUserAdmin(allUsers.get(username), gitlab.getApi(), ldapTree)){
-					LOGGER.info(username + " est déjà  admin");
+					LOGGER.info("L'utilisateur [{}] est deja admin", username);
 				} else {
-					LOGGER.info(username + " ne sera pas ajouté en admin car il n'est pas dans GitLab");
+					LOGGER.info("L'utilisateur [{}] ne sera pas ajoute en admin car il n'est pas dans GitLab", username);
 				}
 			});
 		} catch (IOException e){
-			LOGGER.error("Impossible de récupérer la liste des utilisateurs admin : " + e);
+			LOGGER.error("Impossible de recuperer la liste des utilisateurs admin : {}", e);
 		}
 
-		LOGGER.info("Synchronisation terminée");
+		LOGGER.info("Synchronisation terminee");
 	}
+
 }
