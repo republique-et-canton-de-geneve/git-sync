@@ -88,7 +88,7 @@ public class GitSync {
 
     private void checkMimimumUserCount() throws IOException {
 		// A hashset is used to insure a user is not added more than once
-		Set<LDAPUser> users = new HashSet<LDAPUser>(512);
+		Set<LDAPUser> users = new HashSet<>();
 		for (LDAPGroup group : ldapTree.getGroups()) {
 			for (LDAPUser user : ldapTree.getUsers(group).values()) {
 				users.add(user);

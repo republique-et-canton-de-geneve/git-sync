@@ -25,6 +25,9 @@ public class MissionUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MissionUtils.class);
 
+	private MissionUtils() {
+	}
+
 	/**
 	 * Vérifie que nous sommes bien le propriétaire du groupe Gitlab en question.
 	 *
@@ -71,10 +74,10 @@ public class MissionUtils {
 	public static boolean validateGitlabGroupExistence(LDAPGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " existe dans gitlab...");
+			LOGGER.debug("Le groupe LDAP [{}] existe dans GitLab", ldapGroup.getName());
 			return true;
 		} catch (IOException e) {
-			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " n'existe pas dans GitLab.");
+			LOGGER.debug("Le groupe LDAP [{}] n'existe pas dans GitLab", ldapGroup.getName());
 		}
 		return false;
 	}

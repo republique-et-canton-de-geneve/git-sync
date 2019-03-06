@@ -24,11 +24,11 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-	    addUser(ldapTree, gitlab, MiscConstants.FISHEYE_USERNAME);
-	    addUser(ldapTree, gitlab, MiscConstants.MWFL_USERNAME);
+	    addUser(gitlab, MiscConstants.FISHEYE_USERNAME);
+	    addUser(gitlab, MiscConstants.MWFL_USERNAME);
 	}
 	
-	private void addUser(LDAPTree ldapTree, Gitlab gitlab, String username)	{
+	private void addUser(Gitlab gitlab, String username)	{
 		try {
 			GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
 
@@ -49,7 +49,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 				LOGGER.info("[{}] is not a GitLab user", username);
 			}
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de l'iteration sur l'un des groupes. L'erreur est : " + e);
+			LOGGER.error("Une erreur est survenue lors de l'iteration sur l'un des groupes. L'erreur est : {}", e);
 		}
 	}
 
