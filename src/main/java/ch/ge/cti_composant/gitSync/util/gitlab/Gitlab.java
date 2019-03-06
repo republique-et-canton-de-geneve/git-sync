@@ -13,9 +13,9 @@ public class Gitlab {
 
 	private GitlabAPI api;
 
-	public Gitlab(GitlabTree tree, String URL, String apiKey){
+	public Gitlab(GitlabTree tree, String url, String apiKey){
 		this.tree = Objects.requireNonNull(tree);
-		this.api = GitlabAPI.connect(URL, apiKey);
+		this.api = GitlabAPI.connect(url, apiKey);
 	}
 
 	public GitlabTree getTree() {

@@ -1,6 +1,7 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ public class LDAPUser {
 
 	private HashMap<String, String> attributes;
 
-	public LDAPUser(HashMap<String, String> attributes) {
+	public LDAPUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
 			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN. - {}" + attributes);
