@@ -34,10 +34,14 @@ public class GitSync {
      * the VLDAP information retrieving process and the synchronisation is aborted. 
      */
     private static final int MIMIMUM_USER_COUNT = 10;
-    
-    // Chargement des propriétés
-    public static Properties props = new Properties();
+
+	/**
+	 * Chargement des proprietes.
+	 */
+    private static final Properties props = new Properties();
+
     private LDAPTree ldapTree;
+
     private Gitlab gitlab;
 
     private void init() throws IOException {
@@ -76,6 +80,10 @@ public class GitSync {
 		}
 		
 		LOGGER.info("Job termine...");
+	}
+
+	public static String getProperty(String name) {
+		return props.getProperty(name);
 	}
 
     private void checkMimimumUserCount() throws IOException {
