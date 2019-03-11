@@ -25,7 +25,8 @@ public class MissionUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MissionUtils.class);
 
-	//<editor-fold desc="Méthodes concernant les groupes">
+	private MissionUtils() {
+	}
 
 	/**
 	 * Vérifie que nous sommes bien le propriétaire du groupe Gitlab en question.
@@ -41,15 +42,13 @@ public class MissionUtils {
 					.filter(gitlabGroupMember -> gitlabGroupMember.getAccessLevel() == GitlabAccessLevel.Owner)
 					.collect(Collectors.toList()))
 			{
-			    if (gitlabAPI.getUser().getUsername().equals(owner.getUsername()))
-			    {
-				return true;
+			    if (gitlabAPI.getUser().getUsername().equals(owner.getUsername())) {
+					return true;
 			    }
 			}
-			
 			return false;
 		} catch (IOException e) {
-			LOGGER.error("Impossible d'obtenir des informations sur le groupe " + gitlabGroup.getName() + ".");
+			LOGGER.error("Impossible d'obtenir des informations sur le groupe [{}]", gitlabGroup.getName());
 		}
 		return false;
 	}
@@ -75,17 +74,13 @@ public class MissionUtils {
 	public static boolean validateGitlabGroupExistence(LDAPGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " existe dans gitlab...");
+			LOGGER.debug("Le groupe LDAP [{}] existe dans GitLab", ldapGroup.getName());
 			return true;
 		} catch (IOException e) {
-			LOGGER.debug("Le groupe LDAP " + ldapGroup.getName() + " n'existe pas dans GitLab.");
+			LOGGER.debug("Le groupe LDAP [{}] n'existe pas dans GitLab", ldapGroup.getName());
 		}
 		return false;
 	}
-
-	//</editor-fold>
-
-	//<editor-fold desc="Méthodes concernant les utilisateurs">
 
 	/**
 	 * Vérifie que l'utilisateur existe bel et bien dans GitLab.
@@ -104,7 +99,7 @@ public class MissionUtils {
 			case 0:
 				return false;
 			default:
-				throw new IllegalStateException("Plus d'un utilisateur avec le nom " + user.getName() + " ont été détectés.");
+				throw new IllegalStateException("Plus d'un utilisateur avec le nom " + user.getName() + " a été détecté");
 		}
 	}
 
@@ -125,7 +120,7 @@ public class MissionUtils {
 			boolean isLDAPAdmin = ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(user.getUsername());
 			return isLDAPAdmin || isTechnicalAccount || isTrivialAdmin;
 		} catch (IOException e) {
-			LOGGER.error("Erreur pendant l'évaluation des privilèges de l'utilisateur " + user.getUsername());
+			LOGGER.error("Erreur pendant l'évaluation des privilèges de l'utilisateur [{}]", user.getUsername());
 		}
 		return false;
 	}
@@ -136,19 +131,19 @@ public class MissionUtils {
 			api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 			return allUsers;
 		} catch (IOException e) {
-			LOGGER.error("Impossible de récupérer tous les utilisateurs. L'erreur était : " + e);
+			LOGGER.error("Impossible de récupérer tous les utilisateurs. L'erreur était : {}", e);
 		}
 		return new HashMap<>();
 	}
 
 	public static boolean isGitlabUserMemberOfGroup(List<GitlabGroupMember> members, String user){
-		return members.stream().filter(member -> member.getUsername().equals(user)).count() == 1;
+		return members.stream()
+				.filter(member -> member.getUsername().equals(user))
+				.count() == 1;
 	}
 
 	public static GitlabUser getGitlabUser(GitlabAPI api, String username) {
 			return getAllGitlabUsers(api).get(username);
 	}
-
-	//</editor-fold>
 
 }

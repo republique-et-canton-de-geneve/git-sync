@@ -1,18 +1,20 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Represents a user in LDAP.
  */
 public class LDAPUser {
+
 	private HashMap<String, String> attributes;
 
-	public LDAPUser(HashMap<String, String> attributes) {
+	public LDAPUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN. - " + attributes);
+			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN. - {}" + attributes);
 		}
 	}
 
@@ -29,11 +31,9 @@ public class LDAPUser {
 
 	/**
 	 * Raccourci : permet de récupérer le nom de l'utilisateur.
-	 *
-	 * @return
 	 */
 	public String getName() {
-		return this.getAttribute("cn");
+		return getAttribute("cn");
 	}
 
 	@Override
@@ -43,11 +43,14 @@ public class LDAPUser {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o.getClass() == this.getClass()) {
+		if (o == null) {
+			return false;
+		} else if (o.getClass() == getClass()) {
 			LDAPUser user = (LDAPUser) o;
 			return attributes.get("cn").equals(user.attributes.get("cn"));
 		} else {
 			return false;
 		}
 	}
+
 }
