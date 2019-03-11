@@ -49,7 +49,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					.filter(gitlabGroupMember -> !MissionUtils.isGitlabUserAdmin(gitlabGroupMember, gitlab.getApi(), ldapTree))
 					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 					.forEach(member -> {
-					    	if (!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) {
+					    	if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) && (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
     						LOGGER.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName());
     						try {
     							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
