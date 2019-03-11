@@ -36,12 +36,14 @@ public class LDAPTree {
 	 */
 	public void build() throws IOException {
 		this.ldapTree = new HashMap<>();
+		int timeout = Integer.valueOf(GitSync.props.getProperty("timeout-search-ldap", "600000"));
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(GitSync.props.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_USER"), 
 			                                               GitSync.props.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"), 
 			                                               GinaLdapConfiguration.Type.APPLICATION, 
-			                                               Integer.valueOf(GitSync.props.getProperty("timeout-search-ldap")));
+			                                               timeout,
+			                                               timeout);
 		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
 		
 		try {
