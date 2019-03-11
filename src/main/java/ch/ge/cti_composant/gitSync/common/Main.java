@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
  * This class will load everything in place.
  */
 public class Main {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String[] args){
@@ -17,6 +18,6 @@ public class Main {
 			new GitSync().run(args[0]); // Boot
 			LOGGER.info("Synchronisation terminée. Bonne nuit...");
 		}
-
 	}
+
 }
