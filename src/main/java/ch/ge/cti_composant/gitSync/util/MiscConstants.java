@@ -3,8 +3,15 @@ package ch.ge.cti_composant.gitSync.util;
 /**
  * Placeholder for all fancy constants
  */
-public interface MiscConstants {
-	String ADMIN_LDAP_GROUP = "ADMINISTRATEUR";
-    	public static final String FISHEYE_USERNAME = "TCNSVNREADFISHEYEAAG";
-    	public static final String MWFL_USERNAME    = "TCNSVNMWFLROAAG";
+public class MiscConstants {
+
+	private MiscConstants() {
+	}
+
+	public static final String ADMIN_LDAP_GROUP = "ADMINISTRATEUR";
+
+	public static final String FISHEYE_USERNAME = "TCNSVNREADFISHEYEAAG";
+
+	public static final String MWFL_USERNAME    = "TCNSVNMWFLROAAG";
+
 }

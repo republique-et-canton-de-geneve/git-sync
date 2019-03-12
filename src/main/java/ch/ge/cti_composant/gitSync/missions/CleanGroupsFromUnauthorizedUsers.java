@@ -19,6 +19,7 @@ import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
  * quel type de groupe ou de projet.
  */
 public class CleanGroupsFromUnauthorizedUsers implements Mission {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
 
 	/**
@@ -30,14 +31,15 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le LDAP");
+
 		// Pour chaque groupe...
 		gitlab.getTree().getGroups()
-				.forEach(gitlabGroup -> {
-					LOGGER.info("Synchronisation du groupe " + gitlabGroup.getName() + " en cours");
-					handleGroup(gitlabGroup, ldapTree, gitlab);
-				});
+			.forEach(gitlabGroup -> {
+				LOGGER.info("Synchronisation du groupe [{}] en cours", gitlabGroup.getName());
+				handleGroup(gitlabGroup, ldapTree, gitlab);
+			});
 
-		LOGGER.info("Synchronisation terminée");
+		LOGGER.info("Synchronisation terminee");
 	}
 
 	private void handleGroup(GitlabGroup gitlabGroup, LDAPTree ldapTree, Gitlab gitlab) {
@@ -59,9 +61,8 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					    }
 					});
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de la détection du groupe " + gitlabGroup.getName() + " : " + e);
+			LOGGER.error("Une erreur est survenue lors de la detection du groupe [{}] : {}", gitlabGroup.getName(), e);
 		}
-
 	}
 
 }

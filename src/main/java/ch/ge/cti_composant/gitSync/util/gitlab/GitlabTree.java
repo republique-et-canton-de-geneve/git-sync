@@ -19,14 +19,17 @@ import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
  * Représente l'arborescence GitLab restreinte aux éléments venant du LDAP.
  */
 public class GitlabTree {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabTree.class);
+
 	String apiToken;
+
 	String hostname;
 
-	private Map<GitlabGroup, Map<String, GitlabUser>> gitlabTree;
+	private Map<GitlabGroup, Map<String, GitlabUser>> tree;
 
 	public GitlabTree(String apiToken, String hostname, LDAPTree ldapTree) throws IOException {
-		gitlabTree = new HashMap<>();
+		tree = new HashMap<>();
 		this.apiToken = apiToken;
 		this.hostname = hostname;
 		build(ldapTree);
@@ -45,28 +48,27 @@ public class GitlabTree {
 				// ...et on s'assure que c'est bien le compte technique qui a la main sur le groupe
 				.filter(gitlabGroup -> MissionUtils.validateGitlabGroupOwnership(gitlabGroup, api))
 				.forEach(gitlabGroup -> {
-					gitlabTree.put(gitlabGroup, new HashMap<>());
+					tree.put(gitlabGroup, new HashMap<>());
 					try {
-						api.getGroupMembers(gitlabGroup).forEach(user -> gitlabTree.get(gitlabGroup).put(user.getUsername(), user));
+						api.getGroupMembers(gitlabGroup).forEach(user -> tree.get(gitlabGroup).put(user.getUsername(), user));
 					} catch (IOException e) {
-						LOGGER.error("Une erreur s'est produite lors de la synchronisation du groupe " + gitlabGroup.getName() + " : " + e);
+						LOGGER.error("Une erreur s'est produite lors de la synchronisation du groupe [{}] : {}", gitlabGroup.getName(), e);
 					}
 				});
 	}
 
 	public List<GitlabGroup> getGroups() {
-		return new ArrayList<>(this.gitlabTree.keySet());
+		return new ArrayList<>(this.tree.keySet());
 	}
 
 	public Map<String, GitlabUser> getUsers(GitlabGroup group) {
-		return new HashMap<>(gitlabTree.getOrDefault(group, new HashMap<>()));
+		return new HashMap<>(tree.getOrDefault(group, new HashMap<>()));
 	}
 
 	public Map<String, GitlabUser> getUsers() {
 		HashMap<String, GitlabUser> output = new HashMap<>();
-		gitlabTree.forEach((group, users) -> {
-			output.putAll(new HashMap<>(users));
-		});
+		tree.forEach((group, users) -> output.putAll(new HashMap<>(users)));
 		return output;
 	}
+
 }
