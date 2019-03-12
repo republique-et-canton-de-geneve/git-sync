@@ -26,22 +26,22 @@ import ch.ge.cti_composant.gitSync.util.gitlab.GitlabTree;
  * Main class that does the chit chat between all classes, basically
  */
 public class GitSync {
-    /**
-     *The logger.
-     */
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GitSync.class);
     
     /**
      * The minimum user count. If there are less users that that count, we consider that there is a problem in
      * the VLDAP information retrieving process and the synchronisation is aborted. 
      */
-    
     private static final int MIMIMUM_USER_COUNT = 10;
-    
-    // Chargement des propriétés
-    public static Properties props = new Properties();
+
+	/**
+	 * Chargement des proprietes.
+	 */
+    private static final Properties props = new Properties();
+
     private LDAPTree ldapTree;
+
     private Gitlab gitlab;
 
     private void init() throws IOException {
@@ -79,40 +79,31 @@ public class GitSync {
 		    LOGGER.error("Erreur lors du chargement de l'arborescence LDAP/Gitlab", e);
 		}
 		
-		LOGGER.info("Job termin�...");
+		LOGGER.info("Job termine...");
 	}
 
-    private void checkMimimumUserCount() throws IOException
-    {
-	/**
-	 * A hashset is used to insure a user is not added more than once.
-	 */
-	
-	Set<LDAPUser> users = new HashSet<LDAPUser>(512);
-	
-	for (LDAPGroup group : ldapTree.getGroups())
-	{
-	    for (LDAPUser user : ldapTree.getUsers(group).values())
-	    {
-		users.add(user);
-	    }
+	public static String getProperty(String name) {
+		return props.getProperty(name);
 	}
-	
-	/**
-	 * Make sure the minimal count of users has been found.
-	 */
-	
-	LOGGER.info("Total number of groups = " + ldapTree.getGroups().size());
-	
-	if (users.size() >= MIMIMUM_USER_COUNT)
-	{
-	    LOGGER.info("Total number of users count = " + users.size());
-	}
-	else
-	{
-	    String message = "Total number of users count = " + users.size() + " < " + MIMIMUM_USER_COUNT+ " (mimum user count) -> we suspect a problem -> process aborted";
-	    LOGGER.error(message);
-	    throw new IOException(message);
-	}
+
+    private void checkMimimumUserCount() throws IOException {
+		// A hashset is used to insure a user is not added more than once
+		Set<LDAPUser> users = new HashSet<>();
+		for (LDAPGroup group : ldapTree.getGroups()) {
+			for (LDAPUser user : ldapTree.getUsers(group).values()) {
+				users.add(user);
+			}
+		}
+
+		// Make sure the minimal count of users has been found
+		LOGGER.info("Total number of groups = {}", ldapTree.getGroups().size());
+		if (users.size() >= MIMIMUM_USER_COUNT) {
+			LOGGER.info("Total number of users count = {}", users.size());
+		} else {
+			String message = "Total number of users count = " + users.size() + " < " + MIMIMUM_USER_COUNT+ " (mimum user count) -> we suspect a problem -> process aborted";
+			LOGGER.error(message);
+			throw new IOException(message);
+		}
     }
+
 }

@@ -4,6 +4,7 @@ package ch.ge.cti_composant.gitSync.util.LDAP;
  * Represents a LDAP Group.
  */
 public class LDAPGroup {
+
 	private String name;
 
 	/**
@@ -16,9 +17,11 @@ public class LDAPGroup {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o.getClass() == this.getClass()) {
+		if (o == null) {
+			return false;
+		} else if (o.getClass() == getClass()) {
 			LDAPGroup group = (LDAPGroup) o;
-			return group.name.equals(this.name);
+			return group.name.equals(name);
 		} else {
 			return false;
 		}
@@ -26,11 +29,11 @@ public class LDAPGroup {
 
 	@Override
 	public int hashCode() {
-		return this.name.hashCode();
+		return name.hashCode();
 	}
 
 	public String getName(){
-		return this.name;
+		return name;
 	}
 
 }
