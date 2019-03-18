@@ -11,7 +11,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.9-SNAPSHOT</version>
 
 	<scm>
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
@@ -92,6 +92,12 @@
 		</resources>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+			</plugin>
+
 			<plugin>
 				<inherited>true</inherited>
 				<groupId>org.apache.maven.plugins</groupId>
