@@ -11,7 +11,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.9-SNAPSHOT</version>
 
 	<scm>
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
