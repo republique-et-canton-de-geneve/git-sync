@@ -17,7 +17,6 @@
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
 		<developerConnection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
 		<url>***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</url>
-	  <tag>gitSync-1.0.9</tag>
   </scm>
 
 	<ciManagement>
