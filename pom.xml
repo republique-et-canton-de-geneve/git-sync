@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- Parent POM for compatibility issues -->
@@ -13,13 +11,14 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>1.0.9-SNAPSHOT</version>
+	<version>1.0.9</version>
 
 	<scm>
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
 		<developerConnection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
 		<url>***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</url>
-	</scm>
+	  <tag>gitSync-1.0.9</tag>
+  </scm>
 
 	<ciManagement>
 		<system>jenkins</system>
@@ -116,8 +115,7 @@
 						</goals>
 						<configuration>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>ch.ge.cti_composant.gitSync.common.Main</mainClass>
 								</transformer>
 							</transformers>
