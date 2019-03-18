@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>ch.ge.cti.ct</groupId>
 			<artifactId>gina-ldap-client</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.0.0</version>
 		</dependency>
 
 		<!-- logging -->
