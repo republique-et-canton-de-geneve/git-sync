@@ -17,7 +17,6 @@
 		<connection>scm:git:https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</connection>
 		<developerConnection>scm:git:https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
 		<url>https://prod.etat-ge.ch/gitlab/DEVELOPPEUR-CTI/gitSync.git</url>
-	  <tag>gitSync-1.0.9</tag>
   </scm>
 
 	<ciManagement>
