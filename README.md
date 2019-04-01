@@ -24,8 +24,7 @@ This section specifies the expected behavior of the application.
 
 ## Definitions
 
-* (in the LDAP server)
-Most roles are "standard" roles. One role is a "administrator" role.
+Most LDAP roles are "standard" roles. One role can be an "administrator" role.
 For example, role "IT-DEV-JAVA" is a standard role, whereas "ADMIN" is the administrator role.
 The administrator role, if any, is supplied as a parameter to the application.
 

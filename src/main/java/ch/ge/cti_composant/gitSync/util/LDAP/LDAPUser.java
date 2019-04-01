@@ -3,9 +3,11 @@ package ch.ge.cti_composant.gitSync.util.LDAP;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Represents a user in LDAP.
+ * A user in the LDAP server.
  */
 public class LDAPUser {
 
@@ -14,23 +16,30 @@ public class LDAPUser {
 	public LDAPUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("Chaque utilisateur LDAP a besoin d'un CN. - {}" + attributes);
+			throw new IllegalStateException("An LDAP user needs to have a \"cn\" attribute. Actual attributes are: "
+					+ attributes);
 		}
 	}
 
 	/**
 	 * Gets an attribute from the user.
 	 *
-	 * @param key The attribute key.
-	 * @return String The value of the attribute.
-	 * @throws NullPointerException If the attribute doesnt exist.
+	 * @param key attribute key
+	 * @return value of the attribute
+	 * @throws NullPointerException if the attribute does not exist
 	 */
 	public String getAttribute(String key) {
-		return Objects.requireNonNull(attributes.get(key), "Inexistant attribute.");
+		/*
+		Stream.of(
+				new String[][] {
+						{ "cn", "Jean Dupont" },
+				        { "ou", "IT" }}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+				        */
+		return Objects.requireNonNull(attributes.get(key), "No such attribute '" + key + "'");
 	}
 
 	/**
-	 * Raccourci : permet de récupérer le nom de l'utilisateur.
+	 * Returns the name of the user.
 	 */
 	public String getName() {
 		return getAttribute("cn");
