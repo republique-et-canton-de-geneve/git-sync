@@ -1,16 +1,12 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
 /**
- * Represents a LDAP Group.
+ * A group in the LDAP server.
  */
 public class LDAPGroup {
 
 	private String name;
 
-	/**
-	 * Override du constructeur p.d.p.d avec argument
-	 * @param name Le nom du groupe
-	 */
 	public LDAPGroup(String name){
 		this.name = name;
 	}

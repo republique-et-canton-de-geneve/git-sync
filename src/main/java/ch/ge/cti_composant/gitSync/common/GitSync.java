@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import ch.ge.cti_composant.gitSync.util.LDAP.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +17,6 @@ import ch.ge.cti_composant.gitSync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLDAP;
 import ch.ge.cti_composant.gitSync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitSync.missions.PropagateAdminUsersToAllGroups;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitSync.util.gitlab.GitlabTree;
 
@@ -45,13 +43,18 @@ public class GitSync {
     private Gitlab gitlab;
 
     private void init() throws IOException {
-	ldapTree = new LDAPTree();
+    	// in order to load the data from another LDAP server than Etat de Geneve's LDAP server, replace the tree
+		// factory below with a custom one
+    	LdapTreeFactory treeFactory = new GinaLdapTreeFactory();
+		ldapTree = treeFactory.createTree();
 	
-	checkMimimumUserCount();
+		checkMimimumUserCount();
 
-	gitlab = new Gitlab(new GitlabTree(props.getProperty("gitlab.account.token"),
-		props.getProperty("gitlab.hostname"), ldapTree), props.getProperty("gitlab.hostname"),
-		props.getProperty("gitlab.account.token"));
+		gitlab = new Gitlab(new GitlabTree(
+				props.getProperty("gitlab.account.token"),
+				props.getProperty("gitlab.hostname"), ldapTree),
+				props.getProperty("gitlab.hostname"),
+				props.getProperty("gitlab.account.token"));
     }
 
     /**
