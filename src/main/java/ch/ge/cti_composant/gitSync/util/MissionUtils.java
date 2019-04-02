@@ -29,12 +29,10 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Vérifie que nous sommes bien le propriétaire du groupe GitlabContext en question.
-	 *
-	 * @param gitlabGroup Le groupe GitlabContext en question
-	 * @param gitlabAPI   L'API GitlabContext
-	 * @return Vrai si le groupe nous appartient, faux sinon.
-	 * @apiNote Il ne peut y avoir selon GitLab qu'un seul propriétaire.
+	 * Checks that we are the Owner of the specified GitLab group.
+	 * By "we", we mean "the GitLab (technical) user associated with the token used for the connection to GitLab".
+	 * <br/>
+	 * Note: in GitLab a group can have only one owner.
 	 */
 	public static boolean validateGitlabGroupOwnership(GitlabGroup gitlabGroup, GitlabAPI gitlabAPI) {
 		try {
@@ -54,11 +52,7 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Vérifie que ce groupe existe bien dans LDAP.
-	 *
-	 * @param gitlabGroup Le groupe GitlabContext
-	 * @param ldapTree    L'arborescence LDAP
-	 * @return Vrai si le groupe existe dans LDAP, faux sinon.
+	 * Checks that the specified GitLab group exists also in the LDAP tree
 	 */
 	public static boolean validateLDAPGroupExistence(GitlabGroup gitlabGroup, LDAPTree ldapTree) {
 		return ldapTree.getGroups().contains(new LDAPGroup(gitlabGroup.getName()));

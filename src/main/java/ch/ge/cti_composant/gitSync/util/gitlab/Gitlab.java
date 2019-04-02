@@ -39,6 +39,7 @@ public class Gitlab {
 
 	/**
 	 * Return all users of the specified GitLab group.
+	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers(GitlabGroup group) {
 		return new HashMap<>(tree.getOrDefault(group, new HashMap<>()));
@@ -46,6 +47,7 @@ public class Gitlab {
 
 	/**
 	 * Return all users.
+	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers() {
 		HashMap<String, GitlabUser> output = new HashMap<>();

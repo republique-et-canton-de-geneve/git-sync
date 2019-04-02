@@ -53,7 +53,7 @@ if such group does not exist yet.
     * If a user exists in GitLab, is assigned to the matching group but is not in the list above, remove it from
       the matching group, unless the user belongs to the LDAP administrator role (see reason below).
   
-* For the administrator LDAP role, retrieve the list of users. For every user in the list:
+* For the administrator LDAP role (if any), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
   * If the user exists in GitLab :
     * Assign it the Admin (as opposed to Regular) access level.
@@ -70,6 +70,10 @@ otherwise users having Admin access level are downgraded to Regular access level
   Assignment of a GitLab role permission other than Maintainer, e.g., Developer, Guest or Owner, is carried out
   directly on the GitLab server. 
 * The application does not create GitLab sub-groups. It only creates GitLab groups.
+* Whenever the application creates a GitLab group, the GitLab role permission "Owner" group is automatically
+  assigned by GitLab to the user used for the connection.
+  That user is the user matching the connection token ``gitlab.account.token`` to be supplied in the
+  parameter file ``distribution.properties``.
 * If an existing GitLab group matches no LDAP role, nothing happens to it.
 * The replication is one-way : from the LDAP server to the GitLab server. Accordingly, read-only access
   to the LDAP server is sufficient. 
@@ -135,11 +139,11 @@ Lancer la commande
 The synchronization is carried out by running the application:
 
 ``
-java -jar ... Distribution.properties
+java -jar target/gitSync-XXX-SNAPSHOT.jar ./src/main/resources/distribution.properties
 ``
 
-At État de Genève, execution typically takes NNN minutes to execute. It processes
-about NNN groups encompassing NN users.
+At État de Genève, execution typically takes a few minutes to execute. It processes
+about 100 groups encompassing 1000 group users.
 
 Practical usage requires spawning the application regularly, for example every hour.
 

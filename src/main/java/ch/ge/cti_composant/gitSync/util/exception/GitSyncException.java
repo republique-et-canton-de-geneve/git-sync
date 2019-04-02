@@ -6,6 +6,10 @@ public class GitSyncException extends RuntimeException {
         super(cause);
     }
 
+    public GitSyncException(String msg) {
+        super(msg);
+    }
+
     public GitSyncException(String msg, Exception cause) {
         super(msg, cause);
     }

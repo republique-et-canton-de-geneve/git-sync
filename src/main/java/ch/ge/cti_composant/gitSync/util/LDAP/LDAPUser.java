@@ -62,4 +62,9 @@ public class LDAPUser {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return getName();
+	}
+
 }
