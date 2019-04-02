@@ -11,6 +11,10 @@ public class LDAPGroup {
 		this.name = name;
 	}
 
+	public String getName(){
+		return name;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) {
@@ -28,7 +32,8 @@ public class LDAPGroup {
 		return name.hashCode();
 	}
 
-	public String getName(){
+	@Override
+	public String toString() {
 		return name;
 	}
 

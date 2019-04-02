@@ -1,5 +1,6 @@
 package ch.ge.cti_composant.gitSync.util
 
+import ch.ge.cti_composant.gitSync.data.DataProvider
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser
@@ -59,27 +60,7 @@ class LdapTreeSupportSpec extends Specification {
     }
 
     LDAPTree setupLdapTree() {
-        def net = new LDAPGroup("Network")
-        def dev = new LDAPGroup("Dev")
-
-        def jean = new LDAPUser(Collections.singletonMap("cn", "Jean"))
-        def marie = new LDAPUser(Collections.singletonMap("cn", "Marie"))
-        def paul = new LDAPUser(Collections.singletonMap("cn", "Paul"))
-
-        def netUsers = new HashMap<String, LDAPUser>()
-        netUsers.put(marie.name, marie)
-        netUsers.put(paul.name, paul)
-
-        def devUsers = new HashMap<String, LDAPUser>()
-        devUsers.put(paul.name, paul)
-        devUsers.put(marie.name, marie)
-        devUsers.put(jean.name, jean)
-
-        def tree = new HashMap<LDAPGroup, Map<String, LDAPUser>>()
-        tree.put(net, netUsers)
-        tree.put(dev, devUsers)
-
-        return new LdapTreeSupport(tree)
+        return new DataProvider().setupLdapTree()
     }
 
 }

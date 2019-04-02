@@ -1,6 +1,6 @@
 package ch.ge.cti_composant.gitSync.util.LDAP;
 
-import ch.ge.cti_composant.gitSync.common.GitSync;
+import ch.ge.cti_composant.gitSync.GitSync;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
 import gina.api.GinaApiLdapBaseAble;
 import gina.impl.GinaLdapFactory;
