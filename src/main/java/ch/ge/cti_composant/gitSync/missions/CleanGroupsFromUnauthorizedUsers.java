@@ -1,16 +1,15 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import java.io.IOException;
-
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
+import ch.ge.cti_composant.gitSync.util.MissionUtils;
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.gitlab.api.models.GitlabGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.MiscConstants;
-import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import java.io.IOException;
 
 /**
  * Classe responsable de la suppression des droits "en trop" sur GitLab.
@@ -23,7 +22,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
 
 	/**
-	 * Synchronise les utilisateurs existants Gitlab sur le LDAP.
+	 * Synchronise les utilisateurs existants GitlabContext sur le LDAP.
 	 *
 	 * @param ldapTree l'arbre LDAP
 	 * @param gitlab   Le contexte GitLab.
@@ -33,7 +32,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le LDAP");
 
 		// Pour chaque groupe...
-		gitlab.getTree().getGroups()
+		gitlab.getGroups()
 			.forEach(gitlabGroup -> {
 				LOGGER.info("Synchronisation du groupe [{}] en cours", gitlabGroup.getName());
 				handleGroup(gitlabGroup, ldapTree, gitlab);
@@ -52,11 +51,11 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 					.forEach(member -> {
 					    	if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) && (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
-    						LOGGER.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rôle " + gitlabGroup.getName());
+    						LOGGER.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le rï¿½le " + gitlabGroup.getName());
     						try {
     							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
     						} catch (IOException e) {
-    							LOGGER.error("Une erreur est survenue lors de la suppression du rôle " + gitlabGroup.getName() + " pour " + member.getUsername() );
+    							LOGGER.error("Une erreur est survenue lors de la suppression du rï¿½le " + gitlabGroup.getName() + " pour " + member.getUsername() );
     						}
 					    }
 					});

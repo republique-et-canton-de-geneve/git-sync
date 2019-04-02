@@ -1,19 +1,18 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.MiscConstants;
+import ch.ge.cti_composant.gitSync.util.MissionUtils;
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.MiscConstants;
-import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Ajoute les utilisateurs en admin si ils sont dans le groupe LDAP.

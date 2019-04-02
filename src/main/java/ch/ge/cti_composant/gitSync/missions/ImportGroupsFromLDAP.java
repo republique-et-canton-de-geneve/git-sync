@@ -2,6 +2,7 @@ package ch.ge.cti_composant.gitSync.missions;
 
 import java.io.IOException;
 
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.gitlab.api.models.CreateGroupRequest;
 import org.gitlab.api.models.GitlabVisibility;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 
 /**
  * Classe responsable de la création des groupes GitLab selon le LDAP.

@@ -29,10 +29,10 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Vérifie que nous sommes bien le propriétaire du groupe Gitlab en question.
+	 * Vérifie que nous sommes bien le propriétaire du groupe GitlabContext en question.
 	 *
-	 * @param gitlabGroup Le groupe Gitlab en question
-	 * @param gitlabAPI   L'API Gitlab
+	 * @param gitlabGroup Le groupe GitlabContext en question
+	 * @param gitlabAPI   L'API GitlabContext
 	 * @return Vrai si le groupe nous appartient, faux sinon.
 	 * @apiNote Il ne peut y avoir selon GitLab qu'un seul propriétaire.
 	 */
@@ -56,7 +56,7 @@ public class MissionUtils {
 	/**
 	 * Vérifie que ce groupe existe bien dans LDAP.
 	 *
-	 * @param gitlabGroup Le groupe Gitlab
+	 * @param gitlabGroup Le groupe GitlabContext
 	 * @param ldapTree    L'arborescence LDAP
 	 * @return Vrai si le groupe existe dans LDAP, faux sinon.
 	 */
@@ -65,10 +65,10 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Valide l'existence du groupe Gitlab à partir d'un groupe LDAP.
+	 * Valide l'existence du groupe GitlabContext à partir d'un groupe LDAP.
 	 *
 	 * @param ldapGroup Le groupe LDAP.
-	 * @param api       L'API Gitlab.
+	 * @param api       L'API GitlabContext.
 	 * @return Vrai si le groupe existe, faux sinon.
 	 */
 	public static boolean validateGitlabGroupExistence(LDAPGroup ldapGroup, GitlabAPI api) {
@@ -86,7 +86,7 @@ public class MissionUtils {
 	 * Vérifie que l'utilisateur existe bel et bien dans GitLab.
 	 *
 	 * @param user Un utilisateur LDAP
-	 * @param users Les utilisateurs Gitlab.
+	 * @param users Les utilisateurs GitlabContext.
 	 * @return Vrai si l'utilisateur existe dans GitLab, faux sinon.
 	 */
 	public static boolean validateGitlabUserExistence(LDAPUser user, List<GitlabUser> users) {

@@ -3,6 +3,7 @@ package ch.ge.cti_composant.gitSync.missions;
 import java.io.IOException;
 import java.util.List;
 
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 
 /**
  * Ajoute les admins à tous les groupes.
@@ -33,7 +33,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 			GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
 
 			if (user != null) {
-				for (GitlabGroup gitlabGroup : gitlab.getTree().getGroups()) {
+				for (GitlabGroup gitlabGroup : gitlab.getGroups()) {
 					// Ne pas le faire pour DEVELOPPEUR-GINA ni ADMINISTRATEUR-GINA
 					if (!"ADMINISTRATEUR-GINA".equals(gitlabGroup.getName()) && !"DEVELOPPEUR-GINA".equals(gitlabGroup.getName()) ) {
 						List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());

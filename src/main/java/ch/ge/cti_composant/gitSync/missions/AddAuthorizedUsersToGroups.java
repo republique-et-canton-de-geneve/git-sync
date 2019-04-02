@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 
 /**
  * Ajoute les utilisateurs autorisés au GitLab.
@@ -29,7 +29,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 			Map<String, GitlabUser> allUsers = new HashMap<>();
 			gitlab.getApi().getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-			for (GitlabGroup group : gitlab.getTree().getGroups()) {
+			for (GitlabGroup group : gitlab.getGroups()) {
 				List<GitlabGroupMember> memberList = gitlab.getApi().getGroupMembers(group.getId());
 				LOGGER.info("Gestion des utilisateurs du groupe [{}]...", group.getName());
 
@@ -39,7 +39,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 							.count() == 1;
 
 					if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
-						// L'utilisateur existe dans Gitlab et n'a pas été ajouté au groupe.
+						// L'utilisateur existe dans GitlabContext et n'a pas été ajouté au groupe.
 						LOGGER.info("Ajout de l'utilisateur [{}] au groupe [{}]", username, group.getName());
 						gitlab.getApi().addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
 					} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
