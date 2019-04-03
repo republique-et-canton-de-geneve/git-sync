@@ -13,7 +13,7 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 
 /**
  * Ajoute les utilisateurs autorisés au GitLab.
@@ -23,7 +23,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AddAuthorizedUsersToGroups.class);
 
 	@Override
-	public void start(LDAPTree ldapTree, Gitlab gitlab) {
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Synchronisation : ajout des utilisateurs aux groupes autorises");
 		try {
 			Map<String, GitlabUser> allUsers = new HashMap<>();

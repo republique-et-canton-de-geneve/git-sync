@@ -1,6 +1,6 @@
 package ch.ge.cti_composant.gitSync.service;
 
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -23,11 +23,11 @@ public class GitlabService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabService.class);
 
 	/**
-	 * Constructs the GitLab tree (groups and users) from the specified LDAP_temp tree.
+	 * Constructs the GitLab tree (groups and users) from the specified ldap tree.
 	 *
-	 * @return the GitLab tree, <b>restricted to the elements that come from the LDAP_temp server</b>.
+	 * @return the GitLab tree, <b>restricted to the elements that come from the ldap server</b>.
 	 */
-	public Gitlab buildGitlabContext(String hostname, String apiToken, LDAPTree ldapTree) {
+	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
 		// log on to GitLab
 		GitlabAPI api = GitlabAPI.connect(hostname, apiToken);
 
@@ -44,7 +44,7 @@ public class GitlabService {
 		Map<GitlabGroup, Map<String, GitlabUser>> tree = new HashMap<>();
 		groups.stream()
 				// exclude the groups created by the user
-				.filter(gitlabGroup -> MissionUtils.validateLDAPGroupExistence(gitlabGroup, ldapTree))
+				.filter(gitlabGroup -> MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree))
 				// make sure the technical account owns the group
 				.filter(gitlabGroup -> MissionUtils.validateGitlabGroupOwnership(gitlabGroup, api))
 				.forEach(gitlabGroup -> {

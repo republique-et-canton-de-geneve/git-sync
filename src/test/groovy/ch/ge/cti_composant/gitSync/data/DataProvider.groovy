@@ -1,9 +1,9 @@
 package ch.ge.cti_composant.gitSync.data
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser
-import ch.ge.cti_composant.gitSync.util.LDAP.LdapTreeSupport
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree
+import ch.ge.cti_composant.gitSync.util.ldap.LdapUser
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTreeSupport
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab
 import org.gitlab.api.models.GitlabGroup
 import org.gitlab.api.models.GitlabUser
@@ -14,26 +14,26 @@ import org.gitlab.api.models.GitlabUser
 class DataProvider {
 
     /**
-     * Create an LDAP_temp tree with groups and users.
+     * Create an ldap tree with groups and users.
      */
-    LDAPTree setupLdapTree() {
-        def net = new LDAPGroup("Network")
-        def dev = new LDAPGroup("Dev")
+    LdapTree setupLdapTree() {
+        def net = new LdapGroup("Network")
+        def dev = new LdapGroup("Dev")
 
-        def jean = new LDAPUser(Collections.singletonMap("cn", "Jean"))
-        def marie = new LDAPUser(Collections.singletonMap("cn", "Marie"))
-        def paul = new LDAPUser(Collections.singletonMap("cn", "Paul"))
+        def jean = new LdapUser(Collections.singletonMap("cn", "Jean"))
+        def marie = new LdapUser(Collections.singletonMap("cn", "Marie"))
+        def paul = new LdapUser(Collections.singletonMap("cn", "Paul"))
 
-        def netUsers = new HashMap<String, LDAPUser>()
+        def netUsers = new HashMap<String, LdapUser>()
         netUsers.put(marie.name, marie)
         netUsers.put(paul.name, paul)
 
-        def devUsers = new HashMap<String, LDAPUser>()
+        def devUsers = new HashMap<String, LdapUser>()
         devUsers.put(paul.name, paul)
         devUsers.put(marie.name, marie)
         devUsers.put(jean.name, jean)
 
-        def tree = new HashMap<LDAPGroup, Map<String, LDAPUser>>()
+        def tree = new HashMap<LdapGroup, Map<String, LdapUser>>()
         tree.put(net, netUsers)
         tree.put(dev, devUsers)
 

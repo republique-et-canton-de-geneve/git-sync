@@ -18,7 +18,7 @@ class MissionUtilsSpec extends Specification {
         expect:
         def gitlabGroup = new GitlabGroup()
         gitlabGroup.setName(groupName)
-        found == MissionUtils.validateLDAPGroupExistence(gitlabGroup, ldapTree)
+        found == MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree)
 
         where:
         groupName | found

@@ -1,20 +1,20 @@
-package ch.ge.cti_composant.gitSync.util.LDAP_temp;
+package ch.ge.cti_composant.gitSync.util.ldap;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * A user in the LDAP_temp server.
+ * A user in the ldap server.
  */
-public class LDAPUser {
+public class LdapUser {
 
 	private HashMap<String, String> attributes;
 
-	public LDAPUser(Map<String, String> attributes) {
+	public LdapUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("An LDAP_temp user needs to have a \"cn\" attribute. Actual attributes are: "
+			throw new IllegalStateException("An ldap user needs to have a \"cn\" attribute. Actual attributes are: "
 					+ attributes);
 		}
 	}
@@ -53,7 +53,7 @@ public class LDAPUser {
 		if (o == null) {
 			return false;
 		} else if (o.getClass() == getClass()) {
-			LDAPUser user = (LDAPUser) o;
+			LdapUser user = (LdapUser) o;
 			return attributes.get("cn").equals(user.attributes.get("cn"));
 		} else {
 			return false;
