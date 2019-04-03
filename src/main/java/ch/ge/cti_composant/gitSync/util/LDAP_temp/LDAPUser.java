@@ -1,13 +1,11 @@
-package ch.ge.cti_composant.gitSync.util.LDAP;
+package ch.ge.cti_composant.gitSync.util.LDAP_temp;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
- * A user in the LDAP server.
+ * A user in the LDAP_temp server.
  */
 public class LDAPUser {
 
@@ -16,7 +14,7 @@ public class LDAPUser {
 	public LDAPUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("An LDAP user needs to have a \"cn\" attribute. Actual attributes are: "
+			throw new IllegalStateException("An LDAP_temp user needs to have a \"cn\" attribute. Actual attributes are: "
 					+ attributes);
 		}
 	}

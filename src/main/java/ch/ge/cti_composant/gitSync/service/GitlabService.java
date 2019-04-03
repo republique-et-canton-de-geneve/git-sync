@@ -1,6 +1,6 @@
 package ch.ge.cti_composant.gitSync.service;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -23,9 +23,9 @@ public class GitlabService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabService.class);
 
 	/**
-	 * Constructs the GitLab tree (groups and users) from the specified LDAP tree.
+	 * Constructs the GitLab tree (groups and users) from the specified LDAP_temp tree.
 	 *
-	 * @return the GitLab tree, <b>restricted to the elements that come from the LDAP server</b>.
+	 * @return the GitLab tree, <b>restricted to the elements that come from the LDAP_temp server</b>.
 	 */
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LDAPTree ldapTree) {
 		// log on to GitLab

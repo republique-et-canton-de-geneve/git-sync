@@ -1,7 +1,7 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -22,14 +22,14 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
 
 	/**
-	 * Synchronise les utilisateurs existants GitlabContext sur le LDAP.
+	 * Synchronise les utilisateurs existants GitlabContext sur le LDAP_temp.
 	 *
-	 * @param ldapTree l'arbre LDAP
+	 * @param ldapTree l'arbre LDAP_temp
 	 * @param gitlab   Le contexte GitLab.
 	 */
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le LDAP");
+		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le LDAP_temp");
 
 		// Pour chaque groupe...
 		gitlab.getGroups()

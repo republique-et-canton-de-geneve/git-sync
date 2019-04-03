@@ -1,7 +1,7 @@
-package ch.ge.cti_composant.gitSync.util.LDAP;
+package ch.ge.cti_composant.gitSync.util.LDAP_temp;
 
 /**
- * A group in the LDAP server.
+ * A group in the LDAP_temp server.
  */
 public class LDAPGroup {
 

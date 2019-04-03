@@ -13,7 +13,7 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
 
 /**
  * Ajoute les utilisateurs autorisés au GitLab.
