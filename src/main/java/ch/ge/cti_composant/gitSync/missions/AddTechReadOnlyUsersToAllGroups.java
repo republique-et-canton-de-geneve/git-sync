@@ -28,7 +28,8 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 	    addUser(gitlab, MiscConstants.MWFL_USERNAME);
 	}
 	
-	private void addUser(Gitlab gitlab, String username)	{
+	private void addUser(Gitlab gitlab, String username) {
+		LOGGER.info("Adding administrator users to all groups with Reported permissions");
 		try {
 			GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
 
@@ -38,15 +39,15 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 					if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
 						List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
 						if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-							LOGGER.info("Adding user [{}] to group [{}]", username, gitlabGroup.getName());
+							LOGGER.info("    Adding user [{}] to group [{}]", username, gitlabGroup.getName());
 							gitlab.getApi().addGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
 						} else {
-							LOGGER.info("User [{}] is already a member of group [{}]", username, gitlabGroup.getName());
+							LOGGER.info("    User [{}] is already a member of group [{}]", username, gitlabGroup.getName());
 						}
 					}
 				}
 			} else {
-				LOGGER.info("User [{}] is not a GitLab user", username);
+				LOGGER.info("    User [{}] is not a GitLab user", username);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Exception caught while iterating on a group", e);
