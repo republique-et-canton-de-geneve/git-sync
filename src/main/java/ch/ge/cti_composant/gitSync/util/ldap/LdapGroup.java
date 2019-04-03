@@ -1,7 +1,8 @@
 package ch.ge.cti_composant.gitSync.util.ldap;
 
 /**
- * A group in the ldap server.
+ * A group in the LDAP server.
+ * Will be matched to a group in the GitLab server.
  */
 public class LdapGroup {
 
