@@ -1,10 +1,10 @@
-package ch.ge.cti_composant.gitSync.util.LDAP;
+package ch.ge.cti_composant.gitSync.util.LDAP_temp;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * The tree of the users in the LDAP server.
+ * The tree of the users in the LDAP_temp server.
  */
 public interface LDAPTree {
 

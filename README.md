@@ -147,4 +147,8 @@ about 100 groups encompassing 1000 group users.
 
 Practical usage requires spawning the application regularly, for example every hour.
 
-(A FAIRE : paramétrisation)  
+(A FAIRE : paramétrisation)
+
+# Future evolutions
+
+No future evolutions are planed, besides possibly adding unit tests.

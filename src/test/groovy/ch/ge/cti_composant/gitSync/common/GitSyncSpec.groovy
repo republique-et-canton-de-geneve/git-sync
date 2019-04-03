@@ -4,7 +4,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * Tests class {@link ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup}.
+ * Tests class {@link ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup}.
  */
 @Unroll
 class GitSyncSpec extends Specification {
