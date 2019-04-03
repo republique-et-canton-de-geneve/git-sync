@@ -11,7 +11,7 @@ import spock.lang.Unroll
 @Unroll
 class MissionUtilsSpec extends Specification {
 
-    def "#validateLDAPGroupExistence should find a matching LDAP role for a GitLab group"() {
+    def "#validateLdapGroupExistence should find a matching LDAP role for a GitLab group"() {
         given:
         def ldapTree = new DataProvider().setupLdapTree()
 
