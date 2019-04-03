@@ -16,7 +16,7 @@ import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 
 /**
- * Ajoute les admins à tous les groupes.
+ * Adds the Admin users to all groups.
  */
 public class AddTechReadOnlyUsersToAllGroups implements Mission {
     	
@@ -34,22 +34,22 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 
 			if (user != null) {
 				for (GitlabGroup gitlabGroup : gitlab.getGroups()) {
-					// Ne pas le faire pour ***REMOVED*** ni ***REMOVED***
+					// no op for ***REMOVED*** and ***REMOVED***
 					if (!"***REMOVED***".equals(gitlabGroup.getName()) && !"***REMOVED***".equals(gitlabGroup.getName()) ) {
 						List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
 						if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-							LOGGER.info("Ajout de [{}] a [{}]", username, gitlabGroup.getName());
+							LOGGER.info("Adding user [{}] to group [{}]", username, gitlabGroup.getName());
 							gitlab.getApi().addGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
 						} else {
-							LOGGER.info("[{}] est deja membre du groupe [{}]", username, gitlabGroup.getName());
+							LOGGER.info("User [{}] is already a member of group [{}]", username, gitlabGroup.getName());
 						}
 					}
 				}
 			} else {
-				LOGGER.info("[{}] is not a GitLab user", username);
+				LOGGER.info("User [{}] is not a GitLab user", username);
 			}
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de l'iteration sur l'un des groupes. L'erreur est : {}", e);
+			LOGGER.error("Exception caught while iterating on a group", e);
 		}
 	}
 

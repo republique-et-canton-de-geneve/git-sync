@@ -5,10 +5,12 @@ import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabUser;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * The GitLab context.
@@ -31,14 +33,16 @@ public class Gitlab {
 	}
 
 	/**
-	 * Return all GitLab groups.
+	 * Returns all GitLab groups, sorted by names.
 	 */
 	public List<GitlabGroup> getGroups() {
-		return new ArrayList<>(tree.keySet());
+		return new ArrayList<>(tree.keySet()).stream()
+				.sorted(Comparator.comparing(GitlabGroup::getName))
+				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Return all users of the specified GitLab group.
+	 * Returns all users of the specified GitLab group.
 	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers(GitlabGroup group) {
@@ -46,7 +50,7 @@ public class Gitlab {
 	}
 
 	/**
-	 * Return all users.
+	 * Returns all users.
 	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers() {
