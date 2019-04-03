@@ -1,18 +1,17 @@
-package ch.ge.cti_composant.gitSync.util
+package ch.ge.cti_composant.gitSync.util.ldap
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * Tests class {@link LDAPGroup}.
+ * Tests class {@link LdapGroup}.
  */
 @Unroll
 class LdapGroupSpec extends Specification {
 
     def "#getName should return the correct value"() {
         when:
-        def group = new LDAPGroup("Dev")
+        def group = new LdapGroup("Dev")
 
         then:
         group.name == "Dev"
@@ -20,7 +19,7 @@ class LdapGroupSpec extends Specification {
 
     def "#hashCode should return the correct value"() {
         when:
-        def group = new LDAPGroup("Dev")
+        def group = new LdapGroup("Dev")
 
         then:
         group.hashCode() == 68597
@@ -28,9 +27,9 @@ class LdapGroupSpec extends Specification {
 
     def "#equals should compare correctly"() {
         when:
-        def groupA = new LDAPGroup("Dept A")
-        def groupB = new LDAPGroup("Dept A")
-        def groupC = new LDAPGroup("Dept C")
+        def groupA = new LdapGroup("Dept A")
+        def groupB = new LdapGroup("Dept A")
+        def groupC = new LdapGroup("Dept C")
 
         then:
         groupA == groupB

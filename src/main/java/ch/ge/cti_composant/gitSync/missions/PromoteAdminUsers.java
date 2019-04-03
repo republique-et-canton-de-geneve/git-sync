@@ -1,7 +1,7 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
@@ -15,20 +15,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Ajoute les utilisateurs en admin si ils sont dans le groupe LDAP_temp.
+ * Ajoute les utilisateurs en admin si ils sont dans le groupe ldap.
  */
 public class PromoteAdminUsers implements Mission {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PromoteAdminUsers.class);
 
 	@Override
-	public void start(LDAPTree ldapTree, Gitlab gitlab) {
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Synchronisation : ajout des admins...");
 		try{
 			Map<String, GitlabUser> allUsers = new HashMap<>();
 			gitlab.getApi().getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-			ldapTree.getUsers(new LDAPGroup(MiscConstants.ADMIN_LDAP_GROUP)).forEach((username, ldapUser) -> {
+			ldapTree.getUsers(new LdapGroup(MiscConstants.ADMIN_LDAP_GROUP)).forEach((username, ldapUser) -> {
 				boolean doesUserExist = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
 
 				if (doesUserExist && !allUsers.get(username).isAdmin()) {

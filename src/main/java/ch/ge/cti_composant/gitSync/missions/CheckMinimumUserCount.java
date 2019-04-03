@@ -1,8 +1,8 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPUser;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
 import org.slf4j.Logger;
@@ -22,13 +22,13 @@ public class CheckMinimumUserCount implements Mission {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CheckMinimumUserCount.class);
 
 	@Override
-	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Precondition: check that the LDAP_temp tree is not empty or almost empty");
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Precondition: check that the ldap tree is not empty or almost empty");
 		// A hashset is used to insure a user is not added more than once
 
-		Set<LDAPUser> users = new HashSet<>();
-		for (LDAPGroup group : ldapTree.getGroups()) {
-			for (LDAPUser user : ldapTree.getUsers(group).values()) {
+		Set<LdapUser> users = new HashSet<>();
+		for (LdapGroup group : ldapTree.getGroups()) {
+			for (LdapUser user : ldapTree.getUsers(group).values()) {
 				users.add(user);
 			}
 		}

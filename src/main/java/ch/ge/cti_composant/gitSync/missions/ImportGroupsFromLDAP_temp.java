@@ -10,18 +10,18 @@ import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 
 /**
- * Classe responsable de la création des groupes GitLab selon le LDAP_temp.
+ * Classe responsable de la création des groupes GitLab selon le ldap.
  *
- * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans LDAP_temp.
- * Le sens de synchronisation est donc TOUJOURS LDAP_temp (groupes existants) -> GitLab.
+ * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans ldap.
+ * Le sens de synchronisation est donc TOUJOURS ldap (groupes existants) -> GitLab.
  */
-public class ImportGroupsFromLDAP implements Mission {
+public class ImportGroupsFromLDAP_temp implements Mission {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP_temp.class);
 
 	/**
 	 * Crée les groupes dans GitLab.
@@ -29,10 +29,10 @@ public class ImportGroupsFromLDAP implements Mission {
 	 * @implNote Le/s groupe/s considérés comme admins n'auront pas de groupe créé.
 	 */
 	@Override
-	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Synchronisation : Groupes LDAP_temp � groupes GitLab");
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Synchronisation : Groupes ldap � groupes GitLab");
 		ldapTree.getGroups().stream()
-				.filter(ldapGroup -> !isLDAPGroupAdmin(ldapGroup.getName()))
+				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup.getName()))
 				.forEach(ldapGroup -> {
 					if (MissionUtils.validateGitlabGroupExistence(ldapGroup, gitlab.getApi())) {
 						LOGGER.info("Le groupe [{}] existe : rien ne sera fait", ldapGroup.getName());
@@ -44,7 +44,7 @@ public class ImportGroupsFromLDAP implements Mission {
 		LOGGER.info("Synchronisation terminee");
 	}
 
-	private void createGroup(LDAPGroup ldapGroup, Gitlab gitlab) {
+	private void createGroup(LdapGroup ldapGroup, Gitlab gitlab) {
 		// Création du groupe
 		CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
 		createGroupRequest.setVisibility(GitlabVisibility.PRIVATE);
@@ -55,7 +55,7 @@ public class ImportGroupsFromLDAP implements Mission {
 		}
 	}
 
-	private static boolean isLDAPGroupAdmin(String role) {
+	private static boolean isLdapGroupAdmin(String role) {
 		return role.equals(MiscConstants.ADMIN_LDAP_GROUP);
 	}
 

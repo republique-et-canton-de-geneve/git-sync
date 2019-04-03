@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * The GitLab context.
  * Consists mainly in the GitLab tree (groups and users), usually restricted to the elements that come from
- * the LDAP_temp server.
+ * the ldap server.
  */
 public class Gitlab {
 
