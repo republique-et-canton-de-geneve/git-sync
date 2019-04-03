@@ -1,6 +1,7 @@
 package ch.ge.cti_composant.gitSync.missions;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,11 +27,13 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 	@Override
 
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Propagating admin users to all groups");
 		try {
 			List<GitlabUser> admins = gitlab.getApi().getUsers().stream()
 					.filter(GitlabUser::isAdmin)
 					// remove the admins
 					.filter(admin -> ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(admin.getUsername()))
+					.sorted(Comparator.comparing(GitlabUser::getUsername))
 					.collect(Collectors.toList());
 			for (GitlabGroup gitlabGroup : gitlab.getGroups()) {
 		    	// No op for users ***REMOVED*** ni ***REMOVED***
@@ -38,10 +41,10 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 	   				List<GitlabGroupMember> members = gitlab.getApi().getGroupMembers(gitlabGroup.getId());
 	   				for (GitlabUser admin : admins) {
 	   					if (!MissionUtils.isGitlabUserMemberOfGroup(members, admin.getUsername())) {
-							LOGGER.info("Adding user [{}] to group [{}]", admin.getUsername(), gitlabGroup.getName());
+							LOGGER.info("    Adding user [{}] to group [{}]", admin.getUsername(), gitlabGroup.getName());
 							gitlab.getApi().addGroupMember(gitlabGroup, admin, GitlabAccessLevel.Master);
 						} else {
-							LOGGER.info("User [{}] is already a member of group [{}]" , admin.getUsername(), gitlabGroup.getName());
+							LOGGER.info("    User [{}] is already a member of group [{}]" , admin.getUsername(), gitlabGroup.getName());
 						}
 					}
 		    	}
@@ -49,6 +52,7 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 		} catch (IOException e) {
 			LOGGER.error("Exception caught while iterating on a group", e);
 		}
+		LOGGER.info("Propagating completed");
 	}
 
 }
