@@ -29,7 +29,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		gitlab.getGroups().stream()
 				.sorted(Comparator.comparing(GitlabGroup::getName))
 				.forEach(gitlabGroup -> {
-					LOGGER.info("Mapping group [{}]", gitlabGroup.getName());
+					LOGGER.info("    Mapping group [{}]", gitlabGroup.getName());
 					handleGroup(gitlabGroup, ldapTree, gitlab);
 			});
 
@@ -47,7 +47,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					.forEach(member -> {
 						if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername()))
 							&& (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
-					    	LOGGER.info("User [{}] does not belong or no longer belongs to group [{}]",
+					    	LOGGER.info("        User [{}] does not belong or no longer belongs to group [{}]",
 									member.getUsername(), gitlabGroup.getName());
     						try {
     							gitlab.getApi().deleteGroupMember(gitlabGroup, member);

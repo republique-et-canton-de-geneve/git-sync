@@ -32,7 +32,7 @@ public class PromoteAdminUsers implements Mission {
 				boolean doesUserExist = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
 
 				if (doesUserExist && !allUsers.get(username).isAdmin()) {
-					LOGGER.info("Setting user [{}] as administrator", username);
+					LOGGER.info("    Setting user [{}] as administrator", username);
 					try {
 						gitlab.getApi().updateUser(
 								allUsers.get(username).getId(), allUsers.get(username).getEmail(), null,
@@ -42,9 +42,9 @@ public class PromoteAdminUsers implements Mission {
 						LOGGER.error("Exception caught while setting user [{}] as administrator", username);
 					}
 				} else if (doesUserExist &&  MissionUtils.isGitlabUserAdmin(allUsers.get(username), gitlab.getApi(), ldapTree)){
-					LOGGER.info("User [{}] is already administrator", username);
+					LOGGER.info("    User [{}] is already administrator", username);
 				} else {
-					LOGGER.info("User [{}] won't be set as adminsitrator as it does not exist in GitLab", username);
+					LOGGER.info("    User [{}] won't be set as adminsitrator as it does not exist in GitLab", username);
 				}
 			});
 		} catch (IOException e){

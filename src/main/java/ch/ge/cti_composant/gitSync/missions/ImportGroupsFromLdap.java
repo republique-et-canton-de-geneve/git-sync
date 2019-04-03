@@ -35,9 +35,9 @@ public class ImportGroupsFromLdap implements Mission {
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup.getName()))
 				.forEach(ldapGroup -> {
 					if (MissionUtils.validateGitlabGroupExistence(ldapGroup, gitlab.getApi())) {
-						LOGGER.info("Group [{}] exists: no op", ldapGroup.getName());
+						LOGGER.info("    Group [{}] exists: no op", ldapGroup.getName());
 					} else {
-						LOGGER.info("Detected group [{}] not existing in GitLab. Creating it", ldapGroup.getName());
+						LOGGER.info("    Group [{}] does not exist in GitLab : creating it", ldapGroup.getName());
 						createGroup(ldapGroup, gitlab);
 					}
 				});
