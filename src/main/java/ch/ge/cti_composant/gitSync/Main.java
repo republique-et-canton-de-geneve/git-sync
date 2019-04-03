@@ -12,11 +12,11 @@ public class Main {
 
 	public static void main(String[] args){
 		if (args.length != 1) {
-			LOGGER.error("1 argument expected (the path to property file, such as distribution.properties)");
+			LOGGER.error("1 argument expected: the path to property file, such as distribution.properties");
 		} else {
 			LOGGER.info("Start GitSync");
 			new GitSync().run(args[0]); // Boot
-			LOGGER.info("GitSync synchronisation completed");
+			LOGGER.info("GitSync mapping completed");
 		}
 	}
 
