@@ -1,4 +1,4 @@
-package ch.ge.cti_composant.gitSync.util.LDAP;
+package ch.ge.cti_composant.gitSync.util.LDAP_temp;
 
 import ch.ge.cti_composant.gitSync.GitSync;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An {@link LDAPTree} that obtains its data (LDAP groups and LDAP users) from the Etat de Geneve's
- * LDAP server named Gina.
+ * An {@link LDAPTree} that obtains its data (LDAP_temp groups and LDAP_temp users) from the Etat de Geneve's
+ * LDAP_temp server named Gina.
  * <p>
- * In order to retrieve LDAP groups and users from another LDAP server than GINA, you should replace the usage
+ * In order to retrieve LDAP_temp groups and users from another LDAP_temp server than GINA, you should replace the usage
  * of this class with the usage of a custom implementation of {@link LDAPTree}.
  * </p>
  */
@@ -26,14 +26,14 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GinaLdapTreeFactory.class);
 
     /**
-     * Names of the LDAP attributes to be retrieved from the LDAP server.
+     * Names of the LDAP_temp attributes to be retrieved from the LDAP_temp server.
      * We are only interested in attribute "cn".
      */
     private static final String[] ATTRIBUTES = {"cn"};
 
 	@Override
 	public LDAPTree createTree() throws GitSyncException {
-		// create a search object on the Gina LDAP server
+		// create a search object on the Gina LDAP_temp server
 		int timeout = Integer.parseInt(GitSync.getProperty("timeout-search-ldap"));
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(
 		        GitSync.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"),
@@ -53,7 +53,7 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 
 			// get the users
 			tree.forEach((ldapGroup, ldapUsers) -> {
-				LOGGER.info("Retrieving the users for LDAP group [{}]", ldapGroup.getName());
+				LOGGER.info("Retrieving the users for LDAP_temp group [{}]", ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), ATTRIBUTES)
 							.forEach(user -> {
@@ -63,12 +63,12 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 								}
 							});
 				} catch (RemoteException e) {
-					LOGGER.error("Unable to logon to the LDAP server", e);
+					LOGGER.error("Unable to logon to the LDAP_temp server", e);
 				}
 			});
 		} catch (IOException e) {
-			LOGGER.error("Unable to run the LDAP search, because file distribution.properties could not be found", e);
-			throw new GitSyncException("Exception caught while creating the LDAP tree", e);
+			LOGGER.error("Unable to run the LDAP_temp search, because file distribution.properties could not be found", e);
+			throw new GitSyncException("Exception caught while creating the LDAP_temp tree", e);
 		}
 
 	    return new LdapTreeSupport(tree);

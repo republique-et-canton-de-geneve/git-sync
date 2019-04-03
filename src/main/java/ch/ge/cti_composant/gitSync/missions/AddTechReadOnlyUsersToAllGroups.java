@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
 
 /**
  * Ajoute les admins à tous les groupes.

@@ -10,14 +10,14 @@ import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
 
 /**
- * Classe responsable de la création des groupes GitLab selon le LDAP.
+ * Classe responsable de la création des groupes GitLab selon le LDAP_temp.
  *
- * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans LDAP.
- * Le sens de synchronisation est donc TOUJOURS LDAP (groupes existants) -> GitLab.
+ * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans LDAP_temp.
+ * Le sens de synchronisation est donc TOUJOURS LDAP_temp (groupes existants) -> GitLab.
  */
 public class ImportGroupsFromLDAP implements Mission {
 
@@ -30,7 +30,7 @@ public class ImportGroupsFromLDAP implements Mission {
 	 */
 	@Override
 	public void start(LDAPTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Synchronisation : Groupes LDAP � groupes GitLab");
+		LOGGER.info("Synchronisation : Groupes LDAP_temp � groupes GitLab");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLDAPGroupAdmin(ldapGroup.getName()))
 				.forEach(ldapGroup -> {

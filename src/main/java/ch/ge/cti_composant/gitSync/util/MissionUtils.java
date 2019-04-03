@@ -14,9 +14,9 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPGroup;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPTree;
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPGroup;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPUser;
 
 /**
  * Cette classe contient les utilitaires principaux pour les missions.
@@ -52,26 +52,26 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Checks that the specified GitLab group exists also in the LDAP tree
+	 * Checks that the specified GitLab group exists also in the LDAP_temp tree
 	 */
 	public static boolean validateLDAPGroupExistence(GitlabGroup gitlabGroup, LDAPTree ldapTree) {
 		return ldapTree.getGroups().contains(new LDAPGroup(gitlabGroup.getName()));
 	}
 
 	/**
-	 * Valide l'existence du groupe GitlabContext à partir d'un groupe LDAP.
+	 * Valide l'existence du groupe GitlabContext à partir d'un groupe LDAP_temp.
 	 *
-	 * @param ldapGroup Le groupe LDAP.
+	 * @param ldapGroup Le groupe LDAP_temp.
 	 * @param api       L'API GitlabContext.
 	 * @return Vrai si le groupe existe, faux sinon.
 	 */
 	public static boolean validateGitlabGroupExistence(LDAPGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("Le groupe LDAP [{}] existe dans GitLab", ldapGroup.getName());
+			LOGGER.debug("Le groupe LDAP_temp [{}] existe dans GitLab", ldapGroup.getName());
 			return true;
 		} catch (IOException e) {
-			LOGGER.debug("Le groupe LDAP [{}] n'existe pas dans GitLab", ldapGroup.getName());
+			LOGGER.debug("Le groupe LDAP_temp [{}] n'existe pas dans GitLab", ldapGroup.getName());
 		}
 		return false;
 	}
@@ -79,7 +79,7 @@ public class MissionUtils {
 	/**
 	 * Vérifie que l'utilisateur existe bel et bien dans GitLab.
 	 *
-	 * @param user Un utilisateur LDAP
+	 * @param user Un utilisateur LDAP_temp
 	 * @param users Les utilisateurs GitlabContext.
 	 * @return Vrai si l'utilisateur existe dans GitLab, faux sinon.
 	 */
@@ -102,7 +102,7 @@ public class MissionUtils {
 	 *
 	 * @param user     Le membre du groupe
 	 * @param api      L'objet général GitLab
-	 * @param ldapTree L'arbre représentant l'arborescence LDAP.
+	 * @param ldapTree L'arbre représentant l'arborescence LDAP_temp.
 	 * @return Vrai si l'utilisateur est admin, faux sinon.
 	 */
 	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPI api, LDAPTree ldapTree) {
@@ -110,7 +110,7 @@ public class MissionUtils {
 			// S'agit-il de "moi" ?
 			boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
 			boolean isTrivialAdmin = user.isAdmin();
-			// Ne serait-il pas par hasard dans le groupe LDAP admin ?
+			// Ne serait-il pas par hasard dans le groupe LDAP_temp admin ?
 			boolean isLDAPAdmin = ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(user.getUsername());
 			return isLDAPAdmin || isTechnicalAccount || isTrivialAdmin;
 		} catch (IOException e) {

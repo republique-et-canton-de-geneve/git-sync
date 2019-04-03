@@ -1,4 +1,4 @@
-package ch.ge.cti_composant.gitSync.util.LDAP;
+package ch.ge.cti_composant.gitSync.util.LDAP_temp;
 
 import java.util.ArrayList;
 import java.util.HashMap;

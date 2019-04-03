@@ -14,7 +14,7 @@ import org.gitlab.api.models.GitlabUser
 class DataProvider {
 
     /**
-     * Create an LDAP tree with groups and users.
+     * Create an LDAP_temp tree with groups and users.
      */
     LDAPTree setupLdapTree() {
         def net = new LDAPGroup("Network")
