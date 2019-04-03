@@ -18,7 +18,7 @@ class LdapUserSpec extends Specification {
 
         then:
         IllegalStateException e = thrown()
-        e.getMessage().startsWith("An ldap user needs to have a \"cn\" attribute")
+        e.getMessage().startsWith("An LDAP user needs to have a \"cn\" attribute")
     }
 
     def "#getName should return something when attribute \"cn\" is present"() {

@@ -1,11 +1,8 @@
 package ch.ge.cti_composant.gitSync.util;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
@@ -14,12 +11,14 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
-import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
-import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Cette classe contient les utilitaires principaux pour les missions.
+ * Helper methods for the missions.
  */
 public class MissionUtils {
 
@@ -52,36 +51,28 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Checks that the specified GitLab group exists also in the ldap tree
+	 * Checks that the specified GitLab group exists also in the LDAP tree.
 	 */
 	public static boolean validateLdapGroupExistence(GitlabGroup gitlabGroup, LdapTree ldapTree) {
 		return ldapTree.getGroups().contains(new LdapGroup(gitlabGroup.getName()));
 	}
 
 	/**
-	 * Valide l'existence du groupe GitlabContext à partir d'un groupe ldap.
-	 *
-	 * @param ldapGroup Le groupe ldap.
-	 * @param api       L'API GitlabContext.
-	 * @return Vrai si le groupe existe, faux sinon.
+	 * Checks the existence of a Gitlab group from the specified LDAP group.
 	 */
 	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("Le groupe ldap [{}] existe dans GitLab", ldapGroup.getName());
+			LOGGER.debug("LDAP group [{}] exists in GitLab", ldapGroup.getName());
 			return true;
 		} catch (IOException e) {
-			LOGGER.debug("Le groupe ldap [{}] n'existe pas dans GitLab", ldapGroup.getName());
+			LOGGER.debug("LDAP group [{}] does not exist in GitLab", ldapGroup.getName());
 		}
 		return false;
 	}
 
 	/**
-	 * Vérifie que l'utilisateur existe bel et bien dans GitLab.
-	 *
-	 * @param user Un utilisateur ldap
-	 * @param users Les utilisateurs GitlabContext.
-	 * @return Vrai si l'utilisateur existe dans GitLab, faux sinon.
+	 * Checks that the specified user exists in GitLab.
 	 */
 	public static boolean validateGitlabUserExistence(LdapUser user, List<GitlabUser> users) {
 		long usersCount = users.stream()
@@ -93,28 +84,23 @@ public class MissionUtils {
 			case 0:
 				return false;
 			default:
-				throw new IllegalStateException("Plus d'un utilisateur avec le nom " + user.getName() + " a été détecté");
+				throw new IllegalStateException("More than user with name [" + user.getName() + "] has been found");
 		}
 	}
 
 	/**
-	 * Détermine si l'utilisateur a des droits admin. Il y a plusieurs critères à vérifier.
-	 *
-	 * @param user     Le membre du groupe
-	 * @param api      L'objet général GitLab
-	 * @param ldapTree L'arbre représentant l'arborescence ldap.
-	 * @return Vrai si l'utilisateur est admin, faux sinon.
+	 * Checks whether the specified user has admin rights.
 	 */
 	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPI api, LdapTree ldapTree) {
 		try {
-			// S'agit-il de "moi" ?
+			// is it "me"?
 			boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
 			boolean isTrivialAdmin = user.isAdmin();
-			// Ne serait-il pas par hasard dans le groupe ldap admin ?
+			// is it in the LDAP admin group?
 			boolean isLdapAdmin = ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(user.getUsername());
 			return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
 		} catch (IOException e) {
-			LOGGER.error("Erreur pendant l'évaluation des privilèges de l'utilisateur [{}]", user.getUsername());
+			LOGGER.error("Exception caught while assessing the privileges of user [{}]", user.getUsername(), e);
 		}
 		return false;
 	}
@@ -125,7 +111,7 @@ public class MissionUtils {
 			api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 			return allUsers;
 		} catch (IOException e) {
-			LOGGER.error("Impossible de récupérer tous les utilisateurs. L'erreur était : {}", e);
+			LOGGER.error("Exception caught while retrieving all GitLab users", e);
 		}
 		return new HashMap<>();
 	}

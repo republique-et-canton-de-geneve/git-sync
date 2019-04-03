@@ -35,7 +35,7 @@ public class GitSync {
 
     private void init() {
 		// set up the tree of LDAP groups and LDAP users.
-		// If you need to load the data from another LDAP server than Etat de Geneve's ldap server, you must
+		// If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
 		// replace the treeFactory below with a custom one
 		LdapTreeFactory treeFactory = new GinaLdapTreeFactory();
 		ldapTree = treeFactory.createTree();
@@ -71,7 +71,7 @@ public class GitSync {
 			// add read-only permission to user Fisheye on all groups
 			new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
 		} catch (Exception e) {
-		    LOGGER.error("Exception caught while processing the ldap/GitLab trees", e);
+		    LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
 		}
 		
 		LOGGER.info("End of execution");

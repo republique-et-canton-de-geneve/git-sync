@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An {@link LdapTree} that obtains its data (ldap groups and ldap users) from the Etat de Geneve's
@@ -37,7 +38,7 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
     private static final String[] ATTRIBUTES = {"cn"};
 
 	@Override
-	public LdapTree createTree() throws GitSyncException {
+	public LdapTree createTree() {
 		// create a search object on the Gina ldap server
 		int timeout = Integer.parseInt(GitSync.getProperty("timeout-search-ldap"));
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(
@@ -54,11 +55,11 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 		Map<LdapGroup, Map<String, LdapUser>> tree = new HashMap<>();
 		try {
 			// get the groups
-			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new HashMap<>()));
+			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
 			// get the users
 			tree.forEach((ldapGroup, ldapUsers) -> {
-				LOGGER.info("Retrieving the users for ldap group [{}]", ldapGroup.getName());
+				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), ATTRIBUTES)
 							.forEach(user -> {

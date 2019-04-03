@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A user in the ldap server.
+ * A user in the LDAP server.
  */
 public class LdapUser {
 
@@ -14,7 +14,7 @@ public class LdapUser {
 	public LdapUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);
 		if (!this.attributes.containsKey("cn")) {
-			throw new IllegalStateException("An ldap user needs to have a \"cn\" attribute. Actual attributes are: "
+			throw new IllegalStateException("An LDAP user needs to have a \"cn\" attribute. Actual attributes are: "
 					+ attributes);
 		}
 	}
@@ -27,12 +27,6 @@ public class LdapUser {
 	 * @throws NullPointerException if the attribute does not exist
 	 */
 	public String getAttribute(String key) {
-		/*
-		Stream.of(
-				new String[][] {
-						{ "cn", "Jean Dupont" },
-				        { "ou", "IT" }}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
-				        */
 		return Objects.requireNonNull(attributes.get(key), "No such attribute '" + key + "'");
 	}
 

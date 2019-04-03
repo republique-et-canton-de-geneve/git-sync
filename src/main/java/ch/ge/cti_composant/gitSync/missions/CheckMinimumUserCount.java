@@ -15,7 +15,7 @@ public class CheckMinimumUserCount implements Mission {
 
 	/**
 	 * The minimum user count. If there are less users that that count, we consider that there is a problem in
-	 * the VLDAP information retrieving process and the synchronisation is aborted.
+	 * the VLDAP information retrieving process and the mapping is aborted.
 	 */
 	private static final int MIMIMUM_USER_COUNT = 10;
 
@@ -23,7 +23,7 @@ public class CheckMinimumUserCount implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Precondition: check that the ldap tree is not empty or almost empty");
+		LOGGER.info("Precondition: check that the LDAP tree is not empty or almost empty");
 		// A hashset is used to insure a user is not added more than once
 
 		Set<LdapUser> users = new HashSet<>();

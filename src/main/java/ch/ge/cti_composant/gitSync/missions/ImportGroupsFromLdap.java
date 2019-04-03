@@ -14,44 +14,43 @@ import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 
 /**
- * Classe responsable de la création des groupes GitLab selon le ldap.
- *
- * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans ldap.
- * Le sens de synchronisation est donc TOUJOURS ldap (groupes existants) -> GitLab.
+ * Creates the GitLab groups.
+ * <br/>
+ * Does not remove the GitLab groups that has not been foud in the LDAP server.
+ * The direction of the mapping is always one way: LDAP (existing groups) -> GitLab.
  */
 public class ImportGroupsFromLdap implements Mission {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLdap.class);
 
 	/**
-	 * Crée les groupes dans GitLab.
-	 *
-	 * @implNote Le/s groupe/s considérés comme admins n'auront pas de groupe créé.
+	 * Creates the groups in GitLab.
+	 * <br>>
+	 * No group is created for the admin groups.
 	 */
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Synchronisation : Groupes ldap � groupes GitLab");
+		LOGGER.info("Mapping : LDAP groups to GitLab groups");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup.getName()))
 				.forEach(ldapGroup -> {
 					if (MissionUtils.validateGitlabGroupExistence(ldapGroup, gitlab.getApi())) {
-						LOGGER.info("Le groupe [{}] existe : rien ne sera fait", ldapGroup.getName());
+						LOGGER.info("Group [{}] exists: no op", ldapGroup.getName());
 					} else {
-						LOGGER.info("Groupe inexistant sur GitLab detecte : [{}]. Creation en cours...", ldapGroup.getName());
+						LOGGER.info("Detected group [{}] not existing in GitLab. Creating it", ldapGroup.getName());
 						createGroup(ldapGroup, gitlab);
 					}
 				});
-		LOGGER.info("Synchronisation terminee");
+		LOGGER.info("Mapping completed");
 	}
 
 	private void createGroup(LdapGroup ldapGroup, Gitlab gitlab) {
-		// Création du groupe
 		CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
 		createGroupRequest.setVisibility(GitlabVisibility.PRIVATE);
 		try {
 			gitlab.getApi().createGroup(createGroupRequest, gitlab.getApi().getUser());
 		} catch (IOException e) {
-			LOGGER.error("Impossible de creer le groupe [{}] : {}", ldapGroup.getName(), e);
+			LOGGER.error("Exception caught while creating group [{}]", ldapGroup.getName(), e);
 		}
 	}
 

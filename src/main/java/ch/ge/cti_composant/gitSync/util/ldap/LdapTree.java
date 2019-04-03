@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The tree of the users in the ldap server.
+ * The tree of the users in the LDAP server.
  */
 public interface LdapTree {
 

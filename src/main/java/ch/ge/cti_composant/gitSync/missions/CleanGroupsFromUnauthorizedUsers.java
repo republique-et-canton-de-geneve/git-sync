@@ -10,57 +10,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 /**
- * Classe responsable de la suppression des droits "en trop" sur GitLab.
- *
- * @implNote Les utilisateurs admins sont ignorés. Ils peuvent aller dans n'importe
- * quel type de groupe ou de projet.
+ * Removes the permissions in excess on GitLab.
+ * <br/>
+ * Admin users are ignored. They can be assigned to any type of group or project.
  */
 public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLdap.class);
 
-	/**
-	 * Synchronise les utilisateurs existants GitlabContext sur le ldap.
-	 *
-	 * @param ldapTree l'arbre ldap
-	 * @param gitlab   Le contexte GitLab.
-	 */
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Synchronisation : synchronisation des utilisateurs avec le ldap");
+		LOGGER.info("Mapping: mapping the users with the LDAP server users");
 
-		// Pour chaque groupe...
-		gitlab.getGroups()
-			.forEach(gitlabGroup -> {
-				LOGGER.info("Synchronisation du groupe [{}] en cours", gitlabGroup.getName());
-				handleGroup(gitlabGroup, ldapTree, gitlab);
+		// for every group...
+		gitlab.getGroups().stream()
+				.sorted(Comparator.comparing(GitlabGroup::getName))
+				.forEach(gitlabGroup -> {
+					LOGGER.info("Mapping group [{}]", gitlabGroup.getName());
+					handleGroup(gitlabGroup, ldapTree, gitlab);
 			});
 
-		LOGGER.info("Synchronisation terminee");
+		LOGGER.info("Mapping completed");
 	}
 
 	private void handleGroup(GitlabGroup gitlabGroup, LdapTree ldapTree, Gitlab gitlab) {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 
-		// Pour chaque utilisateur...
+		// for every user...
 		try {
 			gitlab.getApi().getGroupMembers(gitlabGroup.getId()).stream()
 					.filter(gitlabGroupMember -> !MissionUtils.isGitlabUserAdmin(gitlabGroupMember, gitlab.getApi(), ldapTree))
 					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 					.forEach(member -> {
-					    	if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername())) && (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
-    						LOGGER.info("L'utilisateur " + member.getUsername() + " n'a pas/plus les permissions pour le r�le " + gitlabGroup.getName());
+						if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername()))
+							&& (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
+					    	LOGGER.info("User [{}] does not belong or no longer belongs to group [{}]",
+									member.getUsername(), gitlabGroup.getName());
     						try {
     							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
     						} catch (IOException e) {
-    							LOGGER.error("Une erreur est survenue lors de la suppression du r�le " + gitlabGroup.getName() + " pour " + member.getUsername() );
+    							LOGGER.error("Exception caught while removing user [" + member.getUsername() +
+										"] from group [" + gitlabGroup.getName() + "]", e);
     						}
 					    }
 					});
 		} catch (IOException e) {
-			LOGGER.error("Une erreur est survenue lors de la detection du groupe [{}] : {}", gitlabGroup.getName(), e);
+			LOGGER.error("Exception caught while processing group [{}]", gitlabGroup.getName(), e);
 		}
 	}
 

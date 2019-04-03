@@ -24,7 +24,6 @@ public class GitlabService {
 
 	/**
 	 * Constructs the GitLab tree (groups and users) from the specified ldap tree.
-	 *
 	 * @return the GitLab tree, <b>restricted to the elements that come from the ldap server</b>.
 	 */
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
@@ -36,7 +35,7 @@ public class GitlabService {
 		try {
 			groups = api.getGroups();
 		} catch (IOException e) {
-			LOGGER.error("Error caught while retrieving the GitLab groups", e);
+			LOGGER.error("Exception caught while retrieving the GitLab groups", e);
 			throw new GitSyncException(e);
 		}
 
@@ -52,7 +51,7 @@ public class GitlabService {
 					try {
 						api.getGroupMembers(gitlabGroup).forEach(user -> tree.get(gitlabGroup).put(user.getUsername(), user));
 					} catch (IOException e) {
-						LOGGER.error("Error caught while synchronizing group [{}] : {}", gitlabGroup.getName(), e);
+						LOGGER.error("Exception caught while mapping group [{}] : {}", gitlabGroup.getName(), e);
 					}
 				});
 
