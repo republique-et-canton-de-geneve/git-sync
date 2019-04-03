@@ -19,9 +19,9 @@ import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
  * @implNote Cette classe ne supprime PAS les groupes si pas trouvés dans ldap.
  * Le sens de synchronisation est donc TOUJOURS ldap (groupes existants) -> GitLab.
  */
-public class ImportGroupsFromLDAP_temp implements Mission {
+public class ImportGroupsFromLdap implements Mission {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP_temp.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLdap.class);
 
 	/**
 	 * Crée les groupes dans GitLab.

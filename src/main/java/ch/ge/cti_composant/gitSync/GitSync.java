@@ -4,7 +4,7 @@ import ch.ge.cti_composant.gitSync.missions.AddAuthorizedUsersToGroups;
 import ch.ge.cti_composant.gitSync.missions.AddTechReadOnlyUsersToAllGroups;
 import ch.ge.cti_composant.gitSync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitSync.missions.CleanGroupsFromUnauthorizedUsers;
-import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLDAP_temp;
+import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLdap;
 import ch.ge.cti_composant.gitSync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitSync.missions.PropagateAdminUsersToAllGroups;
 import ch.ge.cti_composant.gitSync.service.GitlabService;
@@ -59,7 +59,7 @@ public class GitSync {
 			// avoid to override GitLab groups and users with an empty configuration
 			new CheckMinimumUserCount().start(ldapTree, gitlab);
 			// create the groups in GitLab
-			new ImportGroupsFromLDAP_temp().start(ldapTree, gitlab);
+			new ImportGroupsFromLdap().start(ldapTree, gitlab);
 			// remove the non-authorized users
 			new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
 			// add the authorized users (new permissions)

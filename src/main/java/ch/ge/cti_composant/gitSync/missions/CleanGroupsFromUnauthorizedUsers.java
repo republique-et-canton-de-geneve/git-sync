@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLDAP_temp.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLdap.class);
 
 	/**
 	 * Synchronise les utilisateurs existants GitlabContext sur le ldap.
