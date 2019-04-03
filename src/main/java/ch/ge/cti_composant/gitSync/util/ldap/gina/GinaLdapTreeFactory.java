@@ -1,7 +1,12 @@
-package ch.ge.cti_composant.gitSync.util.LDAP_temp;
+package ch.ge.cti_composant.gitSync.util.ldap.gina;
 
 import ch.ge.cti_composant.gitSync.GitSync;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTreeFactory;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTreeSupport;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
 import gina.api.GinaApiLdapBaseAble;
 import gina.impl.GinaLdapFactory;
 import gina.impl.util.GinaLdapConfiguration;
@@ -14,11 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An {@link LDAPTree} that obtains its data (LDAP_temp groups and LDAP_temp users) from the Etat de Geneve's
- * LDAP_temp server named Gina.
+ * An {@link LdapTree} that obtains its data (ldap groups and ldap users) from the Etat de Geneve's
+ * ldap server named Gina.
  * <p>
- * In order to retrieve LDAP_temp groups and users from another LDAP_temp server than GINA, you should replace the usage
- * of this class with the usage of a custom implementation of {@link LDAPTree}.
+ * In order to retrieve ldap groups and users from another ldap server than GINA, you should replace the usage
+ * of this class with the usage of a custom implementation of {@link LdapTree}.
  * </p>
  */
 public class GinaLdapTreeFactory implements LdapTreeFactory {
@@ -26,14 +31,14 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GinaLdapTreeFactory.class);
 
     /**
-     * Names of the LDAP_temp attributes to be retrieved from the LDAP_temp server.
+     * Names of the ldap attributes to be retrieved from the ldap server.
      * We are only interested in attribute "cn".
      */
     private static final String[] ATTRIBUTES = {"cn"};
 
 	@Override
-	public LDAPTree createTree() throws GitSyncException {
-		// create a search object on the Gina LDAP_temp server
+	public LdapTree createTree() throws GitSyncException {
+		// create a search object on the Gina ldap server
 		int timeout = Integer.parseInt(GitSync.getProperty("timeout-search-ldap"));
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(
 		        GitSync.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"),
@@ -46,29 +51,29 @@ public class GinaLdapTreeFactory implements LdapTreeFactory {
 		GinaApiLdapBaseAble app = GinaLdapFactory.getInstance(conf);
 
 		// create and fill the tree
-		Map<LDAPGroup, Map<String, LDAPUser>> tree = new HashMap<>();
+		Map<LdapGroup, Map<String, LdapUser>> tree = new HashMap<>();
 		try {
 			// get the groups
-			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LDAPGroup(role), new HashMap<>()));
+			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new HashMap<>()));
 
 			// get the users
 			tree.forEach((ldapGroup, ldapUsers) -> {
-				LOGGER.info("Retrieving the users for LDAP_temp group [{}]", ldapGroup.getName());
+				LOGGER.info("Retrieving the users for ldap group [{}]", ldapGroup.getName());
 				try {
 					app.getUsers("GESTREPO", ldapGroup.getName(), ATTRIBUTES)
 							.forEach(user -> {
 								if (user.containsKey("cn")) {
 									LOGGER.info("\t{}", user.get("cn"));
-									ldapUsers.put(user.get("cn"), new LDAPUser(new HashMap<>(user)));
+									ldapUsers.put(user.get("cn"), new LdapUser(new HashMap<>(user)));
 								}
 							});
 				} catch (RemoteException e) {
-					LOGGER.error("Unable to logon to the LDAP_temp server", e);
+					LOGGER.error("Unable to logon to the ldap server", e);
 				}
 			});
 		} catch (IOException e) {
-			LOGGER.error("Unable to run the LDAP_temp search, because file distribution.properties could not be found", e);
-			throw new GitSyncException("Exception caught while creating the LDAP_temp tree", e);
+			LOGGER.error("Unable to run the ldap search, because file distribution.properties could not be found", e);
+			throw new GitSyncException("Exception caught while creating the ldap tree", e);
 		}
 
 	    return new LdapTreeSupport(tree);

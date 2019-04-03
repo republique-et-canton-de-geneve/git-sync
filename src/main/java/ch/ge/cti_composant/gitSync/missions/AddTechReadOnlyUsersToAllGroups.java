@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
-import ch.ge.cti_composant.gitSync.util.LDAP_temp.LDAPTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 
 /**
  * Ajoute les admins à tous les groupes.
@@ -23,7 +23,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AddTechReadOnlyUsersToAllGroups.class);
 
 	@Override
-	public void start(LDAPTree ldapTree, Gitlab gitlab) {
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
 	    addUser(gitlab, MiscConstants.FISHEYE_USERNAME);
 	    addUser(gitlab, MiscConstants.MWFL_USERNAME);
 	}

@@ -1,11 +1,10 @@
-package ch.ge.cti_composant.gitSync.util
+package ch.ge.cti_composant.gitSync.util.ldap
 
-import ch.ge.cti_composant.gitSync.util.LDAP.LDAPUser
 import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * Tests class {@link LDAPUser}.
+ * Tests class {@link LdapUser}.
  */
 @Unroll
 class LdapUserSpec extends Specification {
@@ -15,11 +14,11 @@ class LdapUserSpec extends Specification {
         def attributes = Collections.singletonMap("not cn", "Jean Dupont")
 
         when:
-        new LDAPUser(attributes)
+        new LdapUser(attributes)
 
         then:
         IllegalStateException e = thrown()
-        e.getMessage().startsWith("An LDAP_temp user needs to have a \"cn\" attribute")
+        e.getMessage().startsWith("An ldap user needs to have a \"cn\" attribute")
     }
 
     def "#getName should return something when attribute \"cn\" is present"() {
@@ -27,7 +26,7 @@ class LdapUserSpec extends Specification {
         def attributes = Collections.singletonMap("cn", "Jean Dupont")
 
         when:
-        def user = new LDAPUser(attributes)
+        def user = new LdapUser(attributes)
 
         then:
         user.getName() == "Jean Dupont"
@@ -38,7 +37,7 @@ class LdapUserSpec extends Specification {
         def attributes = new HashMap()
         attributes.put("cn", "Jean Dupont")
         attributes.put("ou", "IT")
-        def user = new LDAPUser(attributes)
+        def user = new LdapUser(attributes)
 
         expect:
         user.getAttribute(key) == value
@@ -54,7 +53,7 @@ class LdapUserSpec extends Specification {
         def attributes = Collections.singletonMap("cn", "Jean Dupont")
 
         when:
-        def user = new LDAPUser(attributes)
+        def user = new LdapUser(attributes)
 
         then:
         user.getName() == "Jean Dupont"
@@ -65,7 +64,7 @@ class LdapUserSpec extends Specification {
         def attributes = Collections.singletonMap("cn", "Jean Dupont")
 
         when:
-        def user = new LDAPUser(attributes)
+        def user = new LdapUser(attributes)
 
         then:
         user.hashCode() == 1396370574
@@ -77,9 +76,9 @@ class LdapUserSpec extends Specification {
         def attributesC = Collections.singletonMap("cn", "Marie Dupont")
 
         when:
-        def userA = new LDAPUser(attributesA)
-        def userB = new LDAPUser(attributesA)
-        def userC = new LDAPUser(attributesC)
+        def userA = new LdapUser(attributesA)
+        def userB = new LdapUser(attributesA)
+        def userC = new LdapUser(attributesC)
 
         then:
         userA == userB
