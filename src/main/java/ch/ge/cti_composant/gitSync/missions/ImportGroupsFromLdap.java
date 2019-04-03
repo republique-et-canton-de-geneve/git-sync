@@ -55,8 +55,8 @@ public class ImportGroupsFromLdap implements Mission {
 		}
 	}
 
-	private static boolean isLdapGroupAdmin(String role) {
-		return role.equals(MiscConstants.ADMIN_LDAP_GROUP);
+	private static boolean isLdapGroupAdmin(String group) {
+		return group.equals(MiscConstants.ADMIN_LDAP_GROUP);
 	}
 
 }

@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * Extracts the roles and users from the ldap server and assigns them as groups and users to
+ * Extracts the groups and users from the LDAP server and assigns them as groups and users to
  * the GitLab server.
  */
 public class GitSync {
@@ -34,13 +34,13 @@ public class GitSync {
     private Gitlab gitlab = null;
 
     private void init() {
-    	// set up the ldap tree of roles and ldap users.
-		// If you need to load the data from another ldap server than Etat de Geneve's ldap server, you must
+		// set up the tree of LDAP groups and LDAP users.
+		// If you need to load the data from another LDAP server than Etat de Geneve's ldap server, you must
 		// replace the treeFactory below with a custom one
 		LdapTreeFactory treeFactory = new GinaLdapTreeFactory();
 		ldapTree = treeFactory.createTree();
 
-		// set up the GitLab tree of groups and GitLab users
+		// set up the tree of GitLab groups and GitLab users
 		gitlab = new GitlabService().buildGitlabContext(
 				props.getProperty("gitlab.hostname"),
 				props.getProperty("gitlab.account.token"),

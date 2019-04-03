@@ -7,10 +7,10 @@ gitSync is a standalone Java application which replicates the users from an LDAP
 
 At État de Genève we use an Active Directory server to authenticate users, plus a home-made solution
 (hereafter denoted as "the LDAP server" ) to manage authorizations.
-As is done in many organizations, the LDAP server organizes users in roles such
+As is done in many organizations, the LDAP server organizes users in groups such
 as "IT-DEV-JAVA", "IT-DEV-PHP" or "FINANCE".
-Access rights to systems and applications are granted to roles or to users.
-A user is assigned any number of roles.
+Access rights to systems and applications are granted to groups or to users.
+A user is assigned to any number of groups.
 
 Now GitLab comes into play.
 The server is an on-premise instance of the GitLAb community edition.
@@ -24,9 +24,9 @@ This section specifies the expected behavior of the application.
 
 ## Definitions
 
-Most LDAP roles are "standard" roles. One role can be an "administrator" role.
-For example, role "IT-DEV-JAVA" is a standard role, whereas "ADMIN" is the administrator role.
-The administrator role, if any, is supplied as a parameter to the application.
+Most LDAP groups are "standard" groups. One group can be an "administrator" group.
+For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "ADMIN" is the administrator group.
+The administrator group, if any, is supplied as a parameter to the application.
 
 ~~(in the GitLab server) Most groups are "standard" groups. A few groups are "administrator" groups.
 For example, group "IT-DEV-JAVA" is a standard group, whereas groups "IT-ADMIN" and "FINANCE-ADMIN" are administrator
@@ -34,14 +34,14 @@ groups.
 Standard groups are typically created by the application, whereas administrator groups are created directly
 (manually) on the GitLab server.
 The list of administrator groups is supplied to the application.
-Administrator roles (in the LDAP server) and administrator groups (in the GitLab server) do not need to be correlated.~~
+Administrator groups (in the LDAP server) and administrator groups (in the GitLab server) do not need to be correlated.~~
 
 ## Business rules
 
-* For every standard LDAP role, create a GitLab group (hereafter coined the "matching group") with the same name, 
+* For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name, 
 if such group does not exist yet.
  
-* For every standard LDAP role, retrieve the list of users. 
+* For every standard LDAP group, retrieve the list of users. 
   * For every user in the list:
     * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
     * **A FAIRE !** If the user exists in GitLab, set its GitLab access level to Regular (as opposed to Admin).
@@ -51,16 +51,16 @@ if such group does not exist yet.
 
   * Additionally:  
     * If a user exists in GitLab, is assigned to the matching group but is not in the list above, remove it from
-      the matching group, unless the user belongs to the LDAP administrator role (see reason below).
+      the matching group, unless the user belongs to the LDAP administrator group (see reason below).
   
-* For the administrator LDAP role (if any), retrieve the list of users. For every user in the list:
+* For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
   * If the user exists in GitLab :
     * Assign it the Admin (as opposed to Regular) access level.
-    * Assign it to all non-administrator groups (with Maintainer GitLab role), except the groups in a black list
+    * Assign it to all non-administrator groups (with Maintainer GitLab role permission), except the groups in a black list
       supplied as a parameter to the application.
 
-Note: the business rules for standard roles are applied before the business rules for the administrator role,
+Note: the business rules for standard groups are applied before the business rules for the administrator group,
 otherwise users having Admin access level are downgraded to Regular access level.
 
 ## Remarks
@@ -74,7 +74,7 @@ otherwise users having Admin access level are downgraded to Regular access level
   assigned by GitLab to the user used for the connection.
   That user is the user matching the connection token ``gitlab.account.token`` to be supplied in the
   parameter file ``distribution.properties``.
-* If an existing GitLab group matches no LDAP role, nothing happens to it.
+* If an existing GitLab group matches no LDAP group, nothing happens to it.
 * The replication is one-way : from the LDAP server to the GitLab server. Accordingly, read-only access
   to the LDAP server is sufficient. 
 
@@ -117,7 +117,7 @@ library, which internally resorts to REST services.
 The application is compatible with any GitLab server, for example GitLab 11, that complies with version 4 of the
 GitLab API.
 
-The application stores the whole LDAP configuration of the roles in memory. For a few hundred users this has not
+The application stores the whole LDAP configuration of the groups in memory. For a few hundred users this has not
 caused any trouble so far.
 
 If some glitch happens when extracting the user configuration from the LDAP server (for example, the data have
