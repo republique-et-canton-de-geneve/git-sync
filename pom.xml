@@ -2,6 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!--
+	  This project does not use Spring. It inherits from spring-boot-dependencies only to make the
+	  management of plugins versions and dependencies versions simpler.
+	  -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-dependencies</artifactId>
+		<version>2.1.4.RELEASE</version>
+	</parent>
+
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
@@ -56,17 +66,14 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.26</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.gitlab</groupId>
@@ -115,7 +122,6 @@
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -125,7 +131,6 @@
 
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.1</version>
 				<configuration>
 					<!-- Jacoco prepare-agent builds some command-line params without -->
 					<!-- which jacoco will not instrument. Hence it is important to add -->
@@ -146,7 +151,6 @@
 
 			<plugin>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -166,7 +170,6 @@
 
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -186,7 +189,6 @@
 			
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9.1</version>
 				<configuration>
 					<source>1.8</source>
 				</configuration>
@@ -224,4 +226,23 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<!-- Profile with access to the Nexus repository of Etat de Geneve -->
+			<id>etat-de-geneve</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<distributionManagement>
+				<repository>
+					<id>internal.project.release</id>
+					<url>***REMOVED***/content/repositories/project_release</url>
+				</repository>
+				<snapshotRepository>
+					<id>internal.project.snapshot</id>
+					<url>***REMOVED***/content/repositories/project_snapshot</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 </project>

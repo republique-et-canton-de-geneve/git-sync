@@ -23,13 +23,13 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping: mapping the users with the LDAP server users");
+		LOGGER.info("Mapping: removing user permissions in excess on GitLab");
 
 		// for every group...
 		gitlab.getGroups().stream()
 				.sorted(Comparator.comparing(GitlabGroup::getName))
 				.forEach(gitlabGroup -> {
-					LOGGER.info("    Mapping group [{}]", gitlabGroup.getName());
+					LOGGER.info("    Processing group [{}]", gitlabGroup.getName());
 					handleGroup(gitlabGroup, ldapTree, gitlab);
 			});
 
