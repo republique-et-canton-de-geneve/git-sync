@@ -12,6 +12,10 @@ import ch.ge.cti_composant.gitSync.util.ldap.gina.GinaLdapTreeFactory;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTreeFactory;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTreeBuilder;
+import ch.ge.cti_composant.gitSync.util.ldap.gina.GinaLdapTreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +41,12 @@ public class GitSync {
 		// set up the tree of LDAP groups and LDAP users.
 		// If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
 		// replace the treeFactory below with a custom one
-		LdapTreeFactory treeFactory = new GinaLdapTreeFactory();
+		LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
+		LdapTreeBuilder treeFactory = new GinaLdapTreeBuilder();
 		ldapTree = treeFactory.createTree();
 
 		// set up the tree of GitLab groups and GitLab users
+		LOGGER.info("PHASE 2: Set up the GitLab tree");
 		gitlab = new GitlabService().buildGitlabContext(
 				props.getProperty("gitlab.hostname"),
 				props.getProperty("gitlab.account.token"),
@@ -56,6 +62,7 @@ public class GitSync {
 			props.load(Files.newInputStream(Paths.get(path)));
 			init();
 
+			LOGGER.info("PHASE 3: Apply the business rules");
 			// avoid to override GitLab groups and users with an empty configuration
 			new CheckMinimumUserCount().start(ldapTree, gitlab);
 			// create the groups in GitLab
@@ -73,10 +80,11 @@ public class GitSync {
 		} catch (Exception e) {
 		    LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
 		}
-		
-		LOGGER.info("End of execution");
 	}
 
+	/**
+	 * Returns the specified property, or null if not found.
+	 */
 	public static String getProperty(String name) {
 		return props.getProperty(name);
 	}

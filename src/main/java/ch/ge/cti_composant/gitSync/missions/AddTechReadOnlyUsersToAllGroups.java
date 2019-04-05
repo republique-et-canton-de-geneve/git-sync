@@ -27,7 +27,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 	    addUser(gitlab, MiscConstants.FISHEYE_USERNAME);
 	    addUser(gitlab, MiscConstants.MWFL_USERNAME);
 	}
-	
+
 	private void addUser(Gitlab gitlab, String username) {
 		LOGGER.info("Adding administrator users to all groups with Reporter permissions");
 		try {

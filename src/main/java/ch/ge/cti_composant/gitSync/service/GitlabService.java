@@ -23,8 +23,8 @@ public class GitlabService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabService.class);
 
 	/**
-	 * Constructs the GitLab tree (groups and users) from the specified ldap tree.
-	 * @return the GitLab tree, <b>restricted to the elements that come from the ldap server</b>.
+	 * Constructs the GitLab tree (groups and users) from the specified LDAP tree.
+	 * @return the GitLab tree, <b>restricted to the elements that come from the LDAP server</b>.
 	 */
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
 		// log on to GitLab
