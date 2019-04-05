@@ -33,7 +33,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 			for (GitlabGroup group : gitlab.getGroups()) {
 				List<GitlabGroupMember> memberList = gitlab.getApi().getGroupMembers(group.getId());
-				LOGGER.info("Processing of the users of group [{}]", group.getName());
+				LOGGER.info("    Processing the users of group [{}]", group.getName());
 
 				Set<String> userNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
 				for (String username : userNames) {
@@ -43,14 +43,14 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 					if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
 						// the user exists in GitLab and it has not been added to the group
-						LOGGER.info("    Adding user [{}] to group [{}]", username, group.getName());
+						LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
 						gitlab.getApi().addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
 					} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
 						// the user exists in GitLab and it has already been added to the group
-						LOGGER.info("    User [{}] is already in group [{}]", username, group.getName());
+						LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
 					} else {
 						// the user does not exist in GitLab
-						LOGGER.info("    User [{}] does not exist in GitLab", username);
+						LOGGER.info("        User [{}] does not exist in GitLab", username);
 					}
 				}
 			}
