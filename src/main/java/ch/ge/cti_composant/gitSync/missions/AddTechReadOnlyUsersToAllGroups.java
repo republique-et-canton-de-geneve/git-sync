@@ -29,7 +29,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 	}
 	
 	private void addUser(Gitlab gitlab, String username) {
-		LOGGER.info("Adding administrator users to all groups with Reported permissions");
+		LOGGER.info("Adding administrator users to all groups with Reporter permissions");
 		try {
 			GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
 
@@ -52,6 +52,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 		} catch (IOException e) {
 			LOGGER.error("Exception caught while iterating on a group", e);
 		}
+		LOGGER.info("Adding administrator users completed");
 	}
 
 }
