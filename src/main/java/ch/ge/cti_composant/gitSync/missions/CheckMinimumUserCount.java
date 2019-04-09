@@ -16,7 +16,7 @@ public class CheckMinimumUserCount implements Mission {
 
 	/**
 	 * Default value of property "minimum-user-count".
-	 * It is used if no value for "minimum-user-count" is supplied in the properties file.
+	 * It is used if no value for "minimum-user-count" is supplied in the configuration file.
 	 */
 	private static final int DEFAULT_MINIMUM_USER_COUNT = 5;
 
@@ -29,9 +29,7 @@ public class CheckMinimumUserCount implements Mission {
 		// A hashset is used to ensure a user is not added more than once
 		Set<LdapUser> users = new HashSet<>();
 		for (LdapGroup group : ldapTree.getGroups()) {
-			for (LdapUser user : ldapTree.getUsers(group).values()) {
-				users.add(user);
-			}
+			users.addAll(ldapTree.getUsers(group).values());
 		}
 
 		// Make sure the minimal count of users has been found
@@ -45,6 +43,8 @@ public class CheckMinimumUserCount implements Mission {
 			LOGGER.error(message);
 			throw new GitSyncException(message);
 		}
+
+		LOGGER.info("Precondition OK");
 	}
 
 	private int getMinimumUserCount() {

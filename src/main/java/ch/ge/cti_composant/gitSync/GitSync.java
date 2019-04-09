@@ -71,7 +71,7 @@ public class GitSync {
 			new PromoteAdminUsers().start(ldapTree, gitlab);
 			// add the Admins to all groups
 			new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
-			// add read-only permission to user Fisheye on all groups
+			// add read-only permission to specific wide-access users on all groups
 			new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
 		} catch (Exception e) {
 		    LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);

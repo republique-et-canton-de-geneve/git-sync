@@ -1,15 +1,13 @@
 package ch.ge.cti_composant.gitSync.missions;
 
-import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
-import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
-import ch.ge.cti_composant.gitSync.util.MiscConstants;
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import org.gitlab.api.models.GitlabGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Comparator;
 
 /**
@@ -23,7 +21,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping: removing user permissions in excess on GitLab");
+		LOGGER.info("Mapping: removing the user permissions in excess on GitLab");
 
 		// for every group...
 		gitlab.getGroups().stream()
@@ -40,26 +38,15 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 
 		// for every user...
-		try {
-			gitlab.getApi().getGroupMembers(gitlabGroup.getId()).stream()
-					.filter(gitlabGroupMember -> !MissionUtils.isGitlabUserAdmin(gitlabGroupMember, gitlab.getApi(), ldapTree))
-					.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
-					.forEach(member -> {
-						if ((!MiscConstants.FISHEYE_USERNAME.equals(member.getUsername()))
-							&& (!MiscConstants.MWFL_USERNAME.equals(member.getUsername()))) {
-					    	LOGGER.info("        User [{}] does not belong or no longer belongs to group [{}]",
-									member.getUsername(), gitlabGroup.getName());
-    						try {
-    							gitlab.getApi().deleteGroupMember(gitlabGroup, member);
-    						} catch (IOException e) {
-    							LOGGER.error("Exception caught while removing user [" + member.getUsername() +
-										"] from group [" + gitlabGroup.getName() + "]", e);
-    						}
-					    }
-					});
-		} catch (IOException e) {
-			LOGGER.error("Exception caught while processing group [{}]", gitlabGroup.getName(), e);
-		}
+		gitlab.apiGetGroupMembers(gitlabGroup.getId()).stream()
+				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
+				.filter(member -> !MissionUtils.isGitlabUserAdmin(member, gitlab.getApi(), ldapTree))
+				.filter(member -> !MissionUtils.getWideAccessUsers().contains(member.getUsername()))
+				.forEach(member -> {
+					LOGGER.info("        Removing user [{}] from group [{}]",
+							member.getUsername(), gitlabGroup.getName());
+					gitlab.apiDeleteGroupMember(gitlabGroup, member);
+				});
 	}
 
 }

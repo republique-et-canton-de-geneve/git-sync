@@ -1,7 +1,10 @@
 package ch.ge.cti_composant.gitSync.util.ldap;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,8 +38,8 @@ public class LdapTreeSupport implements LdapTree {
 		return new TreeMap<>(tree.get(group));
 	}
 
-	public Map<String, LdapUser> getUsers(String group){
-		return getUsers(new LdapGroup(group));
+	public Map<String, LdapUser> getUsers(String groupName) {
+		return StringUtils.isBlank(groupName) ? new HashMap<>() : getUsers(new LdapGroup(groupName));
 	}
 
 }
