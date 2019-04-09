@@ -28,9 +28,11 @@ public class GitlabService {
 	 */
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
 		// log on to GitLab
+		LOGGER.info("Logging to the GitLab server");
 		GitlabAPI api = GitlabAPI.connect(hostname, apiToken);
 
 		// retrieve the GitLab groups
+		LOGGER.info("Retrieving the GitLab groups");
 		List<GitlabGroup> groups;
 		try {
 			groups = api.getGroups();
@@ -39,7 +41,8 @@ public class GitlabService {
 			throw new GitSyncException(e);
 		}
 
-		// check and store the GitLab groups, including their users
+		// check and store the GitLab groups in-memory, including their users
+		LOGGER.info("Constructing the in-memory tree of GitLab groups and users");
 		Map<GitlabGroup, Map<String, GitlabUser>> tree = new HashMap<>();
 		groups.stream()
 				// exclude the groups created by the user

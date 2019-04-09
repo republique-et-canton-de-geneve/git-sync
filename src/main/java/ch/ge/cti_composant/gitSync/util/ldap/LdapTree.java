@@ -12,6 +12,11 @@ public interface LdapTree {
 
 	Map<String, LdapUser> getUsers(LdapGroup group);
 
-	Map<String, LdapUser> getUsers(String group);
+	/**
+	 * Returns the users of the specified LDAP group.
+	 * @param groupName LDAP group name. Can be blank
+	 * @return a map of users, possibly empty
+	 */
+	Map<String, LdapUser> getUsers(String groupName);
 
 }

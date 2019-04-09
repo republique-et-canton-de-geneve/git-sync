@@ -43,12 +43,12 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 		LdapTree ldapTree;
 
 		// create a search object on the Gina ldap server
-		int timeout = Integer.parseInt(GitSync.getProperty("timeout-search-ldap"));
+		int timeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.ldap-timeout"));
 		GinaLdapConfiguration conf = new GinaLdapConfiguration(
-		        GitSync.getProperty("ct-gina-ldap-client.LDAP_SERVER_URL"),
-				GitSync.getProperty("ct-gina-ldap-client.LDAP_BASE_DN"),
-				GitSync.getProperty("ct-gina-ldap-client.LDAP_USER"),
-				GitSync.getProperty("ct-gina-ldap-client.LDAP_PASSWORD"),
+		        GitSync.getProperty("gina-ldap-client.ldap-server-url"),
+				GitSync.getProperty("gina-ldap-client.ldap-base-dn"),
+				GitSync.getProperty("gina-ldap-client.ldap-user"),
+				GitSync.getProperty("gina-ldap-client.ldap-password"),
 				GinaLdapConfiguration.Type.APPLICATION,
 				timeout,
 				timeout);

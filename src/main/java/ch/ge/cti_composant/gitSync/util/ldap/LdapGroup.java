@@ -1,5 +1,8 @@
 package ch.ge.cti_composant.gitSync.util.ldap;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+
 /**
  * A group in the LDAP server.
  * Will be matched to a group in the GitLab server.
@@ -8,7 +11,8 @@ public class LdapGroup {
 
 	private String name;
 
-	public LdapGroup(String name){
+	public LdapGroup(String name) {
+		Validate.notBlank(name, "Group name cannot be blank");
 		this.name = name;
 	}
 

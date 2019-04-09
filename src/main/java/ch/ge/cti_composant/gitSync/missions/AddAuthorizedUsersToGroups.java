@@ -9,7 +9,6 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,36 +25,33 @@ public class AddAuthorizedUsersToGroups implements Mission {
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Mapping: adding the users to the authorized groups");
-		try {
-			Map<String, GitlabUser> allUsers = new HashMap<>();
-			gitlab.getApi().getUsers()
-					.forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-			for (GitlabGroup group : gitlab.getGroups()) {
-				List<GitlabGroupMember> memberList = gitlab.getApi().getGroupMembers(group.getId());
-				LOGGER.info("    Processing the users of group [{}]", group.getName());
+		Map<String, GitlabUser> allUsers = new HashMap<>();
+		gitlab.apiGetUsers()
+				.forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-				Set<String> userNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
-				for (String username : userNames) {
-					boolean isUserAlreadyMemberOfGroup = memberList.stream()
-							.filter(member -> member.getUsername().equals(username))
-							.count() == 1;
+		for (GitlabGroup group : gitlab.getGroups()) {
+			List<GitlabGroupMember> memberList = gitlab.apiGetGroupMembers(group.getId());
+			LOGGER.info("    Processing the users of group [{}]", group.getName());
 
-					if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
-						// the user exists in GitLab and it has not been added to the group
-						LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
-						gitlab.getApi().addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
-					} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
-						// the user exists in GitLab and it has already been added to the group
-						LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
-					} else {
-						// the user does not exist in GitLab
-						LOGGER.info("        User [{}] does not exist in GitLab", username);
-					}
+			Set<String> userNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
+			for (String username : userNames) {
+				boolean isUserAlreadyMemberOfGroup = memberList.stream()
+						.filter(member -> member.getUsername().equals(username))
+						.count() == 1;
+
+				if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
+					// the user exists in GitLab and it has not been added to the group
+					LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
+					gitlab.apiAddGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
+				} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
+					// the user exists in GitLab and it has already been added to the group
+					LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
+				} else {
+					// the user does not exist in GitLab
+					LOGGER.info("        User [{}] does not exist in GitLab", username);
 				}
 			}
-		} catch (IOException e) {
-			LOGGER.error("Exception caught while retrieving the list of users", e);
 		}
 		LOGGER.info("Mapping completed");
 	}
