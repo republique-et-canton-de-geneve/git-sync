@@ -24,9 +24,20 @@ This section specifies the expected behavior of the application.
 
 ## Definitions
 
+### Standard groups and administrator group
+
 Most LDAP groups are "standard" groups. One group can be an "administrator" group.
 For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "ADMIN" is the administrator group.
 The administrator group, if any, is supplied as a parameter to the application.
+
+### Wide-access GitLab users
+
+Some special GitLab users require read-only access on all GitLab groups.
+These users are usually technical users.
+At État de Genève, such a wide-access GitLab user has been created to allow a
+[Fisheye server](https://www.atlassian.com/software/fisheye) to log on to GitLab and freely retrieve commits
+from any Git repository.
+The list of wide-access GitLab users, if any, is supplied as a parameter to the application.
 
 ~~(in the GitLab server) Most groups are "standard" groups. A few groups are "administrator" groups.
 For example, group "IT-DEV-JAVA" is a standard group, whereas groups "IT-ADMIN" and "FINANCE-ADMIN" are administrator
@@ -38,44 +49,47 @@ Administrator groups (in the LDAP server) and administrator groups (in the GitLa
 
 ## Business rules
 
-* For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name, 
+B1. For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
 if such group does not exist yet.
  
-* For every standard LDAP group, retrieve the list of users. 
-  * For every user in the list:
+B2. For every standard LDAP group, retrieve the list of users (L1).
+  * For every user in list L1:
     * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
     * **A FAIRE !** If the user exists in GitLab, set its GitLab access level to Regular (as opposed to Admin).
     * If the user exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
+      This is the main business rule of the application - it is actually its basic purpose.
     * If the user exists in GitLab and is assigned to the matching group, do nothing.
-
   * Additionally:  
-    * If a user exists in GitLab, is assigned to the matching group but is not in the list above, remove it from
+    * If a user exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
       the matching group, unless the user belongs to the LDAP administrator group (see reason below).
-  
-* For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
-  * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
-  * If the user exists in GitLab :
-    * Assign it the Admin (as opposed to Regular) access level.
-    * Assign it to all non-administrator groups (with Maintainer GitLab role permission), except the groups in a black list
-      supplied as a parameter to the application.
 
-Note: the business rules for standard groups are applied before the business rules for the administrator group,
-otherwise users having Admin access level are downgraded to Regular access level.
+B3. For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
+  * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
+  * If the user exists in GitLab:
+    * Give it the Admin (as opposed to Regular) access level.
+    * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
+      black list supplied as a parameter to the application.
+
+B4. For every wide-access GitLab user:
+  * Assign it to every group (with Reporter role permission), except the groups in the black list.
+
+Note: the business rules for the standard groups (B2) are applied before the business rules for the administrator
+group (B3), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
 
 ## Remarks
 
 * The application does not create GitLab users.
-* The application does not assign other GitLab role permission than "Maintainer".
-  Assignment of a GitLab role permission other than Maintainer, e.g., Developer, Guest or Owner, is carried out
+* The application does not assign other GitLab role permission than Maintainer and Reporter.
+  Assignment of a GitLab role permission other than Maintainer, e.g., Developer, Guest or Owner, must be carried out
   directly on the GitLab server. 
 * The application does not create GitLab sub-groups. It only creates GitLab groups.
 * Whenever the application creates a GitLab group, the GitLab role permission "Owner" group is automatically
   assigned by GitLab to the user used for the connection.
-  That user is the user matching the connection token ``gitlab.account.token`` to be supplied in the
-  parameter file ``distribution.properties``.
+  That user is the user that matches the connection token ``gitlab.account.token`` to be supplied in the
+  configuration file.
 * If an existing GitLab group matches no LDAP group, nothing happens to it.
-* The replication is one-way : from the LDAP server to the GitLab server. Accordingly, read-only access
+* The replication is one-way: from the LDAP server to the GitLab server. Accordingly, read-only access
   to the LDAP server is sufficient. 
 
 ## GitLab authentication

@@ -10,3 +10,6 @@
 # Maven
 target/
 dependency-reduced-pom.xml
+
+# Project
+logs/

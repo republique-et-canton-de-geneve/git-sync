@@ -1,8 +1,11 @@
 package ch.ge.cti_composant.gitSync.util;
 
+import ch.ge.cti_composant.gitSync.GitSync;
+import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
+import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
@@ -16,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Helper methods for the missions.
@@ -31,7 +35,7 @@ public class MissionUtils {
 	 * Checks that we are the Owner of the specified GitLab group.
 	 * By "we", we mean "the GitLab (technical) user associated with the token used for the connection to GitLab".
 	 * <br/>
-	 * Note: in GitLab a group can have only one owner.
+	 * Note: in GitLab a group can have only one Owner.
 	 */
 	public static boolean validateGitlabGroupOwnership(GitlabGroup gitlabGroup, GitlabAPI gitlabAPI) {
 		try {
@@ -45,7 +49,7 @@ public class MissionUtils {
 			}
 			return false;
 		} catch (IOException e) {
-			LOGGER.error("Impossible d'obtenir des informations sur le groupe [{}]", gitlabGroup.getName());
+			LOGGER.error("Could not retrieve the data about GitLab group [{}]", gitlabGroup.getName());
 		}
 		return false;
 	}
@@ -58,15 +62,15 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Checks the existence of a Gitlab group from the specified LDAP group.
+	 * Checks the existence of a GitLab group from the specified LDAP group.
 	 */
 	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPI api) {
 		try {
 			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("LDAP group [{}] exists in GitLab", ldapGroup.getName());
+			LOGGER.debug("Group [{}] exists in GitLab", ldapGroup.getName());
 			return true;
 		} catch (IOException e) {
-			LOGGER.debug("LDAP group [{}] does not exist in GitLab", ldapGroup.getName());
+			LOGGER.debug("Group [{}] does not exist in GitLab", ldapGroup.getName());
 		}
 		return false;
 	}
@@ -84,12 +88,12 @@ public class MissionUtils {
 			case 0:
 				return false;
 			default:
-				throw new IllegalStateException("More than user with name [" + user.getName() + "] has been found");
+				throw new GitSyncException("More than one user with name [" + user.getName() + "] has been found");
 		}
 	}
 
 	/**
-	 * Checks whether the specified user has admin rights.
+	 * Checks whether the specified GitLab user has admin rights.
 	 */
 	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPI api, LdapTree ldapTree) {
 		try {
@@ -97,7 +101,7 @@ public class MissionUtils {
 			boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
 			boolean isTrivialAdmin = user.isAdmin();
 			// is it in the LDAP admin group?
-			boolean isLdapAdmin = ldapTree.getUsers(MiscConstants.ADMIN_LDAP_GROUP).containsKey(user.getUsername());
+			boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
 			return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
 		} catch (IOException e) {
 			LOGGER.error("Exception caught while assessing the privileges of user [{}]", user.getUsername(), e);
@@ -124,6 +128,42 @@ public class MissionUtils {
 
 	public static GitlabUser getGitlabUser(GitlabAPI api, String username) {
 			return getAllGitlabUsers(api).get(username);
+	}
+
+	/**
+	 * Gets the name of the LDAP group considered as the administrator group.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a group name, or null if no administrator group is defined in the configuration file.
+	 */
+	public static String getAdministratorGroup() {
+		String groupName = GitSync.getProperty("admin-group");
+		return StringUtils.isBlank(groupName) ? null : groupName;
+	}
+
+	/**
+	 * Gets the list of black listed groups from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getBlackListedGroups() {
+		String groupNames = GitSync.getProperty("black-listed-groups");
+		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
+		return Stream.of(groupNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Gets the list of the users to be assigned read-only access extensively on most groups.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a list of GitLab user names. Can be empty
+	 */
+	public static List<String> getWideAccessUsers() {
+		String userNames = GitSync.getProperty("wide-access-users");
+		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
+		return Stream.of(userNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
 	}
 
 }
