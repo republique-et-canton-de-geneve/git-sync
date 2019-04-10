@@ -158,6 +158,15 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>groovy*/**</exclude>
+										<exclude>overview*.html</exclude>
+									</excludes>
+								</filter>
+							</filters>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>ch.ge.cti_composant.gitSync.Main</mainClass>
