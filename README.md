@@ -159,7 +159,12 @@ The mapping is carried out by running the application:
 java -jar target/gitSync-XXX-SNAPSHOT.jar configuration.properties
 ``
 
-The parameters in file [configuration.properties](./configuration.properties) must be adapted.
+The unique parameter is the path to the configuration file.
+The parameters in the supplied file [configuration.properties](./configuration.properties) must be adapted.
+
+Logging is performed by means of Logback. A basic configuration file `logback.xml` is included in the source
+tree and is present in the JAR file created by the `mvn install` command.
+It is sufficient for standard analysis, although some people might find the INFO-level console output too verbose.
 
 At État de Genève, execution typically takes a few minutes to execute. It processes
 about 100 groups encompassing 1000 group users.
