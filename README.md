@@ -13,10 +13,11 @@ Access rights to systems and applications are granted to groups or to users.
 A user is assigned to any number of groups.
 
 Now GitLab comes into play.
-The server is an on-premise instance of the GitLAb community edition.
-We want to replicate automatically the configuration of the users in the GitLab server.
+The server is an on-premise instance of the GitLab community edition.
+Our need is to *replicate automatically the LDAP configuration of the users onto the GitLab server*.
 For example, we want the GitLab server to acquire automatically groups "IT-DEV-JAVA', 'IT-DEV-PHP', etc.,
-from the LDAP server, as well as the names of the users defined in every group. 
+from the LDAP server, as well as the members of every group.
+We also want the GitLab group members to acquire the adequate right permissions.
 
 # Functional description
 
@@ -27,25 +28,18 @@ This section specifies the expected behavior of the application.
 ### Standard groups and administrator group
 
 Most LDAP groups are "standard" groups. One group can be an "administrator" group.
-For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "ADMIN" is the administrator group.
-The administrator group, if any, is supplied as a parameter to the application.
+For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "***REMOVED***" is the
+administrator group.
+The name of the administrator group, if any, is supplied as a parameter to the application.
 
 ### Wide-access GitLab users
 
 Some special GitLab users require read-only access on all GitLab groups.
 These users are usually technical users.
 At État de Genève, such a wide-access GitLab user has been created to allow a
-[Fisheye server](https://www.atlassian.com/software/fisheye) to log on to GitLab and freely retrieve commits
+[Fisheye](https://www.atlassian.com/software/fisheye) server to log on to GitLab and to freely retrieve commits
 from any Git repository.
 The list of wide-access GitLab users, if any, is supplied as a parameter to the application.
-
-~~(in the GitLab server) Most groups are "standard" groups. A few groups are "administrator" groups.
-For example, group "IT-DEV-JAVA" is a standard group, whereas groups "IT-ADMIN" and "FINANCE-ADMIN" are administrator
-groups.
-Standard groups are typically created by the application, whereas administrator groups are created directly
-(manually) on the GitLab server.
-The list of administrator groups is supplied to the application.
-Administrator groups (in the LDAP server) and administrator groups (in the GitLab server) do not need to be correlated.~~
 
 ## Business rules
 
@@ -54,7 +48,8 @@ if such group does not exist yet.
  
 B2. For every standard LDAP group, retrieve the list of users (L1).
   * For every user in list L1:
-    * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
+    * If the user does not exist in GitLab, do nothing
+      (see section [GitLab authentication](#gitlab-authentication)).
     * **A FAIRE !** If the user exists in GitLab, set its GitLab access level to Regular (as opposed to Admin).
     * If the user exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
@@ -65,7 +60,8 @@ B2. For every standard LDAP group, retrieve the list of users (L1).
       the matching group, unless the user belongs to the LDAP administrator group (see reason below).
 
 B3. For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
-  * If the user does not exist in GitLab, do nothing (see section ``GitLab authentication`` below).
+  * If the user does not exist in GitLab, do nothing
+    (see section [GitLab authentication](#gitlab-authentication)).
   * If the user exists in GitLab:
     * Give it the Admin (as opposed to Regular) access level.
     * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
@@ -119,13 +115,19 @@ It requires Java 8+ to build and run.
 
 Communication with the LDAP server is performed by means of a home-made Java library named
 [gina-ldap-client](https://github.com/republique-et-canton-de-geneve/gina-ldap-client)
-which internally resorts to the standard `javax.naming.ldap` API.
-Transforming the application to connect it to another LDAP server than the one of État de Genève would entail
-replacing library gina-ldap-client-impl with a custom library implementing the interfaces defined
-in gina-ldap-client-api.
-** A FAIRE !!! **
+(in French) which internally resorts to the standard `javax.naming.ldap` API.
+That library is specifically tuned to the LDAP data model of Gina, the État de Genève's LDAP server.
+Transforming the application to connect to another LDAP server than Gina entails the following changes:
+* Creating a class, say, `CustomLdapTreeBuilder` that implements interface
+  [LdapTreeBuilder](./src/main/java/ch/ge/cti_composant/gitSync/util/ldap/LdapTreeBuilder.java);
+* In the top class
+  [GitSync](./src/main/java/ch/ge/cti_composant/gitSync/GitSync.java), replacing the usage of
+  [GinalLdapTreeBuilder](./src/main/java/ch/ge/cti_composant/gitSync/util/ldap/gina/GinaLdapTreeBuilder.java)
+  with that of `CustomLdapTreeBuilder`;
+* In the properties file [configuration.properties](./configuration.properties),
+  replacing the settings of the Gina LDAP server with those of the custom LDAP server.
 
-Communication with the GitLab server is performed by means of GitLab's
+Communication with the GitLab server is performed by means of GitLab's own
 [java-gitlab-api](https://mvnrepository.com/artifact/org.gitlab/java-gitlab-api)
 library, which internally resorts to REST services. 
 The application is compatible with any GitLab server, for example GitLab 11, that complies with version 4 of the
@@ -138,31 +140,33 @@ If some glitch happens when extracting the user configuration from the LDAP serv
 been moved to another zone of the LDAP tree) and the application comes up with an empty configuration, replication
 to the GitLab server will simply clean up the user assignments, thereby preventing all users from
 accessing their projects.
-In order to prevent such bad situation from occurring, an extra configuration parameter (**NOM ??**) is provided: 
-if the configuration contains fewer users than the value of the parameter, the application exits without performing
-the replication. **LOG ? EXCEPTION ?**
+In order to prevent such bad situation from occurring, an extra configuration parameter `minimum-user-count`
+is provided:
+if the user configuration contains fewer users than the value of the parameter, the application exits without performing
+the replication.
 
 # Build
 
-Lancer la commande
+Run
 
 ``mvn clean install``
 
 # Execution
 
-The synchronization is carried out by running the application:
+The mapping is carried out by running the application:
 
 ``
-java -jar target/gitSync-XXX-SNAPSHOT.jar ./src/main/resources/distribution.properties
+java -jar target/gitSync-XXX-SNAPSHOT.jar configuration.properties
 ``
+
+The parameters in file [configuration.properties](./configuration.properties) must be adapted.
 
 At État de Genève, execution typically takes a few minutes to execute. It processes
 about 100 groups encompassing 1000 group users.
 
 Practical usage requires spawning the application regularly, for example every hour.
-
-(A FAIRE : paramétrisation)
+This can be done with a crontab-like job.
 
 # Future evolutions
 
-No future evolutions are planed, besides possibly adding unit tests.
+No future evolutions are planned, besides possibly adding unit tests.

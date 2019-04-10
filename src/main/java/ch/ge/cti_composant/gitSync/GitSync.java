@@ -20,8 +20,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * Extracts the groups and users from the LDAP server and assigns them as groups and users to
- * the GitLab server.
+ * Top-level class of the application: extracts the groups and users from the LDAP server and assigns them as groups
+ * and users to the GitLab server.
  */
 public class GitSync {
 
@@ -33,16 +33,41 @@ public class GitSync {
 
     private Gitlab gitlab = null;
 
-    private void init() {
-		// set up the tree of LDAP groups and LDAP users.
-		// If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
-		// replace the treeFactory below with a custom one
-		LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
-		LdapTreeBuilder treeFactory = new GinaLdapTreeBuilder();
-		ldapTree = treeFactory.createTree();
+    /**
+	 * Perfoms all operations.
+	 */
+	public void run(String path) {
+		try {
+			props.load(Files.newInputStream(Paths.get(path)));
 
-		// set up the tree of GitLab groups and GitLab users
-		LOGGER.info("PHASE 2: Set up the GitLab tree");
+			LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
+			setupLdap();
+
+			LOGGER.info("PHASE 2: Set up the in-memory GitLab tree");
+			setupGitLab();
+
+			LOGGER.info("PHASE 3: Apply the business rules");
+			applyRules();
+
+		} catch (Exception e) {
+		    LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
+		}
+	}
+
+	/**
+	 * Sets up the in-memory tree of LDAP groups and LDAP users.
+	 */
+    private void setupLdap() {
+		// If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
+		// replace the treeBuilder below with a custom one. See file README.md.
+		LdapTreeBuilder treeBuilder = new GinaLdapTreeBuilder();
+		ldapTree = treeBuilder.createTree();
+	}
+
+	/**
+	 * Sets up the in-memory tree of GitLab groups and GitLab users.
+	 */
+    private void setupGitLab() {
 		gitlab = new GitlabService().buildGitlabContext(
 				props.getProperty("gitlab.hostname"),
 				props.getProperty("gitlab.account.token"),
@@ -51,31 +76,28 @@ public class GitSync {
 
     /**
 	 * Performs the missions.
-	 * @param path path to the property file
 	 */
-	public void run(String path) {
-		try {
-			props.load(Files.newInputStream(Paths.get(path)));
-			init();
+	private void applyRules() {
+		// avoid to override GitLab groups and users with an empty configuration
+		new CheckMinimumUserCount().start(ldapTree, gitlab);
 
-			LOGGER.info("PHASE 3: Apply the business rules");
-			// avoid to override GitLab groups and users with an empty configuration
-			new CheckMinimumUserCount().start(ldapTree, gitlab);
-			// create the groups in GitLab
-			new ImportGroupsFromLdap().start(ldapTree, gitlab);
-			// remove the non-authorized users
-			new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
-			// add the authorized users (new permissions)
-			new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
-			// add the Admins
-			new PromoteAdminUsers().start(ldapTree, gitlab);
-			// add the Admins to all groups
-			new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
-			// add read-only permission to specific wide-access users on all groups
-			new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
-		} catch (Exception e) {
-		    LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
-		}
+		// create the groups in GitLab
+		new ImportGroupsFromLdap().start(ldapTree, gitlab);
+
+		// remove the non-authorized users
+		new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
+
+		// add the authorized users (new permissions)
+		new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+
+		// add the Admins
+		new PromoteAdminUsers().start(ldapTree, gitlab);
+
+		// add the Admins to all groups
+		new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
+
+		// add read-only permission to specific wide-access users on all groups
+		new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
 	}
 
 	/**
