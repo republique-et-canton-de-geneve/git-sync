@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<!--
-	  This project does not use Spring. It inherits from spring-boot-dependencies only to make the
-	  management of plugins versions and dependencies versions simpler.
+	  This project does not use Spring. It inherits from spring-boot-dependencies only to simplify the
+	  management of plugins versions and dependencies versions.
 	  -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
