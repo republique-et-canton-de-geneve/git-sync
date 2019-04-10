@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -58,7 +59,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 
 			// initializations
 			final GinaApiLdapBaseAble app2 = app;  // copy of reference, required by the compiler
-			Map<LdapGroup, Map<String, LdapUser>> tree = new HashMap<>();
+			Map<LdapGroup, Map<String, LdapUser>> tree = new TreeMap<>(Comparator.comparing(LdapGroup::getName));
 
 			// get the groups
 			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
