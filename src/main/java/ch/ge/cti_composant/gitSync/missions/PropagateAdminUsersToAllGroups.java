@@ -41,7 +41,7 @@ public class PropagateAdminUsersToAllGroups implements Mission {
 												admin.getUsername(), group.getName());
 										gitlab.apiAddGroupMember(group, admin, GitlabAccessLevel.Master);
 									} else {
-										LOGGER.info("    User [{}] is already a member of group [{}]" ,
+										LOGGER.debug("    User [{}] is already a member of group [{}]" ,
 												admin.getUsername(), group.getName());
 									}
 								});
