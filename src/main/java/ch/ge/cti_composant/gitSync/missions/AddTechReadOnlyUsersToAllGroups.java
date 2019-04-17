@@ -42,7 +42,7 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 										username, gitlabGroup.getName());
 								gitlab.apiAddGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
 							} else {
-								LOGGER.info("        User [{}] is already a member of group [{}]",
+								LOGGER.debug("        User [{}] is already a member of group [{}]",
 										username, gitlabGroup.getName());
 							}
 					});

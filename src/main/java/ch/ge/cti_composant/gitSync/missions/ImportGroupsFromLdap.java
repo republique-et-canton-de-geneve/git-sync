@@ -26,7 +26,7 @@ public class ImportGroupsFromLdap implements Mission {
 	 */
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping : LDAP groups to GitLab groups");
+		LOGGER.info("Mapping: LDAP groups to GitLab groups");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
 				.forEach(ldapGroup -> {
