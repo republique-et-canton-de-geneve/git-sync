@@ -44,7 +44,7 @@ public class PromoteAdminUsers implements Mission {
 								MissionUtils.isGitlabUserAdmin(allUsers.get(username), gitlab.getApi(), ldapTree)) {
 							LOGGER.info("    User [{}] is already administrator", username);
 						} else {
-							LOGGER.info("    User [{}] won't be set as adminsitrator as it does not exist in GitLab",
+							LOGGER.info("    User [{}] won't be set as administrator as it does not exist in GitLab",
 									username);
 						}
 					});
