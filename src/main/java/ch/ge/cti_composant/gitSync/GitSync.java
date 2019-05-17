@@ -15,6 +15,7 @@ import ch.ge.cti_composant.gitSync.util.ldap.gina.GinaLdapTreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -38,7 +39,7 @@ public class GitSync {
      */
     public void run(String path) {
         try {
-            props.load(Files.newInputStream(Paths.get(path)));
+            loadProperties(path);
 
             LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
             setupLdap();
@@ -54,6 +55,16 @@ public class GitSync {
         }
     }
 
+    /**
+     * Loads the properties file.
+     */
+    private void loadProperties(String path) throws IOException {
+        props.load(Files.newInputStream(Paths.get(path)));
+
+        LOGGER.info("Running GitSync with LDAP server [{}] and GitLab server [{}]",
+                props.get("gina-ldap-client.ldap-server-url"),
+                props.get("gitlab.hostname"));
+    }
     /**
      * Sets up the in-memory tree of LDAP groups and LDAP users.
      */

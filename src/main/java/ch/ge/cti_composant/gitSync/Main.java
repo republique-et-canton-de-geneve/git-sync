@@ -14,7 +14,6 @@ public class Main {
 		if (args.length != 1) {
 			LOGGER.error("1 argument expected: the path to configuration file, such as configuration.properties");
 		} else {
-			LOGGER.info("Start GitSync");
 			new GitSync().run(args[0]);
 			LOGGER.info("GitSync completed");
 		}
