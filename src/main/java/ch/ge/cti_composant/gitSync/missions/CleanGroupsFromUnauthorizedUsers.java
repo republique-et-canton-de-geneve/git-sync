@@ -17,7 +17,7 @@ import java.util.Comparator;
  */
 public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImportGroupsFromLdap.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CleanGroupsFromUnauthorizedUsers.class);
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
