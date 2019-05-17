@@ -38,12 +38,17 @@ public class AddAuthorizedUsersToGroups implements Mission {
 			for (String username : userNames) {
 				boolean isUserAlreadyMemberOfGroup = memberList.stream()
 						.filter(member -> member.getUsername().equals(username))
-						.count() == 1;
+						.count() >= 1;
 
 				if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
 					// the user exists in GitLab and it has not been added to the group
 					LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
-					gitlab.apiAddGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
+					try {
+						gitlab.apiAddGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
+					} catch (RuntimeException e) {
+						// we'd rather not cancel the whole operation if an error occurs here
+						LOGGER.warn("Error caught while adding user [{}] to group [{}]", username, group.getName(), e);
+					}
 				} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
 					// the user exists in GitLab and it has already been added to the group
 					LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
