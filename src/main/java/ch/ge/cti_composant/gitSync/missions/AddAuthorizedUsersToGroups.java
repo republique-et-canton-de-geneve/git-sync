@@ -26,7 +26,8 @@ public class AddAuthorizedUsersToGroups implements Mission {
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Mapping: adding the users to the authorized groups");
 
-		LOGGER.info("Total number of GitLab users : {}", gitlab.apiGetUsers().size());
+		LOGGER.info("Total number of GitLab users: {}", gitlab.apiGetUsers().size());
+
 		Map<String, GitlabUser> allUsers = new HashMap<>();
 		gitlab.apiGetUsers()
 				.forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
