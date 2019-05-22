@@ -19,9 +19,4 @@ public interface LdapTree {
 	 */
 	Map<String, LdapUser> getUsers(String groupName);
 
-	/**
-	 * Adds the specified LDAP group to this LDAP tree.
-	 */
-	void addGroup(LdapGroup group);
-
 }
