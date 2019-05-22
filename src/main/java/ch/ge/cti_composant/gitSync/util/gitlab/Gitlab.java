@@ -1,12 +1,8 @@
 package ch.ge.cti_composant.gitSync.util.gitlab;
 
 import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.CreateGroupRequest;
-import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,8 +18,6 @@ import java.util.stream.Collectors;
  * the LDAP server.
  */
 public class Gitlab {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(Gitlab.class);
 
 	private GitlabAPIWrapper api;
 
