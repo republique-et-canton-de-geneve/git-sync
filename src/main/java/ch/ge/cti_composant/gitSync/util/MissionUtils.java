@@ -2,11 +2,11 @@ package ch.ge.cti_composant.gitSync.util;
 
 import ch.ge.cti_composant.gitSync.GitSync;
 import ch.ge.cti_composant.gitSync.util.exception.GitSyncException;
+import ch.ge.cti_composant.gitSync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapUser;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
@@ -14,7 +14,6 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,19 +36,13 @@ public class MissionUtils {
 	 * <br/>
 	 * Note: in GitLab a group can have only one Owner.
 	 */
-	public static boolean validateGitlabGroupOwnership(GitlabGroup gitlabGroup, GitlabAPI gitlabAPI) {
-		try {
-			for (GitlabGroupMember owner : gitlabAPI.getGroupMembers(gitlabGroup).stream()
-					.filter(gitlabGroupMember -> gitlabGroupMember.getAccessLevel() == GitlabAccessLevel.Owner)
-					.collect(Collectors.toList()))
-			{
-			    if (gitlabAPI.getUser().getUsername().equals(owner.getUsername())) {
-					return true;
-			    }
-			}
-			return false;
-		} catch (IOException e) {
-			LOGGER.error("Could not retrieve the data about GitLab group [{}]", gitlabGroup.getName());
+	public static boolean validateGitlabGroupOwnership(GitlabGroup gitlabGroup, GitlabAPIWrapper gitlabAPI) {
+		for (GitlabGroupMember owner : gitlabAPI.getGroupMembers(gitlabGroup).stream()
+				.filter(gitlabGroupMember -> gitlabGroupMember.getAccessLevel() == GitlabAccessLevel.Owner)
+				.collect(Collectors.toList())) {
+		    if (gitlabAPI.getUser().getUsername().equals(owner.getUsername())) {
+				return true;
+		    }
 		}
 		return false;
 	}
@@ -62,14 +55,14 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Checks the existence of a GitLab group from the specified LDAP group.
+	 * Checks that the specified group exists in GitLab.
 	 */
-	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPI api) {
+	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPIWrapper api) {
 		try {
 			api.getGroup(ldapGroup.getName());
 			LOGGER.debug("Group [{}] exists in GitLab", ldapGroup.getName());
 			return true;
-		} catch (IOException e) {
+		} catch (GitSyncException e) {
 			LOGGER.debug("Group [{}] does not exist in GitLab", ldapGroup.getName());
 		}
 		return false;
@@ -95,29 +88,19 @@ public class MissionUtils {
 	/**
 	 * Checks whether the specified GitLab user has admin rights.
 	 */
-	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPI api, LdapTree ldapTree) {
-		try {
-			// is it "me"?
-			boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
-			boolean isTrivialAdmin = user.isAdmin();
-			// is it in the LDAP admin group?
-			boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
-			return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
-		} catch (IOException e) {
-			LOGGER.error("Exception caught while assessing the privileges of user [{}]", user.getUsername(), e);
-		}
-		return false;
+	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPIWrapper api, LdapTree ldapTree) {
+		// is it "me"?
+		boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
+		boolean isTrivialAdmin = user.isAdmin();
+		// is it in the LDAP admin group?
+		boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
+		return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
 	}
 
-	public static Map<String, GitlabUser> getAllGitlabUsers(GitlabAPI api) {
-		try {
-			Map<String, GitlabUser> allUsers = new HashMap<>();
-			api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
-			return allUsers;
-		} catch (IOException e) {
-			LOGGER.error("Exception caught while retrieving all GitLab users", e);
-		}
-		return new HashMap<>();
+	public static Map<String, GitlabUser> getAllGitlabUsers(GitlabAPIWrapper api) {
+		Map<String, GitlabUser> allUsers = new HashMap<>();
+		api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
+		return allUsers;
 	}
 
 	public static boolean isGitlabUserMemberOfGroup(List<GitlabGroupMember> members, String user){
@@ -126,8 +109,8 @@ public class MissionUtils {
 				.count() == 1;
 	}
 
-	public static GitlabUser getGitlabUser(GitlabAPI api, String username) {
-			return getAllGitlabUsers(api).get(username);
+	public static GitlabUser getGitlabUser(GitlabAPIWrapper api, String username) {
+		return getAllGitlabUsers(api).get(username);
 	}
 
 	/**

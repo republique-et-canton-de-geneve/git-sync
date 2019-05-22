@@ -42,4 +42,9 @@ public class LdapTreeSupport implements LdapTree {
 		return StringUtils.isBlank(groupName) ? new HashMap<>() : getUsers(new LdapGroup(groupName));
 	}
 
+	@Override
+	public void addGroup(LdapGroup group) {
+
+	}
+
 }

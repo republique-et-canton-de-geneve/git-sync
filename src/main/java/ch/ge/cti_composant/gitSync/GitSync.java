@@ -4,7 +4,6 @@ import ch.ge.cti_composant.gitSync.missions.AddAuthorizedUsersToGroups;
 import ch.ge.cti_composant.gitSync.missions.AddTechReadOnlyUsersToAllGroups;
 import ch.ge.cti_composant.gitSync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitSync.missions.CleanGroupsFromUnauthorizedUsers;
-import ch.ge.cti_composant.gitSync.missions.ImportGroupsFromLdap;
 import ch.ge.cti_composant.gitSync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitSync.missions.PropagateAdminUsersToAllGroups;
 import ch.ge.cti_composant.gitSync.service.GitlabService;
@@ -65,6 +64,7 @@ public class GitSync {
                 props.get("gina-ldap-client.ldap-server-url"),
                 props.get("gitlab.hostname"));
     }
+
     /**
      * Sets up the in-memory tree of LDAP groups and LDAP users.
      */
@@ -89,11 +89,8 @@ public class GitSync {
      * Performs the missions.
      */
     private void applyRules() {
-        // avoid to override GitLab groups and users with an empty configuration
+        // precaution: do not take the risk to clear up GitLab with an empty set of groups and users
         new CheckMinimumUserCount().start(ldapTree, gitlab);
-
-        // create the groups in GitLab
-        new ImportGroupsFromLdap().start(ldapTree, gitlab);
 
         // remove the non-authorized users
         new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
