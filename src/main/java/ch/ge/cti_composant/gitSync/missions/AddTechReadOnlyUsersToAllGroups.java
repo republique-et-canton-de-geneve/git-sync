@@ -2,6 +2,7 @@ package ch.ge.cti_composant.gitSync.missions;
 
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroupMember;
@@ -30,17 +31,18 @@ public class AddTechReadOnlyUsersToAllGroups implements Mission {
 
 	private void addUser(Gitlab gitlab, String username) {
 		LOGGER.info("    Adding read-only access for user [{}] to all groups, with Reporter permissions", username);
-		GitlabUser user = MissionUtils.getGitlabUser(gitlab.getApi(), username);
+		GitlabAPIWrapper api = gitlab.getApi();
+		GitlabUser user = MissionUtils.getGitlabUser(api, username);
 		if (user != null) {
 			gitlab.getGroups().stream()
 					// no op for the black-listed groups
 					.filter(gitlabGroup -> !MissionUtils.getBlackListedGroups().contains(gitlabGroup.getName()))
 					.forEach(gitlabGroup -> {
-							List<GitlabGroupMember> members = gitlab.apiGetGroupMembers(gitlabGroup.getId());
+							List<GitlabGroupMember> members = api.getGroupMembers(gitlabGroup);
 							if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
 								LOGGER.info("        Adding user [{}] to group [{}]",
 										username, gitlabGroup.getName());
-								gitlab.apiAddGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
+								api.addGroupMember(gitlabGroup, user, GitlabAccessLevel.Reporter);
 							} else {
 								LOGGER.debug("        User [{}] is already a member of group [{}]",
 										username, gitlabGroup.getName());

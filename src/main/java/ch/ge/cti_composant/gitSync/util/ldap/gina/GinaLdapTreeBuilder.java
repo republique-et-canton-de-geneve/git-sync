@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * An {@link LdapTree} that obtains its data (ldap groups and ldap users) from the Etat de Geneve's
+ * An {@link LdapTree} that obtains its data (LDAP groups and LDAP users) from the Etat de Geneve's
  * LDAP server named Gina.
  * <p>
- * In order to retrieve LDAP groups and users from another LDAP server than GINA, you should replace the usage
- * of this class with the usage of your custom implementation of {@link LdapTreeBuilder}.
+ * In order to retrieve LDAP groups and users from another LDAP server than GINA, in method {@link GitSync#setupLdap()}
+ * you should replace the usage of this class with the usage of your own implementation of {@link LdapTreeBuilder}.
  * </p>
  */
 public class GinaLdapTreeBuilder implements LdapTreeBuilder {
@@ -61,10 +61,10 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 			final GinaApiLdapBaseAble app2 = app;  // copy of reference, required by the compiler
 			Map<LdapGroup, Map<String, LdapUser>> tree = new TreeMap<>(Comparator.comparing(LdapGroup::getName));
 
-			// get the groups
+			// get the LDAP groups
 			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
-			// get the users
+			// get the LDAP users
 			tree.forEach((ldapGroup, ldapUsers) -> {
 				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				try {
@@ -79,7 +79,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 					LOGGER.error("Unable to retrieve the users from the LDAP server", e);
 				}
 			});
-	       ldapTree = new LdapTreeSupport(tree);
+	        ldapTree = new LdapTreeSupport(tree);
 		} catch (Exception e) {
 			LOGGER.error("Exception caught while creating the LDAP tree", e);
 			throw new GitSyncException(e);
