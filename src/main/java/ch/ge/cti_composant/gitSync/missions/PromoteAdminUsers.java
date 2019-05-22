@@ -2,6 +2,7 @@ package ch.ge.cti_composant.gitSync.missions;
 
 import ch.ge.cti_composant.gitSync.util.MissionUtils;
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import org.gitlab.api.models.GitlabUser;
@@ -22,9 +23,10 @@ public class PromoteAdminUsers implements Mission {
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Mapping: adding admin users");
+		GitlabAPIWrapper api = gitlab.getApi();
 
 		Map<String, GitlabUser> allUsers = new HashMap<>();
-		gitlab.apiGetUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
+		api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
 		String adminGroup = MissionUtils.getAdministratorGroup();
 		if (adminGroup == null) {
@@ -36,7 +38,7 @@ public class PromoteAdminUsers implements Mission {
 								ldapUser, new ArrayList<>(allUsers.values()));
 						if (userExists && !allUsers.get(username).isAdmin()) {
 							LOGGER.info("    Setting user [{}] as administrator", username);
-							gitlab.apiUpdateUser(
+							api.updateUser(
 									allUsers.get(username).getId(), allUsers.get(username).getEmail(), null,
 									null, null, null, null, null, null,
 									null, null, null, null, true, null);

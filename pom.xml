@@ -59,9 +59,9 @@
 	<dependencies>
 		<!-- Compile dependencies -->
 		<dependency>
-			<groupId>ch.ge.cti.ct</groupId>
+			<groupId>ch.ge.etat.securite</groupId>
 			<artifactId>gina-ldap-client</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

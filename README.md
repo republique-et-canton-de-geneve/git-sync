@@ -50,7 +50,6 @@ B2. For every standard LDAP group, retrieve the list of users (L1).
   * For every user in list L1:
     * If the user does not exist in GitLab, do nothing
       (see section [GitLab authentication](#gitlab-authentication)).
-    * **A FAIRE !** If the user exists in GitLab, set its GitLab access level to Regular (as opposed to Admin).
     * If the user exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
       This is the main business rule of the application - it is actually its basic purpose.
@@ -94,7 +93,7 @@ The application deals with authorization only, not with authentication.
 User authentication on the GitLab server is configured directly on the GitLab server. 
 The authentication provider is typically an LDAP server, possibly the one the application extracts its data from. 
 
-At État de Genève, users known to the LDAP server but still unknown to the GitLab server acquire their
+At État de Genève, end users known to the LDAP server but still unknown to the GitLab server acquire their
 configuration on the GitLab server by means of the following sequence of operations:
 1. On a browser the user navigates to the GitLab server.
    This performs authentication.
@@ -174,4 +173,4 @@ This can be done with a crontab-like job.
 
 # Future evolutions
 
-No future evolutions are planned, besides possibly adding unit tests.
+No future evolutions are currently planned, besides possibly adding unit tests.

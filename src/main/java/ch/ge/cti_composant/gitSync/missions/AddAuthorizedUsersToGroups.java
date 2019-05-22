@@ -1,6 +1,7 @@
 package ch.ge.cti_composant.gitSync.missions;
 
 import ch.ge.cti_composant.gitSync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitSync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitSync.util.ldap.LdapTree;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
@@ -25,15 +26,16 @@ public class AddAuthorizedUsersToGroups implements Mission {
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Mapping: adding the users to the authorized groups");
+		GitlabAPIWrapper api = gitlab.getApi();
 
-		LOGGER.info("Total number of GitLab users: {}", gitlab.apiGetUsers().size());
+		LOGGER.info("Total number of GitLab users: {}", api.getUsers().size());
 
 		Map<String, GitlabUser> allUsers = new HashMap<>();
-		gitlab.apiGetUsers()
+		api.getUsers()
 				.forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
 
 		for (GitlabGroup group : gitlab.getGroups()) {
-			List<GitlabGroupMember> memberList = gitlab.apiGetGroupMembers(group.getId());
+			List<GitlabGroupMember> memberList = api.getGroupMembers(group);
 			LOGGER.info("    Processing the users of group [{}]", group.getName());
 
 			Set<String> userNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
@@ -46,7 +48,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 					// the user exists in GitLab and it has not been added to the group
 					LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
 					try {
-						gitlab.apiAddGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
+						api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
 					} catch (RuntimeException e) {
 						// we'd rather not cancel the whole operation if an error occurs here
 						LOGGER.warn("Error caught while adding user [{}] to group [{}]", username, group.getName(), e);
