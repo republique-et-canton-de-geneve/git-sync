@@ -22,6 +22,8 @@ public class GitlabAPIWrapper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabAPIWrapper.class);
 
+	private static final String ERROR_MESSAGE = "Exception caught while interrogating GitLab";
+
 	/**
 	 * The wrapped GitlabAPI object.
 	 */
@@ -43,7 +45,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.getGroups();
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -60,7 +62,7 @@ public class GitlabAPIWrapper {
 		} catch (FileNotFoundException e) {
 			// occurs when the group does not exist in GitLab
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -75,7 +77,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.createGroup(request, sudoUser);
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -90,7 +92,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.getGroupMembers(group);
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -105,7 +107,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.addGroupMember(group, user, accessLevel);
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -119,7 +121,7 @@ public class GitlabAPIWrapper {
 		try {
 			api.deleteGroupMember(group, user);
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 	}
@@ -133,7 +135,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.getUser();
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -148,7 +150,7 @@ public class GitlabAPIWrapper {
 		try {
 			ret = api.getUsers();
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
@@ -162,19 +164,19 @@ public class GitlabAPIWrapper {
 			Integer targetUserId,
 			String email, String password, String username,
 			String fullName, String skypeId, String linkedIn,
-			String twitter, String website_url, Integer projects_limit,
-			String extern_uid, String extern_provider_name,
-			String bio, Boolean isAdmin, Boolean can_create_group) {
+			String twitter, String websiteUrl, Integer projectsLimit,
+			String externUid, String externProviderName,
+			String bio, Boolean isAdmin, Boolean canCreateGroup) {
 		GitlabUser ret;
 		try {
 			ret = api.updateUser(targetUserId,
 					email, password, username,
 					fullName, skypeId, linkedIn,
-					twitter, website_url, projects_limit,
-					extern_uid, extern_provider_name,
-					bio, isAdmin, can_create_group);
+					twitter, websiteUrl, projectsLimit,
+					externUid, externProviderName,
+					bio, isAdmin, canCreateGroup);
 		} catch (IOException e) {
-			LOGGER.error("Exception caught while interrogating GitLab", e);
+			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
 		}
 		return ret;
