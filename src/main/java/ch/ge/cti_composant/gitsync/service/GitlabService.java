@@ -48,7 +48,7 @@ public class GitlabService {
 	 */
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
 		// log on to GitLab
-		LOGGER.info("Logging to the GitLab server");
+		LOGGER.info("Logging on to the GitLab server");
 		GitlabAPIWrapper api = new GitlabAPIWrapper(GitlabAPI.connect(hostname, apiToken));
 
 		// create the missing groups on GitLab
@@ -57,7 +57,7 @@ public class GitlabService {
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
 				.filter(ldapGroup -> !MissionUtils.validateGitlabGroupExistence(ldapGroup, api))
 				.forEach(ldapGroup -> {
-					LOGGER.info("  Group [{}] does not exist in GitLab: creating it", ldapGroup.getName());
+					LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
 					createGroup(ldapGroup, api);
 				});
 
