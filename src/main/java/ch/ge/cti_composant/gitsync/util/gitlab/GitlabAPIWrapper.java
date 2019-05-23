@@ -71,7 +71,7 @@ public class GitlabAPIWrapper {
 
 	/**
 	 * Wrapper around {@link GitlabAPI#getGroup(String)} .
-	 * Removes the checked exception.
+	 * Removes the checked exception and returns null (instead of throwing an exception) if the group is not found.
 	 */
 	public GitlabGroup getGroup(String path) {
 		GitlabGroup ret = null;
