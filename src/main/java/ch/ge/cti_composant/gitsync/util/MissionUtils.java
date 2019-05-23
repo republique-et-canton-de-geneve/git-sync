@@ -76,14 +76,7 @@ public class MissionUtils {
 	 * Checks that the specified group exists in GitLab.
 	 */
 	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPIWrapper api) {
-		try {
-			api.getGroup(ldapGroup.getName());
-			LOGGER.debug("Group [{}] exists in GitLab", ldapGroup.getName());
-			return true;
-		} catch (GitSyncException e) {
-			LOGGER.debug("Group [{}] does not exist in GitLab", ldapGroup.getName());
-		}
-		return false;
+		return api.getGroup(ldapGroup.getName()) != null;
 	}
 
 	/**
