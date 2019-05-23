@@ -14,7 +14,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.1</version>
 
 	<url>***REMOVED***/x/QYBLRw</url>
 
@@ -44,7 +44,7 @@
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
 		<developerConnection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
 		<url>***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</url>
-    <tag>HEAD</tag>
+    <tag>gitSync-1.1.1</tag>
   </scm>
 
 	<ciManagement>
