@@ -29,6 +29,7 @@ import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeBuilder;
 import ch.ge.cti_composant.gitsync.util.ldap.gina.GinaLdapTreeBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,8 @@ public class GitSync {
     private void loadProperties(String path) throws IOException {
         props.load(Files.newInputStream(Paths.get(path)));
 
-        LOGGER.info("Running GitSync with LDAP server [{}] and GitLab server [{}]",
+        LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
+                getVersion(),
                 props.get("gina-ldap-client.ldap-server-url"),
                 props.get("gitlab.hostname"));
     }
@@ -131,6 +133,28 @@ public class GitSync {
      */
     public static String getProperty(String name) {
         return props.getProperty(name);
+    }
+
+    /**
+     * Returns the Maven version of the JAR.
+     */
+    private static String getVersion() {
+        Properties properties = new Properties();
+        String filePath = "/META-INF/maven/ch.ge.cti.composant/gitSync/pom.properties";
+        String versionName = "version";
+        String versionValue;
+
+        try {
+            properties.load(GitSync.class.getResourceAsStream(filePath));
+            versionValue = properties.getProperty(versionName);
+            if (StringUtils.isBlank(versionValue)) {
+                LOGGER.warn("No property [{}] in file [{}]", versionName, filePath);
+            }
+            return versionValue;
+        } catch (Exception e) {
+            LOGGER.warn("Could not read property [{}] in file [{}]", versionName, filePath, e);
+            return "";
+        }
     }
 
 }
