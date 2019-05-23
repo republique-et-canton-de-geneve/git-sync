@@ -118,10 +118,10 @@ Communication with the LDAP server is performed by means of a home-made Java lib
 That library is specifically tuned to the LDAP data model of Gina, the État de Genève's LDAP server.
 Transforming the application to connect to another LDAP server than Gina entails the following changes:
 * Creating a class, say, `CustomLdapTreeBuilder` that implements interface
-  [LdapTreeBuilder](./src/main/java/ch/ge/cti_composant/gitSync/util/ldap/LdapTreeBuilder.java);
+  [LdapTreeBuilder](src/main/java/ch/ge/cti_composant/gitsync/util/ldap/LdapTreeBuilder.java);
 * In the top class
-  [GitSync](./src/main/java/ch/ge/cti_composant/gitSync/GitSync.java), replacing the usage of
-  [GinalLdapTreeBuilder](./src/main/java/ch/ge/cti_composant/gitSync/util/ldap/gina/GinaLdapTreeBuilder.java)
+  [GitSync](src/main/java/ch/ge/cti_composant/gitsync/GitSync.java), replacing the usage of
+  [GinalLdapTreeBuilder](src/main/java/ch/ge/cti_composant/gitsync/util/ldap/gina/GinaLdapTreeBuilder.java)
   with that of `CustomLdapTreeBuilder`;
 * In the properties file [configuration.properties](./configuration.properties),
   replacing the settings of the Gina LDAP server with those of the custom LDAP server.
