@@ -26,7 +26,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeBuilder;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeSupport;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 import gina.api.GinaApiLdapBaseAble;
-import gina.impl.GinaLdapFactory;
+import gina.impl.GinaLdapAccess;
 import gina.impl.util.GinaLdapConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -50,6 +50,11 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GinaLdapTreeBuilder.class);
 
+	/**
+	 * Name of the Gina application in the LDAP server.
+	 */
+	private static final String APPLICATION = "GESTREPO";
+
     /**
      * Names of the LDAP attributes to be retrieved from the LDAP server.
      * We are only interested in attribute "cn".
@@ -61,32 +66,32 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 		GinaApiLdapBaseAble app = null;
 		LdapTree ldapTree;
 
-		// create a search object on the Gina ldap server
-		int timeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.ldap-timeout"));
-		GinaLdapConfiguration conf = new GinaLdapConfiguration(
-		        GitSync.getProperty("gina-ldap-client.ldap-server-url"),
-				GitSync.getProperty("gina-ldap-client.ldap-base-dn"),
-				GitSync.getProperty("gina-ldap-client.ldap-user"),
-				GitSync.getProperty("gina-ldap-client.ldap-password"),
-				GinaLdapConfiguration.Type.APPLICATION,
-				timeout,
-				timeout);
+		// create a search object on the Gina LDAP server
+		String ldapServer = GitSync.getProperty("gina-ldap-client.ldap-server-url");
+		String ldapUser = GitSync.getProperty("gina-ldap-client.ldap-user");
+		String ldapPassword = GitSync.getProperty("gina-ldap-client.ldap-password");
+		String domain = "CTI";
+		String application = APPLICATION;
+		int connectionTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.connection-timeout"));
+		int readTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.read-timeout"));
+		GinaLdapConfiguration ldapConf = new GinaLdapConfiguration(
+				ldapServer, ldapUser, ldapPassword,domain, application, readTimeout, connectionTimeout);
 		try {
 			// log on to the Gina LDAP server
-			app = GinaLdapFactory.getInstance(conf);
+			app = new GinaLdapAccess(ldapConf);
 
 			// initializations
 			final GinaApiLdapBaseAble app2 = app;  // copy of reference, required by the compiler
 			Map<LdapGroup, Map<String, LdapUser>> tree = new TreeMap<>(Comparator.comparing(LdapGroup::getName));
 
 			// get the LDAP groups
-			app.getAppRoles("GESTREPO").forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
+			app.getAppRoles(APPLICATION).forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
 			// get the LDAP users
 			tree.forEach((ldapGroup, ldapUsers) -> {
 				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				try {
-					app2.getUsers("GESTREPO", ldapGroup.getName(), ATTRIBUTES)
+					app2.getUsers(APPLICATION, ldapGroup.getName(), ATTRIBUTES)
 							.forEach(user -> {
 								if (user.containsKey("cn")) {
 									LOGGER.info("\t{}", user.get("cn"));
