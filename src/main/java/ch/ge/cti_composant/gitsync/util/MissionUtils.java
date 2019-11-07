@@ -29,8 +29,6 @@ import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
 import org.gitlab.api.models.GitlabUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +40,6 @@ import java.util.stream.Stream;
  * Helper methods for the missions.
  */
 public class MissionUtils {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(MissionUtils.class);
 
 	private MissionUtils() {
 	}
