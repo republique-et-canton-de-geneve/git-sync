@@ -72,8 +72,8 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 		String ldapPassword = GitSync.getProperty("gina-ldap-client.ldap-password");
 		String domain = "CTI";
 		String application = APPLICATION;
-		int connectionTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.connection-timeout"));
-		int readTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.read-timeout"));
+		int connectionTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.ldap-connection-timeout"));
+		int readTimeout = Integer.parseInt(GitSync.getProperty("gina-ldap-client.ldap-read-timeout"));
 		GinaLdapConfiguration ldapConf = new GinaLdapConfiguration(
 				ldapServer, ldapUser, ldapPassword,domain, application, readTimeout, connectionTimeout);
 		try {
