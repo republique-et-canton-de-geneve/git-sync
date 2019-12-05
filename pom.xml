@@ -233,6 +233,32 @@
 				</executions>
 			</plugin>
 
+			<!-- Pour generation bom.xml avec goal cyclonedx:makeBom -->
+			<plugin>
+				<groupId>org.cyclonedx</groupId>
+				<artifactId>cyclonedx-maven-plugin</artifactId>
+				<version>1.5.1</version>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<!-- <goal>makeAggregateBom</goal> -->
+							<goal>makeBom</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<schemaVersion>1.1</schemaVersion>
+					<includeBomSerialNumber>true</includeBomSerialNumber>
+					<includeCompileScope>true</includeCompileScope>
+					<includeProvidedScope>true</includeProvidedScope>
+					<includeRuntimeScope>true</includeRuntimeScope>
+					<includeSystemScope>true</includeSystemScope>
+					<includeTestScope>false</includeTestScope>
+					<includeDependencyGraph>true</includeDependencyGraph>
+				</configuration>
+			</plugin>
+
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -282,11 +308,11 @@
 			<distributionManagement>
 				<repository>
 					<id>internal.project.release</id>
-					<url>***REMOVED***/content/repositories/project_release</url>
+					<url>http://melusineicrec01.ceti.etat-ge.ch:23000/ctinexus/content/repositories/project_release</url>
 				</repository>
 				<snapshotRepository>
 					<id>internal.project.snapshot</id>
-					<url>***REMOVED***/content/repositories/project_snapshot</url>
+					<url>http://melusineicrec01.ceti.etat-ge.ch:23000/ctinexus/content/repositories/project_snapshot</url>
 				</snapshotRepository>
 			</distributionManagement>
 		</profile>
