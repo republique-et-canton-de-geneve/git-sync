@@ -112,6 +112,9 @@ class GitLabSpec extends Specification {
             users.get("Jean").getName() == "Jean"
             users.get("Marie").getName() == "Marie"
             users.get("Paul").getName() == "Paul"
+            users.get("Jean").toString() == "Jean"
+            users.get("Marie").toString() == "Marie"
+            users.get("Paul").toString() == "Paul"
         }
 
         def "#getUsers(groupName) should behave like #getUsers(group)"() {
