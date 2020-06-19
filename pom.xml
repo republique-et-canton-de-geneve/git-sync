@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!--
-	  This project does not use Spring. It uses spring-boot-dependencies as a parent only to simplify the
-	  management of the versions of the plugins and the versions of the JAR dependencies.
-	  -->
+	<!-- This project does not use Spring. It uses spring-boot-dependencies 
+		as a parent only to simplify the management of the versions of the plugins 
+		and the versions of the JAR dependencies. -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
@@ -44,8 +45,8 @@
 		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
 		<developerConnection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
 		<url>***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</url>
-    <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<ciManagement>
 		<system>jenkins</system>
@@ -140,7 +141,8 @@
 					<forkCount>1</forkCount>
 					<runOrder>random</runOrder>
 
-					<!-- Required because the names of the Spock spec classes don't match the default Surefire -->
+					<!-- Required because the names of the Spock spec classes don't match 
+						the default Surefire -->
 					<!-- patterns (`*Test` etc.) -->
 					<useFile>false</useFile>
 					<includes>
@@ -150,6 +152,16 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.openclover</groupId>
+				<artifactId>clover-maven-plugin</artifactId>
+				<version>4.4.1</version>
+				<configuration>
+					<generateHtml>false</generateHtml>
+					<generateXml>true</generateXml>
+				</configuration>
+			</plugin>
+			
 			<plugin>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
@@ -169,7 +181,8 @@
 								</filter>
 							</filters>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>ch.ge.cti_composant.gitsync.Main</mainClass>
 								</transformer>
 							</transformers>
@@ -196,7 +209,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
@@ -236,7 +249,8 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
