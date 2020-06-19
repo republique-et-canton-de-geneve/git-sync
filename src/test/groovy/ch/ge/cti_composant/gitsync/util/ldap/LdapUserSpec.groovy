@@ -88,6 +88,17 @@ class LdapUserSpec extends Specification {
         user.hashCode() == 1396370574
     }
 
+    def "#toString should return the correct value"() {
+        given:
+        def attributes = Collections.singletonMap("cn", "Jean Dupont")
+
+        when:
+        def user = new LdapUser(attributes)
+
+        then:
+        user.toString() == "Jean Dupont"
+    }
+
     def "#equals should compare correctly"() {
         given:
         def attributesA = Collections.singletonMap("cn", "Jean Dupont")
