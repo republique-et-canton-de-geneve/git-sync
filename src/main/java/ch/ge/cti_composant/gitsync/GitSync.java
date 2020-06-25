@@ -53,7 +53,7 @@ public class GitSync {
     private Gitlab gitlab = null;
 
     /**
-     * Perfoms all operations.
+     * Performs all operations.
      */
     public void run(String path) {
         try {
