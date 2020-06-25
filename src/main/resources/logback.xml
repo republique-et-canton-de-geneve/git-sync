@@ -26,11 +26,25 @@
       <level>DEBUG</level>
     </filter>
   </appender>
-  
+
+  <!-- Email appender -->
+  <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+    <smtpHost>smtp.etat-ge.ch</smtpHost>
+    <from>XXX@etat.ge.ch</from>
+    <to>YYY@etat.ge.ch</to>
+    <to>ZZZ@etat.ge.ch</to>
+    <subject>GitSync error</subject>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </layout>
+    <asynchronousSending>false</asynchronousSending>
+  </appender>
+
   <!-- Root logger -->
   <root level="INFO">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />
+    <appender-ref ref="EMAIL" />
   </root>
   
 </configuration>
