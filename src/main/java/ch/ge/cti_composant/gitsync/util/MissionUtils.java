@@ -156,4 +156,17 @@ public class MissionUtils {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Gets the list of the users to ignore in the cleaning process.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a list of GitLab user names. Can be empty
+	 */
+	public static List<String> getNotToCleanUsers() {
+		String userNames = GitSync.getProperty("not-to-clean-users");
+		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
+		return Stream.of(userNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+	}
+
 }

@@ -41,6 +41,15 @@ At État de Genève, such a wide-access GitLab user has been created to allow a
 from any Git repository.
 The list of wide-access GitLab users, if any, is supplied as a parameter to the application.
 
+### Not to clean GitLab users
+
+Some special GitLab users will not be removed from GitLab groups, even if in the corresponding LDAP role.
+These users are usually technical users.
+At État de Genève, such a wide-access GitLab user has been created to allow a
+[Fisheye](https://www.atlassian.com/software/fisheye) server to log on to GitLab and to freely retrieve commits
+from any Git repository.
+The list of wide-access GitLab users, if any, is supplied as a parameter to the application.
+
 ## Business rules
 
 B1. For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
@@ -56,7 +65,7 @@ B2. For every standard LDAP group, retrieve the list of users (L1).
     * If the user exists in GitLab and is assigned to the matching group, do nothing.
   * Additionally:  
     * If a user exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
-      the matching group, unless the user belongs to the LDAP administrator group (see reason below).
+      the matching group, unless the user belongs to the LDAP administrator group (see reason below) or to the list of not to clean users.
 
 B3. For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
