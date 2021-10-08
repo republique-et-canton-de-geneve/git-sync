@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>ch.ge.etat.securite</groupId>
 			<artifactId>gina-ldap-client</artifactId>
-			<version>4.0.0</version>
+			<version>4.0.42</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -230,12 +230,19 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.3</version>
+				<version>0.8.7</version>
 				<executions>
 					<execution>
-						<id>preparer-agent-jacoco</id>
+						<id>jacoco-prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
