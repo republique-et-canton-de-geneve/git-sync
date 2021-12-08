@@ -15,7 +15,7 @@
 	<artifactId>gitSync</artifactId>
 	<version>2.5-SNAPSHOT</version>
 
-	<url>***REMOVED***/x/QYBLRw</url>
+	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
 
 	<contributors>
 		<contributor>
@@ -40,16 +40,11 @@
 	</contributors>
 
 	<scm>
-		<connection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</connection>
-		<developerConnection>scm:git:***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</developerConnection>
-		<url>***REMOVED***/DEVELOPPEUR-CTI/gitSync.git</url>
+		<connection>scm:git:${env.GITLAB_URL}/gitSync.git</connection>
+		<developerConnection>scm:git:${env.GITLAB_URL}/gitSync.git</developerConnection>
+		<url>${env.GITLAB_URL}/gitSync.git</url>
 		<tag>HEAD</tag>
 	</scm>
-
-	<ciManagement>
-		<system>jenkins</system>
-		<url>***REMOVED***/job/gitSync</url>
-	</ciManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +55,7 @@
 		<dependency>
 			<groupId>ch.ge.etat.securite</groupId>
 			<artifactId>gina-ldap-client</artifactId>
-			<version>4.0.42</version>
+			<version>4.0.44</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -275,11 +270,11 @@
 			<distributionManagement>
 				<repository>
 					<id>internal.project.release</id>
-					<url>***REMOVED***/content/repositories/project_release</url>
+					<url>${maven2Repository_projet}/project_release</url>
 				</repository>
 				<snapshotRepository>
 					<id>internal.project.snapshot</id>
-					<url>***REMOVED***/content/repositories/project_snapshot</url>
+					<url>${maven2Repository_projet}/project_snapshot</url>
 				</snapshotRepository>
 			</distributionManagement>
 		</profile>
