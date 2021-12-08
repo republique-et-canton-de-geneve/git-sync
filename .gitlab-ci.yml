@@ -10,7 +10,7 @@ variables:
   SONAR_USER_HOME: /cache/sonar
   # config Nexus IQ server
   CLM_MAVEN_GOAL: com.sonatype.clm:clm-maven-plugin:2.29.0-01:evaluate
-#  CLM_SERVER_ID: clm_server
+  CLM_SERVER_ID: clm_server
   CLM_APPLICATION_ID: gitSync
 
 default:
