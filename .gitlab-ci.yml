@@ -1,0 +1,77 @@
+variables:
+  # fix for old git version
+  GIT_STRATEGY: clone
+  GIT_SSL_NO_VERIFY: "true"
+  # config Maven
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  # config SonarQube
+  SONAR_MAVEN_GOAL: org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar
+  SONAR_USER_HOME: /cache/sonar
+  # config Nexus IQ server
+  CLM_MAVEN_GOAL: com.sonatype.clm:clm-maven-plugin:2.29.0-01:evaluate
+#  CLM_SERVER_ID: clm_server
+  CLM_APPLICATION_ID: gitSync
+
+default:
+  tags:
+    - 'for:application-project'
+    - 'host:restricted-container'
+    - 'net:soca-dev'
+  image:
+    name: $DOCKER_URL/ch/ge/cti/build/alpine-maven-git-node:6
+#    name: $DOCKER_URL/ch/ge/cti/build/docker-npm-maven:1.0.1
+
+# Cache downloaded dependencies and plugins between builds.
+# To keep cache across branches add 'key: "$CI_JOB_NAME"'
+cache:
+  untracked: true
+  key: "$CI_PROJECT_ID"
+  paths:
+    - .m2/repository
+
+stages:
+  - build
+  - release
+
+clm_master:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean $CLM_MAVEN_GOAL
+      -Dclm.applicationId=$CLM_APPLICATION_ID -Dclm.serverUrl=$CLM_URL -Dclm.serverId=$CLM_SERVER_ID
+  when: manual
+
+deploy_master:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean deploy $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONARQUBE_URL
+#    - mvn $MAVEN_CLI_OPTS clean deploy $SONAR_MAVEN_GOAL
+#      -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.gitlab.project_id=$CI_PROJECT_PATH
+#      -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  only:
+    - master
+
+release_master:
+  stage: release
+  image: $DOCKER_URL/ch/ge/afc/afc-maven-multi-jdk:soca-jdk11-2
+  before_script:
+    - echo "=========Openshift runner specific script=========="
+    - user_id=$(id -u)
+    - line_content="${USER_NAME:-default}:x:$user_id:0:${USER_NAME:-default} user:${HOME}:/bin/bash"
+    - echo "$line_content" >> /etc/passwd
+    - pwd
+    - ls -hal ./
+  script:
+    - git config --global user.email "$RUNNER_EMAIL"
+    - git config --global user.name "$RUNNER_USERNAME"
+    - git checkout $CI_COMMIT_REF_NAME
+    - mvn $MAVEN_CLI_OPTS release:prepare release:perform
+      -Dresume=false
+      -DignoreSnapshots=true
+      -Dusername=$SCM_USER -Dpassword=$SCM_PASSWORD
+      -DscmCommentPrefix="[skip ci] "
+      -Darguments="-DskipTests -Dmaven.javadoc.skip=true"
+  artifacts:
+    paths:
+      - target/*.jar
+  when: manual
