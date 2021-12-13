@@ -1,3 +1,21 @@
+Build GitHub :
+
+[![Build with GitHub](https://github.com/republique-et-canton-de-geneve/git-sync/actions/workflows/maven.yml/badge.svg)](https://github.com/republique-et-canton-de-geneve/git-sync/actions/workflows/maven.yml)
+
+Analyse SonarCloud :
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=bugs)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=code_smells)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=coverage)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_git-sync&metric=alert_status)](https://sonarcloud.io/dashboard?id=republique-et-canton-de-geneve_git-sync)
+
+Licence :
+
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/why-affero-gpl.html)
+
+
 gitSync is a standalone Java application which replicates the users from an LDAP source into a
 [GitLab](https://about.gitlab.com) server.
 
