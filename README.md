@@ -46,7 +46,7 @@ This section specifies the expected behavior of the application.
 ### Standard groups and administrator group
 
 Most LDAP groups are "standard" groups. One group can be an "administrator" group.
-For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "***REMOVED***" is the
+For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "ADMIN" is the
 administrator group.
 The name of the administrator group, if any, is supplied as a parameter to the application.
 
@@ -59,9 +59,10 @@ At État de Genève, such a wide-access GitLab user has been created to allow a
 from any Git repository.
 The list of wide-access GitLab users, if any, is supplied as a parameter to the application.
 
-### Not to clean GitLab users
+### GitLab users not to be cleaned
 
-Some special GitLab users will not be removed from GitLab groups, even if in the corresponding LDAP role.
+Some special GitLab users will not be removed from GitLab groups, even if they have been removed from the
+corresponding LDAP role.
 These users are usually technical users.
 At État de Genève, such a wide-access GitLab user has been created to allow a
 [Fisheye](https://www.atlassian.com/software/fisheye) server to log on to GitLab and to freely retrieve commits
