@@ -211,4 +211,8 @@ This can be done with a crontab-like job.
 
 # Future evolutions
 
-No future evolutions are currently planned, besides possibly adding unit tests.
+~~No future evolutions are currently planned, besides possibly adding unit tests.~~
+* Logs: ordering the users in the trace "Retrieving the users of LDAP group XXX", plus regrouping the users into 
+  one single line of log instead of one line per user
+* Adding a functionality of assiging one or more users transversally to every group, with a specified role.
+  Configuration example: "USER1.Maintainer;USER2.Owner". Internal reference: SCM-915. 
