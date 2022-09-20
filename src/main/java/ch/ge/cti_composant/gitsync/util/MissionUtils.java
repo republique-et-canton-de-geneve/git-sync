@@ -18,23 +18,26 @@
  */
 package ch.ge.cti_composant.gitsync.util;
 
-import ch.ge.cti_composant.gitsync.GitSync;
-import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
-import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
 import org.gitlab.api.models.GitlabUser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import ch.ge.cti_composant.gitsync.GitSync;
+import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
+import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
  * Helper methods for the missions.
@@ -73,6 +76,28 @@ public class MissionUtils {
 	 */
 	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPIWrapper api) {
 		return api.getGroup(ldapGroup.getName()) != null;
+	}
+
+	/**
+	 * Checks that the specified ldap group is compliant with standard groups regex.
+	 */
+	public static boolean validateGroupnameCompliantStandardGroups(LdapGroup ldapGroup) {
+	    return validateGroupnameCompliantStandardGroups(ldapGroup.getName());
+	}
+
+	/**
+	 * Checks that the specified ldap group name is compliant with standard groups regex.
+	 */
+	public static boolean validateGroupnameCompliantStandardGroups(String ldapGroup) {
+	    String patternString = GitSync.getProperty("standard.groups");
+	    if(StringUtils.isBlank(patternString)) {
+		patternString = "[A-Za-z0-9_-]";
+	    }
+
+	    Pattern pattern = Pattern.compile(patternString);
+	    Matcher matcher = pattern.matcher(ldapGroup);
+
+	    return matcher.lookingAt();
 	}
 
 	/**

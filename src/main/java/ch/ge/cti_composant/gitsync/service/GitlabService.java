@@ -55,6 +55,7 @@ public class GitlabService {
 		LOGGER.info("Creating the missing GitLab groups");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
+				.filter(ldapGroup -> MissionUtils.validateGroupnameCompliantStandardGroups(ldapGroup))
 				.filter(ldapGroup -> !MissionUtils.validateGitlabGroupExistence(ldapGroup, api))
 				.forEach(ldapGroup -> {
 					LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
