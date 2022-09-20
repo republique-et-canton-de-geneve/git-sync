@@ -76,7 +76,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 					LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
 				} else {
 					// the user does not exist in GitLab
-					LOGGER.info("        User [{}] does not exist in GitLab", username);
+					LOGGER.info("        User [{}] does not exist in GitLab (handling of group [{}]", username, group.getName());
 				}
 			}
 		}
