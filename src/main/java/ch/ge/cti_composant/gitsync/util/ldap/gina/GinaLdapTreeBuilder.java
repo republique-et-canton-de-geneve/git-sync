@@ -19,6 +19,7 @@
 package ch.ge.cti_composant.gitsync.util.ldap.gina;
 
 import ch.ge.cti_composant.gitsync.GitSync;
+import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
@@ -87,7 +88,10 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 			Map<LdapGroup, Map<String, LdapUser>> tree = new TreeMap<>(Comparator.comparing(LdapGroup::getName));
 
 			// get the LDAP groups
-			app.getAppRoles(DOMAIN_APPLICATION).forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
+			app.getAppRoles(DOMAIN_APPLICATION)
+				.stream()
+				.filter(role -> MissionUtils.validateGroupnameCompliantStandardGroups(role) || role.equals(MissionUtils.getAdministratorGroup()))
+				.forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
 			// get the LDAP users
 			tree.forEach((ldapGroup, ldapUsers) -> {
