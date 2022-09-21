@@ -70,21 +70,30 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 			    boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser,
 				    new ArrayList<>(allUsers.values()));
 			    if (userExists) {
+				// user is admin, do nothing
 				if (allUsers.get(username).isAdmin()) {
 				    LOGGER.info(
 					    "    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
 					    username, group.getName());
 				}
+				// user is not member, add it
 				else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
 				    LOGGER.info("    Setting user [{}] as owner to group {}", username,
 					    group.getName());
 				    api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
 				}
-				else {
+				// user is member but not owner
+				else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username,
+					GitlabAccessLevel.Owner)) {
 				    LOGGER.info("    Promoting user [{}] as owner to group {}", username,
 					    group.getName());
 				    api.deleteGroupMember(group, allUsers.get(username));
 				    api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
+				}
+				// user is already owner
+				else {
+				    LOGGER.info("    User [{}] is already owner to group {}", username,
+					    group.getName());
 				}
 			    }
 			    else {
