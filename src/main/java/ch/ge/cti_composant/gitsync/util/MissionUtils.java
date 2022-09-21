@@ -156,6 +156,16 @@ public class MissionUtils {
 	}
 
 	/**
+	 * Gets the name of the LDAP group considered as the owner group.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a group name, or null if no owner group is defined in the configuration file.
+	 */
+	public static String getOwnerGroup() {
+		String groupName = GitSync.getProperty("owner-group");
+		return StringUtils.isBlank(groupName) ? null : groupName;
+	}
+
+	/**
 	 * Gets the list of black listed groups from the configuration file.
 	 * See more about this in the README file and in the configuration file.
 	 * @return a list of user names. Can be empty

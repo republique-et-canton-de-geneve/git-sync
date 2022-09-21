@@ -18,26 +18,28 @@
  */
 package ch.ge.cti_composant.gitsync;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ge.cti_composant.gitsync.missions.AddAuthorizedUsersToGroups;
 import ch.ge.cti_composant.gitsync.missions.AddTechReadOnlyUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitsync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitsync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitsync.missions.PropagateAdminUsersToAllGroups;
+import ch.ge.cti_composant.gitsync.missions.PropagateOwnerUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.service.GitlabService;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeBuilder;
 import ch.ge.cti_composant.gitsync.util.ldap.gina.GinaLdapTreeBuilder;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Properties;
 
 /**
  * Top-level class of the application: extracts the groups and users from the LDAP server and assigns them as groups
@@ -126,6 +128,9 @@ public class GitSync {
 
         // add the Admins to all groups
         new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
+
+        // add the Owners to all groups
+        new PropagateOwnerUsersToAllGroups().start(ldapTree, gitlab);
 
         // add read-only permission to specific wide-access users on all groups
         new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
