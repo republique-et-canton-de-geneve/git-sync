@@ -90,7 +90,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 			// get the LDAP groups
 			app.getAppRoles(DOMAIN_APPLICATION)
 				.stream()
-				.filter(role -> MissionUtils.validateGroupnameCompliantStandardGroups(role) || role.equals(MissionUtils.getAdministratorGroup()))
+				.filter(role -> MissionUtils.validateGroupnameCompliantStandardGroups(role) || role.equals(MissionUtils.getAdministratorGroup()) || role.equals(MissionUtils.getOwnerGroup()))
 				.forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
 			// get the LDAP users
