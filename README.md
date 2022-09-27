@@ -48,8 +48,8 @@ This section specifies the expected behavior of the application.
 By default, a LDAP group is considered as a "standard" groups. One group can be an "administrator" group.
 For example, LDAP group "IT-DEV-JAVA" is a standard group, whereas LDAP group "ADMIN" is the
 administrator group.
-The name of the administrator group, if any, is supplied as parameter `admin-group`
-in the application's configuration file.
+The name of the administrator group, if any, is supplied as parameter `admin-group` in the application's configuration file.
+The name of the standard groups must follow the naming convention defined by the parameter `standard.groups` (regex pattern).
 
 ### Wide-access GitLab users
 
