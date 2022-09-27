@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabAccessLevel;
+import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
 import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
@@ -63,50 +64,48 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 		    // no op for the black-listed groups
 		    .filter(group -> !MissionUtils.getBlackListedGroups().contains(group.getName()))
 		    .filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
-		    .forEach(group -> {
-			List<GitlabGroupMember> members = api.getGroupMembers(group);
-
-			owners.forEach((username, ldapUser) -> {
-			    boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser,
-				    new ArrayList<>(allUsers.values()));
-			    if (userExists) {
-				// user is admin, do nothing
-				if (allUsers.get(username).isAdmin()) {
-				    LOGGER.info(
-					    "    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
-					    username, group.getName());
-				}
-				// user is not member, add it
-				else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-				    LOGGER.info("    Setting user [{}] as owner to group {}", username,
-					    group.getName());
-				    api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
-				}
-				// user is member but not owner
-				else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username,
-					GitlabAccessLevel.Owner)) {
-				    LOGGER.info("    Promoting user [{}] as owner to group {}", username,
-					    group.getName());
-				    api.deleteGroupMember(group, allUsers.get(username));
-				    api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
-				}
-				// user is already owner
-				else {
-				    LOGGER.info("    User [{}] is already owner to group {}", username,
-					    group.getName());
-				}
-			    }
-			    else {
-				LOGGER.info(
-					"    User [{}] won't be set as owner to group {} as it does not exist in GitLab",
-					username, group.getName());
-			    }
-
-			});
-		    });
+		    .forEach(group -> manageGroup(api, group, allUsers, owners));
 	}
 
 	LOGGER.info("Propagating owner users completed");
     }
 
+    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> allUsers,
+	    Map<String, LdapUser> owners) {
+	List<GitlabGroupMember> members = api.getGroupMembers(group);
+
+	owners.forEach((username, ldapUser) -> setUserAsOwner(api, username, group, ldapUser, allUsers, members));
+    }
+
+    private void setUserAsOwner(GitlabAPIWrapper api, String username, GitlabGroup group, LdapUser ldapUser,
+	    Map<String, GitlabUser> allUsers, List<GitlabGroupMember> members) {
+	boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
+	if (userExists) {
+	    // user is admin, do nothing
+	    if (allUsers.get(username).isAdmin()) {
+		LOGGER.info("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
+			username, group.getName());
+	    }
+	    // user is not member, add it
+	    else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
+		LOGGER.info("    Setting user [{}] as owner to group {}", username, group.getName());
+		api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
+	    }
+	    // user is member but not owner
+	    else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username,
+		    GitlabAccessLevel.Owner)) {
+		LOGGER.info("    Promoting user [{}] as owner to group {}", username, group.getName());
+		api.deleteGroupMember(group, allUsers.get(username));
+		api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
+	    }
+	    // user is already owner
+	    else {
+		LOGGER.info("    User [{}] is already owner to group {}", username, group.getName());
+	    }
+	}
+	else {
+	    LOGGER.info("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
+		    group.getName());
+	}
+    }
 }
