@@ -18,7 +18,10 @@
  */
 package ch.ge.cti_composant.gitsync.util.gitlab;
 
-import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.CreateGroupRequest;
 import org.gitlab.api.models.GitlabAccessLevel;
@@ -28,9 +31,7 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
+import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
 
 /**
  * A simple wrapper around a {@link GitlabAPI} object, to replace the checked exceptions with unchecked exceptions.
@@ -137,7 +138,10 @@ public class GitlabAPIWrapper {
 	 */
 	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
 		try {
-			api.deleteGroupMember(group, user);
+		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabGroupMember.URL + "/" + user.getId();
+		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
+			// Api bug : too many slash before members
+		        // api.deleteGroupMember(group, user);
 		} catch (IOException e) {
 			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
