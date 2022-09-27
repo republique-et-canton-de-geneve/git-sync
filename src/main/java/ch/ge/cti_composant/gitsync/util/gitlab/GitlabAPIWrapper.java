@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.CreateGroupRequest;
+import org.gitlab.api.models.GitlabAbstractMember;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
@@ -138,10 +139,9 @@ public class GitlabAPIWrapper {
 	 */
 	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
 		try {
-		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabGroupMember.URL + "/" + user.getId();
+		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
 		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
-			// Api bug : too many slash before members
-		        // api.deleteGroupMember(group, user);
+			// Api bug : too many slash before members in api.deleteGroupMember(group, user);
 		} catch (IOException e) {
 			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);

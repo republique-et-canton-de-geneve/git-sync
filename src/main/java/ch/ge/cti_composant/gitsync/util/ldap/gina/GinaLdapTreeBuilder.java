@@ -97,9 +97,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 			tree.forEach((ldapGroup, ldapUsers) -> {
 				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				try {
-				    	Comparator<Map<String, String>> userComparator = (user1, user2) -> { 
-				    	    return user1.containsKey("cn") ? user1.get("cn").compareTo(user2.get("cn")) : 0;
-				    	};
+				    	Comparator<Map<String, String>> userComparator = (user1, user2) -> user1.containsKey("cn") ? user1.get("cn").compareTo(user2.get("cn")) : 0;
 
 					app.getUsers(DOMAIN_APPLICATION, ldapGroup.getName(), ATTRIBUTES).stream()
 					.sorted(userComparator)
