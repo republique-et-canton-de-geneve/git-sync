@@ -136,12 +136,12 @@ public class GitlabAPIWrapper {
 	/**
 	 * Wrapper around {@link GitlabAPI#deleteGroupMember(GitlabGroup, GitlabUser)}.
 	 * Removes the checked exception.
+	 * Gitlab api bug : too many slash before members in api.deleteGroupMember(group, user);
 	 */
 	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
 		try {
 		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
 		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
-			// Api bug : too many slash before members in api.deleteGroupMember(group, user);
 		} catch (IOException e) {
 			LOGGER.error(ERROR_MESSAGE, e);
 			throw new GitSyncException(e);
