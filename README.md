@@ -107,6 +107,14 @@ BR3. For the administrator LDAP group (if any), retrieve the list of users. For 
 BR4. For every wide-access GitLab user:
   * Assign it to every group (with Reporter role permission), except the groups in the black list.
 
+BR5. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
+  * If the user does not exist in GitLab, do nothing
+    (see section [GitLab authentication](#gitlab-authentication)).
+  * If the user exists in GitLab:
+    * Assign it to all non-administrator groups (with Owner role permission), except the groups in a
+      black list supplied as a parameter to the application.
+
+
 Note: the business rules for the standard groups (BR2) are applied before the business rules for the administrator
 group (BR3), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
 
