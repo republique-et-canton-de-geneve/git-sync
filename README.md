@@ -43,6 +43,12 @@ This section specifies the expected behavior of the application.
 
 ## Definitions
 
+### Dry run mode
+
+The parameter `dry-run` allow you to run the application without modification in GitLab.
+Only logs are displayed so you can check future modifications before to set `dry-run` to false.
+If the parameter is absent, False is the default value.
+
 ### Standard groups and administrator group
 
 By default, a LDAP group is considered as a "standard" groups. One group can be an "administrator" group.
