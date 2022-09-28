@@ -84,6 +84,10 @@ For some business rules below, some LDAP groups will be explicitly omitted.
 The list of blacklisted LDAP groups, if any, is supplied as parameter `black-listed-groups`
 in the application's configuration file.
 
+### Limited access groups
+
+At État de Genève the baseline is to provide read-only access (Developer role) to all developers. That is, every developer is able to discover code, clone and create merge requests, even on code that is outside of their working group. For some (bad) reasons, some groups must remain preserved from such a wide access. The list of such limited-access groups, if any, is supplied as parameter `limited-access-groups` in the application's configuration file.
+
 ## Business rules
 
 BR1. For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
@@ -95,14 +99,20 @@ BR2. For every standard LDAP group, retrieve the list of users (L1).
       (see section [GitLab authentication](#gitlab-authentication)).
     * If the user exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
-      This is the main business rule of the application - it is actually the application's basic purpose.
     * If the user exists in GitLab and is already assigned to the matching group, do nothing.
   * Additionally:  
     * If a user exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
       the matching group, unless the user belongs to the LDAP administrator group (see reason below) or to the list of
       not-to-be-cleaned users.
 
-BR3. For the administrator LDAP group (if any), retrieve the list of users. For every user in the list:
+BR3. Retrieve the list of users (L1) of all standard GitLab groups:
+  * For every user in list L1:
+    * For every GitLab group not in `limited-access-groups`:
+      * If he is not assigned to the matching group, assign it with the "Developer" GitLab role.
+      * If he has a lower GitLab role assigned to the matching group, assign it with the "Developer" GitLab role.
+      * If he has a upper or equal GitLab role assigned to the matching group, do nothing.
+
+BR4. For the administrator LDAP group (if any, defined by `admin-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user exists in GitLab:
@@ -110,19 +120,18 @@ BR3. For the administrator LDAP group (if any), retrieve the list of users. For 
     * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
       black list supplied as a parameter to the application.
 
-BR4. For every wide-access GitLab user:
+BR5. For every wide-access GitLab user:
   * Assign it to every group (with Reporter role permission), except the groups in the black list.
 
-BR5. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
+BR6. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user exists in GitLab:
     * Assign it to all non-administrator groups (with Owner role permission), except the groups in a
       black list supplied as a parameter to the application.
 
-
 Note: the business rules for the standard groups (BR2) are applied before the business rules for the administrator
-group (BR3), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
+group (BR4), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
 
 ## Remarks
 
