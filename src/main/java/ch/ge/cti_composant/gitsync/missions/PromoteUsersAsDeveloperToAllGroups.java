@@ -59,14 +59,14 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 			if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
 			    LOGGER.info("    User [{}] not member, adding as developer to group [{}]",
 				    user.getUsername(), group.getName());
-			    // api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+			    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
 			}
 			else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members,
 				user.getUsername(), GitlabAccessLevel.Developer)) {
 			    LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(),
 				    group.getName());
-			    // api.deleteGroupMember(group, user);
-			    // api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+			    api.deleteGroupMember(group, user);
+			    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
 			}
 			else {
 			    LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]", user.getUsername(),
