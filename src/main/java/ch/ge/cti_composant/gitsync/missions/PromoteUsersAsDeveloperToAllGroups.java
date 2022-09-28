@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.gitlab.api.models.GitlabAccessLevel;
+import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabGroupMember;
 import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
@@ -48,34 +49,36 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 	List<GitlabUser> users = api.getUsers().stream().sorted(Comparator.comparing(GitlabUser::getUsername))
 		.collect(Collectors.toList());
 
-	gitlab.getGroups().stream()
-		.filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
+	gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
 		.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
 		// for each gitlab group
-		.forEach(group -> {
-		    List<GitlabGroupMember> members = api.getGroupMembers(group);
-
-		    users.stream().forEach(user -> {
-			if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
-			    LOGGER.info("    User [{}] not member, adding as developer to group [{}]",
-				    user.getUsername(), group.getName());
-			    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
-			}
-			else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members,
-				user.getUsername(), GitlabAccessLevel.Developer)) {
-			    LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(),
-				    group.getName());
-			    api.deleteGroupMember(group, user);
-			    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
-			}
-			else {
-			    LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]", user.getUsername(),
-				    group.getName());
-			}
-		    });
-		});
+		.forEach(group -> manageGroup(api, group, users));
 
 	LOGGER.info("Promoting users as developer completed");
+    }
+
+    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, List<GitlabUser> users) {
+	List<GitlabGroupMember> members = api.getGroupMembers(group);
+	users.stream().forEach(user -> promoteUserAsDeveloper(api, group, user, members));
+    }
+
+    private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, GitlabUser user,
+	    List<GitlabGroupMember> members) {
+	if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
+	    LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(),
+		    group.getName());
+	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+	}
+	else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(),
+		GitlabAccessLevel.Developer)) {
+	    LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
+	    api.deleteGroupMember(group, user);
+	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+	}
+	else {
+	    LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
+		    user.getUsername(), group.getName());
+	}
     }
 
 }
