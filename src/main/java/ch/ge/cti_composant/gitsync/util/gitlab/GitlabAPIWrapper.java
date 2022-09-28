@@ -32,6 +32,7 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.ge.cti_composant.gitsync.GitSync;
 import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
 
 /**
@@ -93,12 +94,14 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public GitlabGroup createGroup(CreateGroupRequest request, GitlabUser sudoUser) {
-		GitlabGroup ret;
-		try {
-			ret = api.createGroup(request, sudoUser);
-		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		GitlabGroup ret = null;
+		if(!GitSync.isDryRun()) {
+        		try {
+        			ret = api.createGroup(request, sudoUser);
+        		} catch (IOException e) {
+        			LOGGER.error(ERROR_MESSAGE, e);
+        			throw new GitSyncException(e);
+        		}
 		}
 		return ret;
 	}
@@ -123,12 +126,14 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public GitlabGroupMember addGroupMember(GitlabGroup group, GitlabUser user, GitlabAccessLevel accessLevel) {
-		GitlabGroupMember ret;
-		try {
-			ret = api.addGroupMember(group, user, accessLevel);
-		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		GitlabGroupMember ret = null;
+		if(!GitSync.isDryRun()) {
+        		try {
+        			ret = api.addGroupMember(group, user, accessLevel);
+        		} catch (IOException e) {
+        			LOGGER.error(ERROR_MESSAGE, e);
+        			throw new GitSyncException(e);
+        		}
 		}
 		return ret;
 	}
@@ -139,12 +144,14 @@ public class GitlabAPIWrapper {
 	 * Gitlab api bug : too many slash before members in api.deleteGroupMember(group, user);
 	 */
 	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
-		try {
-		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
-		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
-		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		if(!GitSync.isDryRun()) {
+        		try {
+        		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
+        		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
+        		} catch (IOException e) {
+        			LOGGER.error(ERROR_MESSAGE, e);
+        			throw new GitSyncException(e);
+        		}
 		}
 	}
 
@@ -189,17 +196,19 @@ public class GitlabAPIWrapper {
 			String twitter, String websiteUrl, Integer projectsLimit,
 			String externUid, String externProviderName,
 			String bio, Boolean isAdmin, Boolean canCreateGroup) {
-		GitlabUser ret;
-		try {
-			ret = api.updateUser(targetUserId,
-					email, password, username,
-					fullName, skypeId, linkedIn,
-					twitter, websiteUrl, projectsLimit,
-					externUid, externProviderName,
-					bio, isAdmin, canCreateGroup);
-		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		GitlabUser ret = null;
+		if(!GitSync.isDryRun()) {
+        		try {
+        			ret = api.updateUser(targetUserId,
+        					email, password, username,
+        					fullName, skypeId, linkedIn,
+        					twitter, websiteUrl, projectsLimit,
+        					externUid, externProviderName,
+        					bio, isAdmin, canCreateGroup);
+        		} catch (IOException e) {
+        			LOGGER.error(ERROR_MESSAGE, e);
+        			throw new GitSyncException(e);
+        		}
 		}
 		return ret;
 	}
