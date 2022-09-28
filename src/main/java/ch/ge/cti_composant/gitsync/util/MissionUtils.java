@@ -141,6 +141,13 @@ public class MissionUtils {
 				.count() == 1;
 	}
 
+	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<GitlabGroupMember> members, String user, GitlabAccessLevel accesslevel) {
+		return members.stream()
+				.filter(member -> member.getUsername().equals(user))
+				.filter(member -> member.isAdmin() || member.getAccessLevel().accessValue >= accesslevel.accessValue)
+				.count() == 1;
+	}
+
 	public static GitlabUser getGitlabUser(GitlabAPIWrapper api, String username) {
 		return getAllGitlabUsers(api).get(username);
 	}
@@ -172,6 +179,19 @@ public class MissionUtils {
 	 */
 	public static List<String> getBlackListedGroups() {
 		String groupNames = GitSync.getProperty("black-listed-groups");
+		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
+		return Stream.of(groupNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Gets the list of limited access groups from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getLimitedAccessGroups() {
+		String groupNames = GitSync.getProperty("limited-access-groups");
 		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
 		return Stream.of(groupNames.split(","))
 				.filter(StringUtils::isNotBlank)
