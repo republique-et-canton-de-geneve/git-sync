@@ -35,6 +35,7 @@ import ch.ge.cti_composant.gitsync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitsync.missions.PromoteAdminUsers;
 import ch.ge.cti_composant.gitsync.missions.PropagateAdminUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.missions.PropagateOwnerUsersToAllGroups;
+import ch.ge.cti_composant.gitsync.missions.PromoteUsersAsDeveloperToAllGroups;
 import ch.ge.cti_composant.gitsync.service.GitlabService;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
@@ -88,6 +89,14 @@ public class GitSync {
                 getVersion(),
                 props.get("gina-ldap-client.ldap-server-url"),
                 props.get("gitlab.hostname"));
+        
+        if(isDryRun()) {
+            LOGGER.info("");
+            LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            LOGGER.info("DRY RUN ACTIVATED => NO MODIFICATION IN GITLAB, ONLY LOGS");
+            LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            LOGGER.info("");
+        }
     }
 
     /**
@@ -122,6 +131,9 @@ public class GitSync {
 
         // add the authorized users (new permissions)
         new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+
+        // add developer level to all users to all groups
+        new PromoteUsersAsDeveloperToAllGroups().start(ldapTree, gitlab);
 
         // add the Admins
         new PromoteAdminUsers().start(ldapTree, gitlab);
@@ -163,6 +175,13 @@ public class GitSync {
             LOGGER.warn("Could not read property [{}] in file [{}]", versionName, filePath, e);
             return "";
         }
+    }
+
+    /**
+     * Check if dry run or not
+     */
+    public static boolean isDryRun() {
+	return "true".equals(GitSync.getProperty("dry-run"));
     }
 
 }
