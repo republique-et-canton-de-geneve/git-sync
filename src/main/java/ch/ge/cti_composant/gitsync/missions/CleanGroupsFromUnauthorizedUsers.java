@@ -18,16 +18,22 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.gitlab.api.models.GitlabAccessLevel;
+import org.gitlab.api.models.GitlabGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import org.gitlab.api.models.GitlabGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Comparator;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
  * Removes the permissions in excess on GitLab.
@@ -42,18 +48,27 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
 		LOGGER.info("Mapping: removing the user permissions in excess on GitLab");
 
+		String ownerGroup = MissionUtils.getOwnerGroup();
+		LOGGER.info("    Property owner-group is set to [{}]", ownerGroup);
+
+		// Users in owner group
+		final Map<String, LdapUser> owners = new HashMap<>();
+		if (StringUtils.isNotBlank(ownerGroup) && ldapTree.getGroups().contains(new LdapGroup(ownerGroup))) {
+		    owners.putAll(ldapTree.getUsers(ownerGroup));
+		}
+		
 		// for every group...
 		gitlab.getGroups().stream()
 				.sorted(Comparator.comparing(GitlabGroup::getName))
 				.forEach(gitlabGroup -> {
 					LOGGER.info("    Processing group [{}]", gitlabGroup.getName());
-					handleGroup(gitlabGroup, ldapTree, gitlab);
+					handleGroup(gitlabGroup, ldapTree, gitlab, owners);
 			});
 
 		LOGGER.info("Mapping completed");
 	}
 
-	private void handleGroup(GitlabGroup gitlabGroup, LdapTree ldapTree, Gitlab gitlab) {
+	private void handleGroup(GitlabGroup gitlabGroup, LdapTree ldapTree, Gitlab gitlab, Map<String, LdapUser> owners) {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 		GitlabAPIWrapper api = gitlab.getApi();
 
@@ -63,6 +78,8 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 				.filter(member -> !MissionUtils.isGitlabUserAdmin(member, api, ldapTree))
 				.filter(member -> !MissionUtils.getWideAccessUsers().contains(member.getUsername()))
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
+				.filter(member -> !owners.containsKey(member.getUsername()))
+				.filter(member -> member.getAccessLevel().accessValue >= GitlabAccessLevel.Developer.accessValue)
 				.forEach(member -> {
 					LOGGER.info("        Removing user [{}] from group [{}]",
 							member.getUsername(), gitlabGroup.getName());
