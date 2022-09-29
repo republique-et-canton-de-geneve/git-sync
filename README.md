@@ -27,11 +27,11 @@ At État de Genève we use an Active Directory server to authenticate users, plu
 (hereafter denoted as "the LDAP server" ) to manage authorizations.
 As is done in many organizations, the LDAP server organizes users in groups such
 as "IT-DEV-JAVA", "IT-DEV-PHP" or "FINANCE".
-Access rights to systems and applications are granted to groups or to users.
+In the LDAP server, access rights to systems and applications are granted to groups or to users.
 A user is assigned to any number of groups.
 
 Now GitLab comes into play.
-The server is an on-premise instance of the GitLab community edition.
+At État de Genève, the GitLab server is an on-premise instance of the GitLab community edition.
 Our need is to *replicate automatically the LDAP configuration of the users onto the GitLab server*.
 For example, we want the GitLab server to acquire automatically groups "IT-DEV-JAVA', 'IT-DEV-PHP', etc.,
 from the LDAP server, as well as the members of every group.
@@ -45,7 +45,7 @@ This section specifies the expected behavior of the application.
 
 ### Dry run mode
 
-The parameter `dry-run` allow you to run the application without modification in GitLab.
+The parameter `dry-run` allows you to run the application without incurring any modification in GitLab.
 Only logs are displayed so you can check future modifications before to set `dry-run` to false.
 If the parameter is absent, False is the default value.
 
@@ -84,9 +84,14 @@ For some business rules below, some LDAP groups will be explicitly omitted.
 The list of blacklisted LDAP groups, if any, is supplied as parameter `black-listed-groups`
 in the application's configuration file.
 
-### Limited access groups
+### Limited-access groups
 
-At État de Genève the baseline is to provide read-only access (Developer role) to all developers. That is, every developer is able to discover code, clone and create merge requests, even on code that is outside of their working group. For some (bad) reasons, some groups must remain preserved from such a wide access. The list of such limited-access groups, if any, is supplied as parameter `limited-access-groups` in the application's configuration file.
+At État de Genève the baseline is to provide read-only access (Developer role) to all developers.
+That is, every developer is able to discover code, clone and create merge requests, even on code that is outside
+their working group.
+For historical reasons, some groups must remain preserved from such a wide access.
+The list of such limited-access groups, if any, is supplied as parameter `limited-access-groups` in the
+application's configuration file.
 
 ## Business rules
 
@@ -97,25 +102,27 @@ BR2. For every standard LDAP group, retrieve the list of users (L1).
   * For every user in list L1:
     * If the user does not exist in GitLab, do nothing
       (see section [GitLab authentication](#gitlab-authentication)).
-    * If the user exists in GitLab and is not assigned to the matching group, 
+    * If the user already exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
-    * If the user exists in GitLab and is already assigned to the matching group, do nothing.
+    * If the user already exists in GitLab and is already assigned to the matching group, do nothing.
   * Additionally:  
-    * If a user exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
+    * If a user already exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
       the matching group, unless the user belongs to the LDAP administrator group (see reason below) or to the list of
       not-to-be-cleaned users.
 
 BR3. Retrieve the list of users (L1) of all standard GitLab groups:
   * For every user in list L1:
     * For every GitLab group not in `limited-access-groups`:
-      * If he is not assigned to the matching group, assign it with the "Developer" GitLab role.
-      * If he has a lower GitLab role assigned to the matching group, assign it with the "Developer" GitLab role.
-      * If he has a upper or equal GitLab role assigned to the matching group, do nothing.
+      * If the user is not assigned to the matching group, assign it with the "Developer" GitLab role.
+      * If the user is already assigned to the matching group with a role weaker than "Developer",
+        assign it with the "Developer" GitLab role.
+      * If the user is already assigned to the matching group with a role stronger than or equal to "Developer",
+        do nothing.
 
 BR4. For the administrator LDAP group (if any, defined by `admin-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
-  * If the user exists in GitLab:
+  * If the user already exists in GitLab:
     * Give it the Admin (as opposed to Regular) access level.
     * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
       black list supplied as a parameter to the application.
@@ -136,9 +143,6 @@ group (BR4), otherwise GitLab users having Admin access level would end up being
 ## Remarks
 
 * The application does not create GitLab users.
-* The application does not assign other GitLab role permission than Maintainer and Reporter.
-  Assignment of a GitLab role permission other than Maintainer, e.g., Developer, Guest or Owner, must be carried out
-  directly on the GitLab server. 
 * The application does not create GitLab sub-groups. It only creates GitLab groups.
 * Whenever the application creates a GitLab group, the GitLab role permission "Owner" group is automatically
   assigned by GitLab to the user used for the connection.
@@ -190,8 +194,8 @@ Transforming the application to connect to another LDAP server than Gina entails
 Communication with the GitLab server is performed by means of GitLab's own
 [java-gitlab-api](https://mvnrepository.com/artifact/org.gitlab/java-gitlab-api)
 library, which internally resorts to REST services. 
-The application is compatible with any GitLab server, for example GitLab 11, that complies with version 4 of the
-GitLab API.
+The application is compatible with any GitLab server, for example GitLab 11.X or GitLab 14.X, 
+that complies with version 4 of the GitLab API.
 
 The application stores the whole LDAP configuration of the groups in memory. For a few hundred users this has not
 caused any trouble so far.
@@ -231,11 +235,3 @@ about 100 groups encompassing 1000 group users.
 
 Practical usage requires spawning the application regularly, for example every hour.
 This can be done with a crontab-like job.
-
-# Future evolutions
-
-~~No future evolutions are currently planned, besides possibly adding unit tests.~~
-* Logs: ordering the users in the trace "Retrieving the users of LDAP group XXX", plus regrouping the users into 
-  one single line of log instead of one line per user
-* Adding a functionality of assiging one or more users transversally to every group, with a specified role.
-  Configuration example: "USER1.Maintainer;USER2.Owner". Internal reference: SCM-915. 
