@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitsync.missions.AddAuthorizedUsersToGroups;
-import ch.ge.cti_composant.gitsync.missions.AddTechReadOnlyUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitsync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitsync.missions.PromoteAdminUsers;
@@ -143,9 +142,6 @@ public class GitSync {
 
         // add the Owners to all groups
         new PropagateOwnerUsersToAllGroups().start(ldapTree, gitlab);
-
-        // add read-only permission to specific wide-access users on all groups
-        new AddTechReadOnlyUsersToAllGroups().start(ldapTree, gitlab);
     }
 
     /**

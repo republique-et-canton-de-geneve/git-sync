@@ -199,19 +199,6 @@ public class MissionUtils {
 	}
 
 	/**
-	 * Gets the list of the users to be assigned read-only access extensively on most groups.
-	 * See more about this in the README file and in the configuration file.
-	 * @return a list of GitLab user names. Can be empty
-	 */
-	public static List<String> getWideAccessUsers() {
-		String userNames = GitSync.getProperty("wide-access-users");
-		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
-		return Stream.of(userNames.split(","))
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
-	}
-
-	/**
 	 * Gets the list of the users to ignore in the cleaning process.
 	 * See more about this in the README file and in the configuration file.
 	 * @return a list of GitLab user names. Can be empty
