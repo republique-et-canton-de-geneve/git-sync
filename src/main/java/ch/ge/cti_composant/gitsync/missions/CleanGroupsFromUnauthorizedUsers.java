@@ -76,7 +76,6 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		api.getGroupMembers(gitlabGroup).stream()
 				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
 				.filter(member -> !MissionUtils.isGitlabUserAdmin(member, api, ldapTree))
-				.filter(member -> !MissionUtils.getWideAccessUsers().contains(member.getUsername()))
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 				.filter(member -> !owners.containsKey(member.getUsername()))
 				.filter(member -> member.getAccessLevel().accessValue >= GitlabAccessLevel.Developer.accessValue)

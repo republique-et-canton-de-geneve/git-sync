@@ -57,16 +57,6 @@ administrator group.
 The name of the administrator group, if any, is supplied as parameter `admin-group` in the application's configuration file.
 The name of the standard groups must follow the naming convention defined by the parameter `standard.groups` (regex pattern).
 
-### Wide-access GitLab users
-
-Some special GitLab users require read-only access on all GitLab groups.
-These users are usually technical users.
-At État de Genève, such a wide-access GitLab user has been created to allow a
-[Fisheye](https://www.atlassian.com/software/fisheye) server to log on to GitLab and to freely retrieve commits
-from any Git repository.
-The list of wide-access GitLab users, if any, is supplied as parameter `wide-access-users`
-in the application's configuration file.
-
 ### GitLab users not to be cleaned
 
 Some special GitLab users will not be removed from GitLab groups, even if they have been removed from the
@@ -127,10 +117,7 @@ BR4. For the administrator LDAP group (if any, defined by `admin-group`), retrie
     * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
       black list supplied as a parameter to the application.
 
-BR5. For every wide-access GitLab user:
-  * Assign it to every group (with Reporter role permission), except the groups in the black list.
-
-BR6. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
+BR5. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user exists in GitLab:
