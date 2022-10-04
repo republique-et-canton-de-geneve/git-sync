@@ -18,9 +18,11 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
@@ -32,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
  * Set users as developer to all groups.
@@ -46,24 +50,34 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 	LOGGER.info("Promoting users as developer to all groups");
 	GitlabAPIWrapper api = gitlab.getApi();
 
-	List<GitlabUser> users = api.getUsers().stream().sorted(Comparator.comparing(GitlabUser::getUsername))
-		.collect(Collectors.toList());
+	// GitLab users
+	Map<String, GitlabUser> gitlabUsers = new TreeMap<>();
+	api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+
+	// Ldap users
+	Set<LdapUser> ldapUsers = new HashSet<>();
+	for (LdapGroup group : ldapTree.getGroups()) {
+	    ldapUsers.addAll(ldapTree.getUsers(group).values());
+	}
 
 	gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
 		.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
 		// for each gitlab group
-		.forEach(group -> manageGroup(api, group, users));
+		.forEach(group -> manageGroup(api, group, gitlabUsers, ldapUsers));
 
 	LOGGER.info("Promoting users as developer completed");
     }
 
-    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, List<GitlabUser> users) {
+    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> gitlabUsers, Set<LdapUser> ldapUsers) {
 	List<GitlabGroupMember> members = api.getGroupMembers(group);
-	users.stream().forEach(user -> promoteUserAsDeveloper(api, group, user, members));
+	ldapUsers.stream()
+		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only ldap users existing in GitLab
+		.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
     }
 
-    private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, GitlabUser user,
-	    List<GitlabGroupMember> members) {
+    private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, LdapUser ldapUser,
+	    List<GitlabGroupMember> members, Map<String, GitlabUser> gitlabUsers) {
+	GitlabUser user = gitlabUsers.get(ldapUser.getName());
 	if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
 	    LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(),
 		    group.getName());
