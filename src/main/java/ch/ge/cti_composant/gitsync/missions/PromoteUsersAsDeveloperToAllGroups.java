@@ -18,6 +18,7 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 	List<GitlabGroupMember> members = api.getGroupMembers(group);
 	ldapUsers.stream()
 		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only ldap users existing in GitLab
+		.sorted(Comparator.comparing(LdapUser::getName))
 		.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
     }
 
