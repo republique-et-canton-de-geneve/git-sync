@@ -138,14 +138,14 @@ public class MissionUtils {
 	public static boolean isGitlabUserMemberOfGroup(List<GitlabGroupMember> members, String user){
 		return members.stream()
 				.filter(member -> member.getUsername().equals(user))
-				.count() == 1;
+				.count() >= 1;
 	}
 
 	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<GitlabGroupMember> members, String user, GitlabAccessLevel accesslevel) {
 		return members.stream()
 				.filter(member -> member.getUsername().equals(user))
 				.filter(member -> member.isAdmin() || member.getAccessLevel().accessValue >= accesslevel.accessValue)
-				.count() == 1;
+				.count() >= 1;
 	}
 
 	public static GitlabUser getGitlabUser(GitlabAPIWrapper api, String username) {
