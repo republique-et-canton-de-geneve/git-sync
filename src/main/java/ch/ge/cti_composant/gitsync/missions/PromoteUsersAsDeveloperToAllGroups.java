@@ -64,7 +64,10 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 	gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
 		.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
 		// for each gitlab group
-		.forEach(group -> manageGroup(api, group, gitlabUsers, ldapUsers));
+		.forEach(group -> {
+		    LOGGER.info("Promoting users as developer to group [{}]", group.getName());
+		    manageGroup(api, group, gitlabUsers, ldapUsers);
+		});
 
 	LOGGER.info("Promoting users as developer completed");
     }
