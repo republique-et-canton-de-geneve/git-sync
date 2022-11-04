@@ -17,7 +17,7 @@ default:
   tags:
     - 'for:application-project'
     - 'host:restricted-container'
-    - 'net:soca-dev'
+    - 'net:soca4-dev'
   image:
     name: $DOCKER_URL/ch/ge/cti/build/alpine-maven-git-node:6
 #    name: $DOCKER_URL/ch/ge/cti/build/docker-npm-maven:1.0.1
