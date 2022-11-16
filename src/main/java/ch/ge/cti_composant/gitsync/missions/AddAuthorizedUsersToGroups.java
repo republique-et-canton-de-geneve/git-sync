@@ -18,6 +18,7 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
+import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
@@ -72,8 +73,16 @@ public class AddAuthorizedUsersToGroups implements Mission {
 						LOGGER.warn("Error caught while adding user [{}] to group [{}]", username, group.getName(), e);
 					}
 				} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
+				    if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username,
+					    GitlabAccessLevel.Master)) {
+					LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
+					api.deleteGroupMember(group, allUsers.get(username));
+					api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Master);
+				    }
+				    else {
 					// the user exists in GitLab and it has already been added to the group
 					LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
+				    }
 				} else {
 					// the user does not exist in GitLab
 					LOGGER.info("        User [{}] does not exist in GitLab (handling of group [{}])", username, group.getName());
