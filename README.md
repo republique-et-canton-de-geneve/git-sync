@@ -124,6 +124,11 @@ BR5. For the owner LDAP group (if any, defined by `owner-group`), retrieve the l
     * Assign it to all non-administrator groups (with Owner role permission), except the groups in a
       black list supplied as a parameter to the application.
 
+BR6. Retrieve the list of users (L1) of all standard GitLab groups:
+  * For every user in list L1:
+    * If the user is blocked in Gitlab and is active in LDAP, unblock the user
+    * If the user is active in Gitlab and is inactive in LDAP, block the user
+
 Note: the business rules for the standard groups (BR2) are applied before the business rules for the administrator
 group (BR4), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
 

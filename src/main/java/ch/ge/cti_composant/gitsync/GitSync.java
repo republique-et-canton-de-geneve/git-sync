@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitsync.missions.AddAuthorizedUsersToGroups;
+import ch.ge.cti_composant.gitsync.missions.BlockOrUnblockUsers;
 import ch.ge.cti_composant.gitsync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitsync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitsync.missions.PromoteAdminUsers;
@@ -124,6 +125,9 @@ public class GitSync {
     private void applyRules() {
         // precaution: do not take the risk to clear up GitLab with an empty set of groups and users
         new CheckMinimumUserCount().start(ldapTree, gitlab);
+
+        // block or unblock users
+        new BlockOrUnblockUsers().start(ldapTree, gitlab);
 
         // remove the non-authorized users
         new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
