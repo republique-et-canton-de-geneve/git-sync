@@ -27,6 +27,7 @@ import org.gitlab.api.models.GitlabUserIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
@@ -56,10 +57,11 @@ public class BlockOrUnblockUsers implements Mission {
 	    ldapUsers.putAll(ldapTree.getUsers(group));
 	}
 
-	for (GitlabUser gitlabUser : gitlabUsers.values()) {
-	    blockOrUnblockUser(api, gitlabUser, ldapUsers);
-	}
-
+	gitlabUsers.values().stream()
+	    .filter(user -> !MissionUtils.getWideAccessUsers().contains(user.getUsername()))
+	    .filter(user -> !MissionUtils.getNotToCleanUsers().contains(user.getUsername()))
+	    .forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
+	    
 	LOGGER.info("Block or unblock users in gitlab completed");
     }
 

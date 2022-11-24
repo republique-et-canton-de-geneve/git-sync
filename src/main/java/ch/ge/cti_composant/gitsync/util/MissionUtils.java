@@ -211,4 +211,17 @@ public class MissionUtils {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Gets the list of wide access listed users from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getWideAccessUsers() {
+		String userNames = GitSync.getProperty("wide-access-users");
+		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
+		return Stream.of(userNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+	}
+
 }
