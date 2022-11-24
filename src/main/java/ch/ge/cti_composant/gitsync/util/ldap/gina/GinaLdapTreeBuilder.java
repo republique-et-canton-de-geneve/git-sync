@@ -69,7 +69,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
      * Names of the LDAP attributes to be retrieved from the LDAP server.
      * We are only interested in attribute "cn".
      */
-    private static final String[] ATTRIBUTES = {"cn"};
+    private static final String[] ATTRIBUTES = {"cn", "loginDisabled"};
 
 	@Override
 	public LdapTree createTree() {

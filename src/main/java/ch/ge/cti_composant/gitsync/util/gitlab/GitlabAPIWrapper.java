@@ -213,4 +213,34 @@ public class GitlabAPIWrapper {
 		return ret;
 	}
 
+    /**
+     * Wrapper around {@link GitlabAPI#blockUser(Integer)}. Removes the checked exception.
+     */
+    public void blockUser(Integer targetUserId) {
+	if (!GitSync.isDryRun()) {
+	    try {
+		api.blockUser(targetUserId);
+	    }
+	    catch (IOException e) {
+		LOGGER.error(ERROR_MESSAGE, e);
+		throw new GitSyncException(e);
+	    }
+	}
+    }
+
+    /**
+     * Wrapper around {@link GitlabAPI#unblockUser(Integer)}. Removes the checked exception.
+     */
+    public void unblockUser(Integer targetUserId) {
+	if (!GitSync.isDryRun()) {
+	    try {
+		api.unblockUser(targetUserId);
+	    }
+	    catch (IOException e) {
+		LOGGER.error(ERROR_MESSAGE, e);
+		throw new GitSyncException(e);
+	    }
+	}
+    }
+
 }
