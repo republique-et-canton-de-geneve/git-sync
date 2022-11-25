@@ -20,6 +20,7 @@ package ch.ge.cti_composant.gitsync.missions;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -89,8 +90,8 @@ public class BlockOrUnblockUsers implements Mission {
 	boolean isActiveGitlab = !"blocked".equals(gitlabUser.getState());
 
 	// User state in ldap
-	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase());
-	String loginDisabled = Boolean.FALSE.toString();
+	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase(Locale.FRANCE));
+	String loginDisabled;
 	if (currentLdapUser != null) {
 	    try {
 		loginDisabled = currentLdapUser.getAttribute("loginDisabled");
