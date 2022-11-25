@@ -18,6 +18,7 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +61,7 @@ public class BlockOrUnblockUsers implements Mission {
 	gitlabUsers.values().stream()
 	    .filter(user -> !MissionUtils.getWideAccessUsers().contains(user.getUsername()))
 	    .filter(user -> !MissionUtils.getNotToCleanUsers().contains(user.getUsername()))
+	    .sorted(Comparator.comparing(GitlabUser::getUsername))
 	    .forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
 	    
 	LOGGER.info("Block or unblock users in gitlab completed");
@@ -87,7 +89,7 @@ public class BlockOrUnblockUsers implements Mission {
 	boolean isActiveGitlab = !"blocked".equals(gitlabUser.getState());
 
 	// User state in ldap
-	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername());
+	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase());
 	String loginDisabled = Boolean.FALSE.toString();
 	if (currentLdapUser != null) {
 	    try {
