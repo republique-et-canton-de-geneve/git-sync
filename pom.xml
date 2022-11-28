@@ -13,7 +13,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>3.6-SNAPSHOT</version>
+	<version>3.6</version>
 
 	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
 
@@ -43,7 +43,7 @@
 		<connection>scm:git:${env.GITLAB_URL}/gitSync.git</connection>
 		<developerConnection>scm:git:${env.GITLAB_URL}/gitSync.git</developerConnection>
 		<url>${env.GITLAB_URL}/gitSync.git</url>
-		<tag>HEAD</tag>
+		<tag>gitSync-3.6</tag>
 	</scm>
 
 	<properties>
