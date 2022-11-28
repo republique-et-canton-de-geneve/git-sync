@@ -79,6 +79,19 @@ public class BlockOrUnblockUsers implements Mission {
 	return result;
     }
 
+    private String getCnFromLdapIdentity(final GitlabUser gitlabUser) {
+	String result = gitlabUser.getUsername();
+	for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
+	    if ("ldapmain".equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
+		String ldapUid = ident.getExternUid().replace("cn=", "");
+		ldapUid = ldapUid.substring(0, ldapUid.indexOf(","));
+		result = ldapUid;
+		break;
+	    }
+	}
+	return result;
+    }
+
     private void blockOrUnblockUser(GitlabAPIWrapper api, final GitlabUser gitlabUser,
 	    Map<String, LdapUser> ldapUsers) {
 	if (gitlabUser == null || !fromLdap(gitlabUser)) {
@@ -96,6 +109,10 @@ public class BlockOrUnblockUsers implements Mission {
 
 	// User state in ldap
 	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase(Locale.FRANCE));
+	if(currentLdapUser == null) {
+	    String cnFromLdapIdentity = getCnFromLdapIdentity(gitlabUser);
+	    currentLdapUser = ldapUsers.get(cnFromLdapIdentity.toUpperCase(Locale.FRANCE));
+	}
 	String loginDisabled;
 	if (currentLdapUser != null) {
 	    try {
