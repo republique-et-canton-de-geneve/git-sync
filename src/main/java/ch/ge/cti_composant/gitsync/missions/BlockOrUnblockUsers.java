@@ -87,7 +87,12 @@ public class BlockOrUnblockUsers implements Mission {
 	}
 
 	// User state in gitlab
-	boolean isActiveGitlab = !"blocked".equals(gitlabUser.getState());
+	String gitlabUserState = gitlabUser.getState();
+	if("ldap_blocked".equals(gitlabUserState)) {
+	    // Do nothing, impossible to change state via api
+	    return;
+	}
+	boolean isActiveGitlab = !"blocked".equals(gitlabUserState);
 
 	// User state in ldap
 	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase(Locale.FRANCE));
@@ -97,7 +102,7 @@ public class BlockOrUnblockUsers implements Mission {
 		loginDisabled = currentLdapUser.getAttribute("loginDisabled");
 	    }
 	    catch (Exception e) {
-		loginDisabled = Boolean.FALSE.toString();
+		loginDisabled = Boolean.TRUE.toString();
 	    }
 	}
 	else {
