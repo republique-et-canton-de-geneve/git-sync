@@ -24,7 +24,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * Tests class {@link MissionUtils}. 
+ * Tests class {@link MissionUtils}.
  */
 @Unroll
 class MissionUtilsSpec extends Specification {
