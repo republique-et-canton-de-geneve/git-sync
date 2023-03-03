@@ -79,6 +79,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 				.filter(member -> !owners.containsKey(member.getUsername()))
 				.filter(member -> (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName()) || member.getAccessLevel().accessValue > GitlabAccessLevel.Developer.accessValue))
+				.filter(member -> !member.getUsername().contains("_bot"))
 				.forEach(member -> {
 					LOGGER.info("        Removing user [{}] from group [{}]",
 							member.getUsername(), gitlabGroup.getName());
