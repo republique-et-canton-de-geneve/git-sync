@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- This project does not use Spring. It uses spring-boot-dependencies 
@@ -167,7 +169,7 @@
 					<generateXml>true</generateXml>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
@@ -187,7 +189,8 @@
 								</filter>
 							</filters>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>ch.ge.cti_composant.gitsync.Main</mainClass>
 								</transformer>
 							</transformers>
@@ -225,7 +228,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.7</version>
+				<version>0.8.9</version>
 				<executions>
 					<execution>
 						<id>jacoco-prepare-agent</id>
@@ -258,6 +261,18 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<plugin>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.9.1.2184</version>
+			<dependencies>
+				<dependency>
+					<groupId>org.codehaus.woodstox</groupId>
+					<artifactId>woodstox-core-lgpl</artifactId>
+					<version>4.4.1</version>
+				</dependency>
+			</dependencies>
+		</plugin>
 	</build>
 
 	<profiles>
