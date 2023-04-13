@@ -124,6 +124,23 @@
 			</resource>
 		</resources>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.0.1746</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.codehaus.woodstox</groupId>
+							<artifactId>woodstox-core-lgpl</artifactId>
+							<version>4.4.1</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
@@ -259,18 +276,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonarsource.scanner.maven</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.7.0.1746</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.woodstox</groupId>
-						<artifactId>woodstox-core-lgpl</artifactId>
-						<version>4.4.1</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
