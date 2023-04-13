@@ -260,19 +260,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.woodstox</groupId>
+						<artifactId>woodstox-core-lgpl</artifactId>
+						<version>4.4.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
-		<plugin>
-			<groupId>org.sonarsource.scanner.maven</groupId>
-			<artifactId>sonar-maven-plugin</artifactId>
-			<version>3.9.1.2184</version>
-			<dependencies>
-				<dependency>
-					<groupId>org.codehaus.woodstox</groupId>
-					<artifactId>woodstox-core-lgpl</artifactId>
-					<version>4.4.1</version>
-				</dependency>
-			</dependencies>
-		</plugin>
 	</build>
 
 	<profiles>
