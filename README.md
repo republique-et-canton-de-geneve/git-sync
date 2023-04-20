@@ -207,6 +207,13 @@ Run
 
 ``mvn clean install``
 
+Starting from version 3.10, the dependency on `gina-ldap-client` 4.2.0 is no longer available in Maven Central.
+So if you are a developer from outside État de Genève, before running the above command,
+you will have to clone
+[projet gina-ldap-client](https://github.com/republique-et-canton-de-geneve/gina-ldap-client)
+from GitLab, then build it (`mvn install`), then modify the POM of this projet to make it depend on your
+snapshot version of `gina-ldap-client` instead of the release version.
+
 # Execution
 
 The mapping is carried out by running the application:

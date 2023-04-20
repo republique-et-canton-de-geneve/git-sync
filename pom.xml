@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>ch.ge.etat.securite</groupId>
 			<artifactId>gina-ldap-client</artifactId>
-			<version>4.0.44</version>
+			<version>4.2.0</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
