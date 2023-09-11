@@ -1,4 +1,6 @@
 variables:
+  # config Git
+  GIT_DEPTH: 20
   # config Maven
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
@@ -39,9 +41,6 @@ deploy_master:
   stage: build
   script:
     - mvn $MAVEN_CLI_OPTS clean deploy $SONAR_MAVEN_GOAL
-#    - mvn $MAVEN_CLI_OPTS clean deploy $SONAR_MAVEN_GOAL
-#      -Dsonar.login=$SONAR_LOGIN -Dsonar.gitlab.project_id=$CI_PROJECT_PATH
-#      -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
   only:
     - master
 
