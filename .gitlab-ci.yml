@@ -1,7 +1,4 @@
 variables:
-  # fix for old git version
-  GIT_STRATEGY: clone
-  GIT_SSL_NO_VERIFY: "true"
   # config Maven
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
@@ -20,10 +17,7 @@ default:
     - 'net:soca4-dev'
   image:
     name: $DOCKER_URL/ch/ge/cti/build/alpine-maven-git-node:6
-#    name: $DOCKER_URL/ch/ge/cti/build/docker-npm-maven:1.0.1
 
-# Cache downloaded dependencies and plugins between builds.
-# To keep cache across branches add 'key: "$CI_JOB_NAME"'
 cache:
   untracked: true
   key: "$CI_PROJECT_ID"
