@@ -11,5 +11,8 @@
 target/
 dependency-reduced-pom.xml
 
-# Project
+# Projet
 logs/
+
+# Sonar
+.scannerwork/
