@@ -18,8 +18,11 @@
  */
 package ch.ge.cti_composant.gitsync;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Main class to spawn a {@link GitSync}.
@@ -29,12 +32,14 @@ public class Main {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String[] args){
+	        MDC.put("threadid", UUID.randomUUID().toString());
 		if (args.length != 1) {
 			LOGGER.error("1 argument expected: the path to configuration file, such as configuration.properties");
 		} else {
 			new GitSync().run(args[0]);
 			LOGGER.info("GitSync completed");
 		}
+	        MDC.clear();
 	}
 
 }
