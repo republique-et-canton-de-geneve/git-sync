@@ -3,7 +3,7 @@
   <!-- Console appender -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <pattern>%date{HH:mm:ss} [%X{threadid}] %-5level  %msg%n</pattern>
+      <pattern>%date{HH:mm:ss} [%.12X{threadid}] %-5level  %msg%n</pattern>
     </encoder>
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <level>DEBUG</level>
@@ -19,7 +19,7 @@
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <pattern>%date{HH:mm:ss} [%X{threadid}] %-5level  %msg%n</pattern>
+      <pattern>%date{HH:mm:ss} [%.12X{threadid}] %-5level  %msg%n</pattern>
     </encoder>
     <prudent>true</prudent>
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
