@@ -1,67 +1,13 @@
+include:
+  - project: $PROJECT_TEMPLATES_GITLABCI_PATH
+    ref: main
+    file: '.gitlab-ci-java-basic.yml'
+
+
+# --------------------------------------
+# Variables
+# --------------------------------------
 variables:
-  # config Maven
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  # config SonarQube
-  SONAR_MAVEN_GOAL: org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar
-  SONAR_USER_HOME: /cache/sonar
-  # config Nexus IQ server
-  CLM_MAVEN_GOAL: com.sonatype.clm:clm-maven-plugin:2.29.0-01:evaluate
-  CLM_SERVER_ID: clm_server
-  CLM_APPLICATION_ID: gitSync
-
-default:
-  tags:
-    - 'for:application-project'
-    - 'host:restricted-container'
-    - 'net:soca4-dev'
-  image:
-    name: $DOCKER_URL/ch/ge/cti/build/alpine-maven-git-node:6
-
-cache:
-  untracked: true
-  key: "$CI_PROJECT_ID"
-  paths:
-    - .m2/repository
-
-stages:
-  - build
-  - release
-
-clm_master:
-  stage: build
-  script:
-    - mvn $MAVEN_CLI_OPTS clean $CLM_MAVEN_GOAL
-      -Dclm.applicationId=$CLM_APPLICATION_ID -Dclm.serverUrl=$CLM_URL -Dclm.serverId=$CLM_SERVER_ID
-  when: manual
-
-deploy_master:
-  stage: build
-  script:
-    - mvn $MAVEN_CLI_OPTS clean deploy $SONAR_MAVEN_GOAL
-  only:
-    - master
-
-release_master:
-  stage: release
-  before_script:
-    - echo "=========Openshift runner specific script=========="
-    - user_id=$(id -u)
-    - line_content="${USER_NAME:-default}:x:$user_id:0:${USER_NAME:-default} user:${HOME}:/bin/bash"
-    - echo "$line_content" >> /etc/passwd
-    - pwd
-    - ls -hal ./
-  script:
-    - git config --global user.email "$RUNNER_EMAIL"
-    - git config --global user.name "$RUNNER_USERNAME"
-    - git checkout $CI_COMMIT_REF_NAME
-    - mvn $MAVEN_CLI_OPTS release:prepare release:perform
-      -Dresume=false
-      -DignoreSnapshots=true
-      -Dusername=$SCM_USER -Dpassword=$SCM_PASSWORD
-      -DscmCommentPrefix="[skip ci] "
-      -Darguments="-DskipTests -Dmaven.javadoc.skip=true"
-  artifacts:
-    paths:
-      - target/*.jar
-  when: manual
+  # Docker
+  DOCKER_IMAGE: $DOCKER_URL/maven:3.8.6-openjdk-11
+  DOCKER_IMAGE_SOAPUI: $DOCKER_URL/maven:3.8.6-openjdk-11
