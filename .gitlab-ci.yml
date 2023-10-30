@@ -11,3 +11,9 @@ variables:
   # Docker
   DOCKER_IMAGE: $DOCKER_URL/maven:3.8.6-openjdk-11
   DOCKER_IMAGE_SOAPUI: $DOCKER_URL/maven:3.8.6-openjdk-11
+
+default:
+  tags:
+    - 'for:application-project'
+    - 'host:restricted-container'
+    - 'net:soca4-dev'
