@@ -44,7 +44,6 @@ deploy_master:
 
 release_master:
   stage: release
-  image: $DOCKER_URL/ch/ge/afc/afc-maven-multi-jdk:soca-jdk11-2
   before_script:
     - echo "=========Openshift runner specific script=========="
     - user_id=$(id -u)
