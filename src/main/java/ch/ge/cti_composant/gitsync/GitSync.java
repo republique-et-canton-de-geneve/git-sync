@@ -184,4 +184,16 @@ public class GitSync {
 	return "true".equals(GitSync.getProperty("dry-run"));
     }
 
+    /**
+     * Returns the specified property, or default value if not found.
+     */
+    public static int getPropertyAsInt(String name, int defaultValue) {
+        int result = defaultValue;
+	String p = props.getProperty(name);
+        if(!StringUtils.isBlank(p) && p.matches("[0-9]+")) {
+            result = Integer.valueOf(p);
+        }
+        return result;
+    }
+
 }

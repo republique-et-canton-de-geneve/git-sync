@@ -44,6 +44,9 @@ public class GitlabAPIWrapper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabAPIWrapper.class);
 
 	private static final String ERROR_MESSAGE = "Exception caught while interrogating GitLab";
+	
+	private int maxTries = GitSync.getPropertyAsInt("retry-nb-max-attempts", 3);
+	private long sleepTime = GitSync.getPropertyAsInt("retry-time-between-attemps", 5000);
 
 	/**
 	 * The wrapped GitlabAPI object.
@@ -62,14 +65,15 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public List<GitlabGroup> getGroups() {
-		List<GitlabGroup> ret;
+	    int count = 0;
+	    while(true) {
 		try {
-			ret = api.getGroups();
+			return api.getGroups();
 		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
 		}
-		return ret;
+	    }
 	}
 
 	/**
@@ -77,15 +81,20 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception and returns null (instead of throwing an exception) if the group is not found.
 	 */
 	public GitlabGroup getGroup(String path) {
+	    int count = 0;
 		GitlabGroup ret = null;
+		    while(true) {
 		try {
 			ret = api.getGroup(path);
+			break;
 		} catch (FileNotFoundException e) {
 			// occurs when the group does not exist in GitLab
+		    break;
 		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
 		}
+		    }
 		return ret;
 	}
 
@@ -94,14 +103,18 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public GitlabGroup createGroup(CreateGroupRequest request, GitlabUser sudoUser) {
+	    int count = 0;
 		GitlabGroup ret = null;
 		if(!GitSync.isDryRun()) {
+		    while(true) {
         		try {
         			ret = api.createGroup(request, sudoUser);
+        			break;
         		} catch (IOException e) {
-        			LOGGER.error(ERROR_MESSAGE, e);
-        			throw new GitSyncException(e);
+        		    count++;
+        		    handleException(e, count);
         		}
+		    }
 		}
 		return ret;
 	}
@@ -111,13 +124,17 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public List<GitlabGroupMember> getGroupMembers(GitlabGroup group) {
+	    int count = 0;
 		List<GitlabGroupMember> ret;
+		    while(true) {
 		try {
 			ret = api.getGroupMembers(group);
+			break;
 		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
 		}
+		    }
 		return ret;
 	}
 
@@ -126,14 +143,18 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public GitlabGroupMember addGroupMember(GitlabGroup group, GitlabUser user, GitlabAccessLevel accessLevel) {
+	    int count = 0;
 		GitlabGroupMember ret = null;
 		if(!GitSync.isDryRun()) {
+		    while(true) {
         		try {
         			ret = api.addGroupMember(group, user, accessLevel);
+        			break;
         		} catch (IOException e) {
-        			LOGGER.error(ERROR_MESSAGE, e);
-        			throw new GitSyncException(e);
+        		    count++;
+        		    handleException(e, count);
         		}
+		    }
 		}
 		return ret;
 	}
@@ -144,14 +165,18 @@ public class GitlabAPIWrapper {
 	 * Gitlab api bug : too many slash before members in api.deleteGroupMember(group, user);
 	 */
 	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
+	    int count = 0;
 		if(!GitSync.isDryRun()) {
+		    while(true) {
         		try {
         		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
         		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
+        		        break;
         		} catch (IOException e) {
-        			LOGGER.error(ERROR_MESSAGE, e);
-        			throw new GitSyncException(e);
+        		    count++;
+        		    handleException(e, count);
         		}
+		    }
 		}
 	}
 
@@ -160,13 +185,17 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public GitlabUser getUser() {
+	    int count = 0;
 		GitlabUser ret;
+		    while(true) {
 		try {
 			ret = api.getUser();
+			break;
 		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
 		}
+		    }
 		return ret;
 	}
 
@@ -175,13 +204,17 @@ public class GitlabAPIWrapper {
 	 * Removes the checked exception.
 	 */
 	public List<GitlabUser> getUsers() {
+	    int count = 0;
 		List<GitlabUser> ret;
+		    while(true) {
 		try {
 			ret = api.getUsers();
+			break;
 		} catch (IOException e) {
-			LOGGER.error(ERROR_MESSAGE, e);
-			throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
 		}
+		    }
 		return ret;
 	}
 
@@ -196,8 +229,10 @@ public class GitlabAPIWrapper {
 			String twitter, String websiteUrl, Integer projectsLimit,
 			String externUid, String externProviderName,
 			String bio, Boolean isAdmin, Boolean canCreateGroup) {
+	    int count = 0;
 		GitlabUser ret = null;
 		if(!GitSync.isDryRun()) {
+		    while(true) {
         		try {
         			ret = api.updateUser(targetUserId,
         					email, password, username,
@@ -205,10 +240,12 @@ public class GitlabAPIWrapper {
         					twitter, websiteUrl, projectsLimit,
         					externUid, externProviderName,
         					bio, isAdmin, canCreateGroup);
+        			break;
         		} catch (IOException e) {
-        			LOGGER.error(ERROR_MESSAGE, e);
-        			throw new GitSyncException(e);
+        		    count++;
+        		    handleException(e, count);
         		}
+		    }
 		}
 		return ret;
 	}
@@ -217,13 +254,17 @@ public class GitlabAPIWrapper {
      * Wrapper around {@link GitlabAPI#blockUser(Integer)}. Removes the checked exception.
      */
     public void blockUser(Integer targetUserId) {
+	    int count = 0;
 	if (!GitSync.isDryRun()) {
+	    while(true) {
 	    try {
 		api.blockUser(targetUserId);
+		break;
 	    }
 	    catch (IOException e) {
-		LOGGER.error(ERROR_MESSAGE, e);
-		throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
+	    }
 	    }
 	}
     }
@@ -232,15 +273,40 @@ public class GitlabAPIWrapper {
      * Wrapper around {@link GitlabAPI#unblockUser(Integer)}. Removes the checked exception.
      */
     public void unblockUser(Integer targetUserId) {
+	    int count = 0;
 	if (!GitSync.isDryRun()) {
+	    while(true) {
 	    try {
 		api.unblockUser(targetUserId);
+		break;
 	    }
 	    catch (IOException e) {
-		LOGGER.error(ERROR_MESSAGE, e);
-		throw new GitSyncException(e);
+		    count++;
+		    handleException(e, count);
+	    }
 	    }
 	}
     }
 
+    private void sleep(int count) {
+	try {
+	    Thread.sleep(sleepTime * count);
+	}
+	catch (InterruptedException e1) {
+	    LOGGER.warn(e1.getMessage());
+	}
+    }
+
+    private void handleException(IOException e, int count) throws GitSyncException {
+	if (count >= maxTries) {
+	    LOGGER.warn("attempt {}/{} failed, throw exception", count, maxTries);
+	    LOGGER.error(ERROR_MESSAGE, e);
+	    throw new GitSyncException(e);
+	}
+	else {
+	    LOGGER.warn("attempt {}/{} failed, retry => {}", count, maxTries, e.getMessage());
+	    sleep(count);
+	}
+    }
+    
 }
