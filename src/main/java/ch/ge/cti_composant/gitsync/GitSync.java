@@ -52,7 +52,7 @@ public class GitSync {
 
     private static final Properties props = new Properties();
 
-    private LdapTree ldapTree = null;
+    private LdapTree ldapTree;
 
     private Gitlab gitlab = null;
 
