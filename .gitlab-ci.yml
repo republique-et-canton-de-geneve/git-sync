@@ -1,6 +1,6 @@
 include:
   - project: $PROJECT_TEMPLATES_GITLABCI_PATH
-    ref: 1.0.2
+    ref: main
     file: '.gitlab-ci-java-basic.yml'
 
 
