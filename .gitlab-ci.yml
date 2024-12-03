@@ -1,8 +1,7 @@
 include:
   - project: $PROJECT_TEMPLATES_GITLABCI_PATH
-    ref: main
+    ref: develop
     file: '.gitlab-ci-java-basic.yml'
-
 
 # --------------------------------------
 # Variables
@@ -10,7 +9,6 @@ include:
 variables:
   # Docker
   DOCKER_IMAGE: $DOCKER_URL/maven:3.8.6-openjdk-11
-
 
 # --------------------------------------
 # Tags
@@ -20,3 +18,4 @@ default:
     - 'for:application-project'
     - 'host:restricted-container'
     - 'net:soca4-dev'
+
