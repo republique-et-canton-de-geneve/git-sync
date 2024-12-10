@@ -39,14 +39,14 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
- * Adds the owner users to all groups except if already admin.
+ * Adds the owner users to all groups except if already admin (BR 5).
  */
 public class PropagateOwnerUsersToAllGroups implements Mission {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropagateOwnerUsersToAllGroups.class);
 
-    @Override
-    public void start(LdapTree ldapTree, Gitlab gitlab) {
+	@Override
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
 	LOGGER.info("Propagating owner users to all groups");
 	GitlabAPIWrapper api = gitlab.getApi();
 
@@ -57,10 +57,10 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 	LOGGER.info("    Property owner-group is set to [{}]", ownerGroup);
 
 	if (StringUtils.isNotBlank(ownerGroup) && ldapTree.getGroups().contains(new LdapGroup(ownerGroup))) {
-	    // Users in owner group
-	    Map<String, LdapUser> owners = ldapTree.getUsers(ownerGroup);
+		// Users in owner group
+		Map<String, LdapUser> owners = ldapTree.getUsers(ownerGroup);
 
-	    gitlab.getGroups().stream()
+		gitlab.getGroups().stream()
 		    // no op for the black-listed groups
 		    .filter(group -> !MissionUtils.getBlackListedGroups().contains(group.getName()))
 		    .filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
@@ -68,44 +68,44 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 	}
 
 	LOGGER.info("Propagating owner users completed");
-    }
-
-    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> allUsers,
-	    Map<String, LdapUser> owners) {
-	List<GitlabGroupMember> members = api.getGroupMembers(group);
-
-	owners.forEach((username, ldapUser) -> setUserAsOwner(api, username, group, ldapUser, allUsers, members));
-    }
-
-    private void setUserAsOwner(GitlabAPIWrapper api, String username, GitlabGroup group, LdapUser ldapUser,
-	    Map<String, GitlabUser> allUsers, List<GitlabGroupMember> members) {
-	boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
-	if (userExists) {
-	    // user is admin, do nothing
-	    if (allUsers.get(username).isAdmin()) {
-		LOGGER.info("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
-			username, group.getName());
-	    }
-	    // user is not member, add it
-	    else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-		LOGGER.info("    Setting user [{}] as owner to group {}", username, group.getName());
-		api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
-	    }
-	    // user is member but not owner
-	    else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username,
-		    GitlabAccessLevel.Owner)) {
-		LOGGER.info("    Promoting user [{}] as owner to group {}", username, group.getName());
-		api.deleteGroupMember(group, allUsers.get(username));
-		api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
-	    }
-	    // user is already owner
-	    else {
-		LOGGER.info("    User [{}] is already owner to group {}", username, group.getName());
-	    }
 	}
-	else {
-	    LOGGER.info("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
-		    group.getName());
+
+	private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> allUsers,
+		Map<String, LdapUser> owners) {
+		List<GitlabGroupMember> members = api.getGroupMembers(group);
+		owners.forEach((username, ldapUser) -> setUserAsOwner(api, username, group, ldapUser, allUsers, members));
 	}
-    }
+
+	private void setUserAsOwner(GitlabAPIWrapper api, String username, GitlabGroup group, LdapUser ldapUser,
+		Map<String, GitlabUser> allUsers, List<GitlabGroupMember> members) {
+		boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
+		if (userExists) {
+			// user is admin, do nothing
+			if (allUsers.get(username).isAdmin()) {
+				LOGGER.info("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
+				            username, group.getName());
+			}
+			// user is not member, add it
+			else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
+				LOGGER.info("    Setting user [{}] as owner to group {}", username, group.getName());
+				api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
+			}
+			// user is member but not owner
+			else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username,
+			         GitlabAccessLevel.Owner)) {
+				LOGGER.info("    Promoting user [{}] as owner to group {}", username, group.getName());
+				api.deleteGroupMember(group, allUsers.get(username));
+				api.addGroupMember(group, allUsers.get(username), GitlabAccessLevel.Owner);
+			}
+			// user is already owner
+			else {
+				LOGGER.info("    User [{}] is already owner to group {}", username, group.getName());
+			}
+		}
+		else {
+			LOGGER.info("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
+			            group.getName());
+		}
+	}
+
 }
