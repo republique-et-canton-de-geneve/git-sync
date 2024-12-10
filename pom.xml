@@ -8,12 +8,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
-		<version>2.1.4.RELEASE</version>
+		<version>2.7.18</version>
 	</parent>
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>4.2-SNAPSHOT</version>
+	<version>5.0-SNAPSHOT</version>
 
 	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
 
@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>2.4.16</version>
+			<version>2.4.21</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -96,9 +96,8 @@
 
 		<!-- Runtime dependencies -->
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
@@ -126,19 +125,12 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.9.1.2184</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.woodstox</groupId>
-							<artifactId>woodstox-core-lgpl</artifactId>
-							<version>4.4.1</version>
-						</dependency>
-					</dependencies>
+					<version>5.0.0.4389</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -146,7 +138,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.1</version>
 			</plugin>
 
 			<plugin>
@@ -182,7 +174,7 @@
 			<plugin>
 				<groupId>org.openclover</groupId>
 				<artifactId>clover-maven-plugin</artifactId>
-				<version>4.4.1</version>
+				<version>4.5.2</version>
 				<configuration>
 					<generateHtml>false</generateHtml>
 					<generateXml>true</generateXml>
@@ -246,7 +238,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.9</version>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
 						<id>jacoco-prepare-agent</id>
@@ -268,7 +260,7 @@
 			<plugin>
 				<groupId>org.codehaus.gmavenplus</groupId>
 				<artifactId>gmavenplus-plugin</artifactId>
-				<version>1.9.0</version>
+				<version>4.0.1</version>
 				<executions>
 					<execution>
 						<goals>
