@@ -25,7 +25,7 @@ gitSync is a standalone Java application which replicates the users from an LDAP
 
 At État de Genève we use an Active Directory server to authenticate users, plus a home-made solution
 (hereafter denoted as "the LDAP server" ) to manage authorizations.
-As is done in many organizations, the LDAP server organizes users in groups such
+As is done in many organizations, the LDAP server organizes users in groups, such
 as "IT-DEV-JAVA", "IT-DEV-PHP" or "FINANCE".
 In the LDAP server, access rights to systems and applications are granted to groups or to users.
 A user is assigned to any number of groups.
@@ -85,23 +85,31 @@ application's configuration file.
 
 ## Business rules
 
-BR1. For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
+This section lists the actions that are carried out at every execution of the application.
+
+### BR1 : create GitLab groups
+
+For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
 if such group does not exist yet.
  
-BR2. For every standard LDAP group, retrieve the list of users (L1).
-  * For every user in list L1:
+### BR2 : create group Maintainers
+
+For every standard LDAP group, retrieve the list of users (LU).
+  * For every user in list LU:
     * If the user does not exist in GitLab, do nothing
       (see section [GitLab authentication](#gitlab-authentication)).
     * If the user already exists in GitLab and is not assigned to the matching group, 
       assign it with the "Maintainer" GitLab role.
     * If the user already exists in GitLab and is already assigned to the matching group, do nothing.
   * Additionally:  
-    * If a user already exists in GitLab, is assigned to the matching group but is not in list L1, remove it from
+    * If a user already exists in GitLab, is assigned to the matching group but is not in list LU, remove it from
       the matching group, unless the user belongs to the LDAP administrator group (see reason below) or to the list of
       not-to-be-cleaned users.
 
-BR3. Retrieve the list of users (L1) of all standard GitLab groups:
-  * For every user in list L1:
+### BR3 : set all others users are Developers
+
+Create Retrieve the list of users (LU) of all standard GitLab groups:
+  * For every user in list LU:
     * For every GitLab group not in `limited-access-groups`:
       * If the user is not assigned to the matching group, assign it with the "Developer" GitLab role.
       * If the user is already assigned to the matching group with a role weaker than "Developer",
@@ -109,7 +117,9 @@ BR3. Retrieve the list of users (L1) of all standard GitLab groups:
       * If the user is already assigned to the matching group with a role stronger than or equal to "Developer",
         do nothing.
 
-BR4. For the administrator LDAP group (if any, defined by `admin-group`), retrieve the list of users. For every user in the list:
+### BR4 : manage administrators
+
+For the administrator LDAP group (if any, defined by `admin-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user already exists in GitLab:
@@ -117,20 +127,29 @@ BR4. For the administrator LDAP group (if any, defined by `admin-group`), retrie
     * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
       black list supplied as a parameter to the application.
 
-BR5. For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
+### BR5 : manage Owners
+
+For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user exists in GitLab:
     * Assign it to all non-administrator groups (with Owner role permission), except the groups in a
       black list supplied as a parameter to the application.
 
-BR6. Retrieve the list of users (L1) of all standard GitLab groups:
-  * For every user in list L1:
+### BR6 : block or unblock users
+
+Retrieve the list of users (LU) of all standard GitLab groups:
+  * For every user in list LU:
     * If the user is blocked in Gitlab and is active in LDAP, unblock the user
     * If the user is active in Gitlab and is inactive in LDAP, block the user
 
-Note: the business rules for the standard groups (BR2) are applied before the business rules for the administrator
-group (BR4), otherwise GitLab users having Admin access level would end up being downgraded to Regular access level.
+### Notes
+  * The business rules for the standard groups (BR2) are applied before the business rules for the
+    administrator group (BR4), otherwise GitLab users having Admin access level would end up being
+    downgraded to Regular access level.
+  * In all business rules here above, whenever a list of users (LU) is mentioned, only the users
+    whose name comply with the regular expression supplied by the parameter `standard-group-users`
+    are considered. The other users are ignored.
 
 ## Remarks
 

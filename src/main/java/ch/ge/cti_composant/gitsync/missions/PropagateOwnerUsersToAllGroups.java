@@ -39,7 +39,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
- * Adds the owner users to all groups except if already admin (BR 5).
+ * Adds the owner users to all groups except if already admin (BR5).
  */
 public class PropagateOwnerUsersToAllGroups implements Mission {
 

@@ -40,7 +40,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
- * Set users as developer to all groups.
+ * Set users as developer to all groups (BR3)
  */
 public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 
@@ -75,7 +75,8 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
     private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> gitlabUsers, Set<LdapUser> ldapUsers) {
 	List<GitlabGroupMember> members = api.getGroupMembers(group);
 	ldapUsers.stream()
-		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only ldap users existing in GitLab
+		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only LDAP users existing in GitLab
+		.filter(user -> MissionUtils.isUserCompliant(user.getName()))
 		.sorted(Comparator.comparing(LdapUser::getName))
 		.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
     }

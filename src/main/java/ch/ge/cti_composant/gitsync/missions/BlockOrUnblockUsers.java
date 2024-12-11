@@ -37,7 +37,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
- * Adds the authorized users to GitLab.
+ * Blocks or unblocks users in GitLab (BR5).
  */
 public class BlockOrUnblockUsers implements Mission {
 

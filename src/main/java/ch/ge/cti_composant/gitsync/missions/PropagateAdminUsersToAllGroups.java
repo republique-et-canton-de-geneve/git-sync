@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Adds the admin users to all groups.
+ * Adds the admin users to all groups (BR4).
  */
 public class PropagateAdminUsersToAllGroups implements Mission {
 

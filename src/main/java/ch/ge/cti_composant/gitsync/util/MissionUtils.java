@@ -38,11 +38,18 @@ import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper methods for the missions.
  */
 public class MissionUtils {
+
+	private static Pattern standardGroupsPattern;
+
+	private static Pattern standardGroupUsersPattern;
 
 	private MissionUtils() {
 	}
@@ -89,15 +96,14 @@ public class MissionUtils {
 	 * Checks that the specified ldap group name is compliant with standard groups regex.
 	 */
 	public static boolean validateGroupnameCompliantStandardGroups(String ldapGroup) {
-	    String patternString = GitSync.getProperty("standard.groups");
-	    if(StringUtils.isBlank(patternString)) {
-		patternString = "[A-Za-z0-9_-]";
-	    }
+		return getStandardGroupsPattern().matcher(ldapGroup).lookingAt();
+	}
 
-	    Pattern pattern = Pattern.compile(patternString);
-	    Matcher matcher = pattern.matcher(ldapGroup);
-
-	    return matcher.lookingAt();
+	/**
+	 * Checks that the specified user name complies with the regex given in parameter "standard-group-users".
+	 */
+	public static boolean isUserCompliant(String username) {
+		return getStandardGroupUsersPattern().matcher(username).lookingAt();
 	}
 
 	/**
@@ -222,6 +228,28 @@ public class MissionUtils {
 		return Stream.of(userNames.split(","))
 				.filter(StringUtils::isNotBlank)
 				.collect(Collectors.toList());
+	}
+
+	private static Pattern getStandardGroupsPattern() {
+		if (standardGroupsPattern == null) {
+			String patternString = GitSync.getProperty("standard.groups");
+			if (StringUtils.isBlank(patternString)) {
+				patternString = "[A-Za-z0-9_-]";
+			}
+			standardGroupsPattern = Pattern.compile(patternString);
+		}
+		return standardGroupsPattern;
+	}
+
+	private static Pattern getStandardGroupUsersPattern() {
+		if (standardGroupUsersPattern == null) {
+			String patternString = GitSync.getProperty("standard-group-users");
+			if (StringUtils.isBlank(patternString)) {
+				patternString = "[A-Za-z0-9_-]";
+			}
+			standardGroupUsersPattern = Pattern.compile(patternString);
+		}
+		return standardGroupUsersPattern;
 	}
 
 }

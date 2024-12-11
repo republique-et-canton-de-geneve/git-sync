@@ -20,11 +20,13 @@ package ch.ge.cti_composant.gitsync.missions;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabAccessLevel;
 import org.gitlab.api.models.GitlabGroup;
+import org.gitlab.api.models.GitlabGroupMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
 /**
- * Removes the permissions in excess on GitLab.
+ * Removes the permissions in excess on GitLab (BR2).
  * <br/>
  * Admin users are ignored. They can be assigned to any type of group or project.
  */
@@ -54,7 +56,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		// Users in owner group
 		final Map<String, LdapUser> owners = new HashMap<>();
 		if (StringUtils.isNotBlank(ownerGroup) && ldapTree.getGroups().contains(new LdapGroup(ownerGroup))) {
-		    owners.putAll(ldapTree.getUsers(ownerGroup));
+			owners.putAll(ldapTree.getUsers(ownerGroup));
 		}
 		
 		// for every group...
@@ -71,20 +73,27 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	private void handleGroup(GitlabGroup gitlabGroup, LdapTree ldapTree, Gitlab gitlab, Map<String, LdapUser> owners) {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 		GitlabAPIWrapper api = gitlab.getApi();
+		List<GitlabGroupMember> members = api.getGroupMembers(gitlabGroup);
 
-		// for every user...
-		api.getGroupMembers(gitlabGroup).stream()
-				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername()))
+		members.stream()
+				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername())
+						&& MissionUtils.isUserCompliant(member.getUsername()))  // will be handled below
 				.filter(member -> !MissionUtils.isGitlabUserAdmin(member, api, ldapTree))
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 				.filter(member -> !owners.containsKey(member.getUsername()))
-				.filter(member -> (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName()) || member.getAccessLevel().accessValue > GitlabAccessLevel.Developer.accessValue))
+				.filter(member -> MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())
+						|| member.getAccessLevel().accessValue > GitlabAccessLevel.Developer.accessValue)
 				.filter(member -> !member.getUsername().contains("_bot"))
-				.forEach(member -> {
-					LOGGER.info("        Removing user [{}] from group [{}]",
-							member.getUsername(), gitlabGroup.getName());
-					api.deleteGroupMember(gitlabGroup, member);
-				});
+				.forEach(member -> removeUser(member, gitlabGroup, api, ""));
+
+		members.stream()
+				.filter(member -> !MissionUtils.isUserCompliant(member.getUsername()))
+				.forEach(member -> removeUser(member, gitlabGroup, api, " (banned user)"));
+	}
+
+	private void removeUser(GitlabGroupMember member, GitlabGroup gitlabGroup, GitlabAPIWrapper api, String cause) {
+		LOGGER.info("        Removing user [{}] from group [{}]{}", member.getUsername(), gitlabGroup.getName(), cause);
+		api.deleteGroupMember(gitlabGroup, member);
 	}
 
 }

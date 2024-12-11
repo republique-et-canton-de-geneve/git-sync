@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Adds the Admin users if they are present in the LDAP group.
+ * Adds the Admin users if they are present in the LDAP group (BR4).
  */
 public class PromoteAdminUsers implements Mission {
 
