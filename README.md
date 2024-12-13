@@ -89,32 +89,32 @@ This section lists the actions that are carried out at every execution of the ap
 
 ### BR1 : create GitLab groups
 
-For every standard LDAP group, create a GitLab group (hereafter coined the "matching group") with the same name,
+For every standard LDAP group, create a GitLab group (hereafter coined the "matching GitLab group") with the same name,
 if such group does not exist yet.
  
-### BR2 : create group Maintainers
+### BR2 : manage Maintainers
 
 For every standard LDAP group, retrieve the list of users (LU).
   * For every user in list LU:
     * If the user does not exist in GitLab, do nothing
       (see section [GitLab authentication](#gitlab-authentication)).
-    * If the user already exists in GitLab and is not assigned to the matching group, 
+    * If the user already exists in GitLab and is not assigned to the matching GitLab group, 
       assign it with the "Maintainer" GitLab role.
-    * If the user already exists in GitLab and is already assigned to the matching group, do nothing.
+    * If the user already exists in GitLab and is already assigned to the matching GitLab group, do nothing.
   * Additionally:  
-    * If a user already exists in GitLab, is assigned to the matching group but is not in list LU, remove it from
-      the matching group, unless the user belongs to the LDAP administrator group (see reason below) or to the list of
-      not-to-be-cleaned users.
+    * If any user already exists in GitLab, is assigned to the matching GitLab group, has "Maintainer role",
+      but is not in list LU, remove it from the GitLab group,
+      unless the user belongs to the list of not-to-be-cleaned users.
 
 ### BR3 : set all others users are Developers
 
 Create Retrieve the list of users (LU) of all standard GitLab groups:
   * For every user in list LU:
     * For every GitLab group not in `limited-access-groups`:
-      * If the user is not assigned to the matching group, assign it with the "Developer" GitLab role.
-      * If the user is already assigned to the matching group with a role weaker than "Developer",
+      * If the user is not assigned to the GitLab group, assign it with the "Developer" GitLab role.
+      * If the user is already assigned to the GitLab group with a role weaker than "Developer",
         assign it with the "Developer" GitLab role.
-      * If the user is already assigned to the matching group with a role stronger than or equal to "Developer",
+      * If the user is already assigned to the GitLab group with a role stronger than or equal to "Developer",
         do nothing.
 
 ### BR4 : manage administrators
@@ -124,8 +124,6 @@ For the administrator LDAP group (if any, defined by `admin-group`), retrieve th
     (see section [GitLab authentication](#gitlab-authentication)).
   * If the user already exists in GitLab:
     * Give it the Admin (as opposed to Regular) access level.
-    * Assign it to all non-administrator groups (with Maintainer role permission), except the groups in a
-      black list supplied as a parameter to the application.
 
 ### BR5 : manage Owners
 

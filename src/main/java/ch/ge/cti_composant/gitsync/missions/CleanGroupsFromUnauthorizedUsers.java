@@ -78,11 +78,11 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		members.stream()
 				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername())
 						&& MissionUtils.isUserCompliant(member.getUsername()))  // will be handled below
-				.filter(member -> !MissionUtils.isGitlabUserAdmin(member, api, ldapTree))
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 				.filter(member -> !owners.containsKey(member.getUsername()))
-				.filter(member -> MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())
-						|| member.getAccessLevel().accessValue > GitlabAccessLevel.Developer.accessValue)
+				.filter(member -> (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())
+						 && member.getAccessLevel().accessValue == GitlabAccessLevel.Master.accessValue)
+						|| member.getAccessLevel().accessValue == GitlabAccessLevel.Master.accessValue)
 				.filter(member -> !member.getUsername().contains("_bot"))
 				.forEach(member -> removeUser(member, gitlabGroup, api, ""));
 

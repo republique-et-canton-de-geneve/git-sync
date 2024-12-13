@@ -45,7 +45,7 @@ public class BlockOrUnblockUsers implements Mission {
 
     @Override
     public void start(LdapTree ldapTree, Gitlab gitlab) {
-	LOGGER.info("Block or unblock users in gitlab");
+	LOGGER.info("Block or unblock users in GitLab");
 
 	GitlabAPIWrapper api = gitlab.getApi();
 
@@ -65,7 +65,7 @@ public class BlockOrUnblockUsers implements Mission {
 	    .sorted(Comparator.comparing(GitlabUser::getUsername))
 	    .forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
 	    
-	LOGGER.info("Block or unblock users in gitlab completed");
+	LOGGER.info("Block or unblock users in GitLab completed");
     }
 
     private boolean fromLdap(final GitlabUser gitlabUser) {

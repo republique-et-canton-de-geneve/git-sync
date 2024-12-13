@@ -33,7 +33,6 @@ import ch.ge.cti_composant.gitsync.missions.BlockOrUnblockUsers;
 import ch.ge.cti_composant.gitsync.missions.CheckMinimumUserCount;
 import ch.ge.cti_composant.gitsync.missions.CleanGroupsFromUnauthorizedUsers;
 import ch.ge.cti_composant.gitsync.missions.PromoteAdminUsers;
-import ch.ge.cti_composant.gitsync.missions.PropagateAdminUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.missions.PropagateOwnerUsersToAllGroups;
 import ch.ge.cti_composant.gitsync.missions.PromoteUsersAsDeveloperToAllGroups;
 import ch.ge.cti_composant.gitsync.service.GitlabService;
@@ -140,9 +139,6 @@ public class GitSync {
 
         // add the Admins
         new PromoteAdminUsers().start(ldapTree, gitlab);
-
-        // add the Admins to all groups
-        new PropagateAdminUsersToAllGroups().start(ldapTree, gitlab);
 
         // add the Owners to all groups
         new PropagateOwnerUsersToAllGroups().start(ldapTree, gitlab);

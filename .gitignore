@@ -16,3 +16,6 @@ logs/
 
 # Sonar
 .scannerwork/
+
+# Application
+configuration-recette.properties
