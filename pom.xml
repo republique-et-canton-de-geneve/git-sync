@@ -13,7 +13,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>5.0.1-SNAPSHOT</version>
+	<version>5.1.0-SNAPSHOT</version>
 
 	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
 
@@ -68,7 +68,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
+			<artifactId>commons-text</artifactId>
+			<version>1.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.gitlab</groupId>

@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,9 +86,9 @@ public class GitSync {
         }
 
         LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
-                getVersion(),
-                props.get("gina-ldap-client.ldap-server-url"),
-                props.get("gitlab.hostname"));
+                sanitize(getVersion()),
+                sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
+                sanitize((String) props.get("gitlab.hostname")));
         
         if(isDryRun()) {
             LOGGER.info("");
@@ -190,6 +191,10 @@ public class GitSync {
             result = Integer.valueOf(p);
         }
         return result;
+    }
+
+    private static String sanitize(String s) {
+        return StringEscapeUtils.escapeHtml4(s);
     }
 
 }
