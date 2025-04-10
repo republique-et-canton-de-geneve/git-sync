@@ -1,3 +1,5 @@
+Test
+
 Build GitHub :
 
 [![Build with GitHub](https://github.com/republique-et-canton-de-geneve/git-sync/actions/workflows/maven.yml/badge.svg)](https://github.com/republique-et-canton-de-geneve/git-sync/actions/workflows/maven.yml)
