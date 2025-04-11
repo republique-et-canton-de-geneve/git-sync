@@ -3,10 +3,6 @@ include:
     ref: develop
     file: '.gitlab-ci-java-basic.yml'
 
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-
 # --------------------------------------
 # Variables
 # --------------------------------------
