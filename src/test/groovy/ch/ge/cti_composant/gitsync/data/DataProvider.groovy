@@ -23,8 +23,7 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapTree
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeSupport
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab
-import org.gitlab.api.models.GitlabGroup
-import org.gitlab.api.models.GitlabUser
+import org.gitlab4j.api.models.Group
 
 /**
  * Class to provide data used by several Spec classes.
@@ -34,7 +33,7 @@ class DataProvider {
     /**
      * Create an ldap tree with groups and users.
      */
-    LdapTree setupLdapTree() {
+    static LdapTree setupLdapTree() {
         def net = new LdapGroup("Network")
         def dev = new LdapGroup("Dev")
 
@@ -61,34 +60,16 @@ class DataProvider {
     /**
      * Create a GitLab tree with groups and users.
      */
-    Gitlab setupGitlabTree() {
+    static Gitlab setupGitlabTree() {
         // groups
-        def net = new GitlabGroup()
+        def net = new Group()
         net.setName("Network")
-        def dev = new GitlabGroup()
+        def dev = new Group()
         dev.setName("Dev")
 
-        // users
-        def jean = new GitlabUser()
-        jean.setName("Jean")
-        def marie = new GitlabUser()
-        marie.setName("Marie")
-        def paul = new GitlabUser()
-        paul.setName("Paul")
-
-        // tree
-        def netUsers = new HashMap<String, GitlabUser>()
-        netUsers.put(marie.name, marie)
-        netUsers.put(paul.name, paul)
-
-        def devUsers = new HashMap<String, GitlabUser>()
-        devUsers.put(paul.name, paul)
-        devUsers.put(marie.name, marie)
-        devUsers.put(jean.name, jean)
-
-        def tree = new HashMap<GitlabGroup, Map<String, GitlabUser>>()
-        tree.put(net, netUsers)
-        tree.put(dev, devUsers)
+        def tree = new HashSet<Group>()
+        tree.add(net)
+        tree.add(dev)
 
         // gitlab
         def gitlab = new Gitlab(tree, "someUrl", "someApiKey")

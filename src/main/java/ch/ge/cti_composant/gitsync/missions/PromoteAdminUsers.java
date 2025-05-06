@@ -23,13 +23,17 @@ import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import org.gitlab.api.models.GitlabUser;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
+import org.gitlab4j.api.models.AbstractUser;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.lang.Boolean.FALSE;
 
 /**
  * Adds the Admin users if they are present in the LDAP group (BR4).
@@ -43,34 +47,37 @@ public class PromoteAdminUsers implements Mission {
 		LOGGER.info("Mapping: adding admin users");
 		GitlabAPIWrapper api = gitlab.getApi();
 
-		Map<String, GitlabUser> allUsers = new HashMap<>();
-		api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
+		Map<String, User> allGitlabUsers = api.getUsers().stream()
+				.collect(Collectors.toMap(AbstractUser::getUsername, user -> user, (v1, v2) -> v2));
 
 		String adminGroup = MissionUtils.getAdministratorGroup();
 		if (adminGroup == null) {
 			LOGGER.info("    No administrator group defined");
 		} else {
 			ldapTree.getUsers(new LdapGroup(adminGroup))
-					.forEach((username, ldapUser) -> {
-						boolean userExists = MissionUtils.validateGitlabUserExistence(
-								ldapUser, new ArrayList<>(allUsers.values()));
-						if (userExists && !allUsers.get(username).isAdmin()) {
-							LOGGER.info("    Setting user [{}] as administrator", username);
-							api.updateUser(
-									allUsers.get(username).getId(), allUsers.get(username).getEmail(), null,
-									null, null, null, null, null, null,
-									null, null, null, null, true, null);
-						} else if (userExists &&
-								MissionUtils.isGitlabUserAdmin(allUsers.get(username), gitlab.getApi(), ldapTree)) {
-							LOGGER.info("    User [{}] is already administrator", username);
-						} else {
-							LOGGER.info("    User [{}] won't be set as administrator as it does not exist in GitLab",
-									username);
-						}
-					});
+					.forEach((username, ldapUser) ->
+							handlePromotionToAdmin(ldapTree, username, ldapUser, allGitlabUsers, api));
+		}
+		LOGGER.info("Mapping completed");
+	}
+
+	private static void handlePromotionToAdmin(LdapTree ldapTree, String username, LdapUser ldapUser,
+											   Map<String, User> allUsers, GitlabAPIWrapper api) {
+
+		boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
+
+		if (!userExists) {
+			LOGGER.info("    User [{}] won't be set as administrator as it does not exist in GitLab", username);
+			return;
 		}
 
-		LOGGER.info("Mapping completed");
+		User user = allUsers.get(username);
+		if (FALSE.equals(user.getIsAdmin())) {
+			LOGGER.info("    Setting user [{}] as administrator", username);
+			api.promoteToAdmin(user.getId());
+		} else if (MissionUtils.isGitlabUserAdmin(user, api, ldapTree)) {
+			LOGGER.info("    User [{}] is already administrator", username);
+		}
 	}
 
 }

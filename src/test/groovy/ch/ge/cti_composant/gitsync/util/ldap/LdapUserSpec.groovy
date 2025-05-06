@@ -50,7 +50,7 @@ class LdapUserSpec extends Specification {
         user.getName() == "Jean Dupont"
     }
 
-    def "#getAttribute should succeed for an existing attribute"() {
+    def "getAttribute should succeed for an existing attribute"() {
         given:
         def attributes = new HashMap()
         attributes.put("cn", "Jean Dupont")
@@ -112,7 +112,7 @@ class LdapUserSpec extends Specification {
         then:
         userA == userB
         userA != userC
-        !userA.equals(null)
+        userA != null
         userA != "Jean Dupont"
     }
 

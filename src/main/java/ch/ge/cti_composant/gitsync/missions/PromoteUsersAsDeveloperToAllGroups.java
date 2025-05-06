@@ -19,86 +19,80 @@
 package ch.ge.cti_composant.gitsync.missions;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
+
+import static org.gitlab4j.api.models.AccessLevel.DEVELOPER;
 
 /**
  * Set users as developer to all groups (BR3)
  */
 public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PromoteUsersAsDeveloperToAllGroups.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PromoteUsersAsDeveloperToAllGroups.class);
 
-    @Override
-    public void start(LdapTree ldapTree, Gitlab gitlab) {
-	LOGGER.info("Promoting users as developer to all groups");
-	GitlabAPIWrapper api = gitlab.getApi();
+	@Override
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Promoting users as developer to all groups");
+		GitlabAPIWrapper api = gitlab.getApi();
 
-	// GitLab users
-	Map<String, GitlabUser> gitlabUsers = new TreeMap<>();
-	api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+		// GitLab users
+		Map<String, User> gitlabUsers = new TreeMap<>();
+		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-	// Ldap users
-	Set<LdapUser> ldapUsers = new HashSet<>();
-	for (LdapGroup group : ldapTree.getGroups()) {
-	    ldapUsers.addAll(ldapTree.getUsers(group).values());
+		// Ldap users
+		Set<LdapUser> ldapUsers = MissionUtils.getLdapUsers(ldapTree);
+
+		// Keep only compliant LDAP users existing in GitLab
+		Stream<LdapUser> filteredUsersStream = ldapUsers.stream()
+				.filter(user -> gitlabUsers.containsKey(user.getName()))
+				.filter(user -> MissionUtils.isUserCompliant(user.getName()))
+				.sorted(Comparator.comparing(LdapUser::getName));
+
+		gitlab.getGroups().stream()
+				.filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
+				.filter(group -> MissionUtils.validateGroupNameCompliantStandardGroups(group.getName()))
+				// for each gitlab group
+				.forEach(group -> {
+					LOGGER.info("Promoting users as developer to group [{}]", group.getName());
+					manageGroup(api, group, gitlabUsers, filteredUsersStream);
+				});
+
+		LOGGER.info("Promoting users as developer completed");
 	}
 
-	gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
-		.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
-		// for each gitlab group
-		.forEach(group -> {
-		    LOGGER.info("Promoting users as developer to group [{}]", group.getName());
-		    manageGroup(api, group, gitlabUsers, ldapUsers);
-		});
-
-	LOGGER.info("Promoting users as developer completed");
-    }
-
-    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> gitlabUsers, Set<LdapUser> ldapUsers) {
-	List<GitlabGroupMember> members = api.getGroupMembers(group);
-	ldapUsers.stream()
-		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only LDAP users existing in GitLab
-		.filter(user -> MissionUtils.isUserCompliant(user.getName()))
-		.sorted(Comparator.comparing(LdapUser::getName))
-		.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
-    }
-
-    private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, LdapUser ldapUser,
-	    List<GitlabGroupMember> members, Map<String, GitlabUser> gitlabUsers) {
-	GitlabUser user = gitlabUsers.get(ldapUser.getName());
-	if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
-	    LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(),
-		    group.getName());
-	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> gitlabUsers, Stream<LdapUser> ldapUsers) {
+		List<Member> members = api.getGroupMembers(group);
+		ldapUsers.forEach(user -> promoteUserAsDeveloper(api, group, members, gitlabUsers.get(user.getName())));
 	}
-	else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(),
-		GitlabAccessLevel.Developer)) {
-	    LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
-	    api.deleteGroupMember(group, user);
-	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+
+	private void promoteUserAsDeveloper(GitlabAPIWrapper api, Group group, List<Member> members, User user) {
+		if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
+			LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(), group.getName());
+			api.addGroupMember(group, user.getId(), DEVELOPER);
+		} else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(), DEVELOPER)) {
+			LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
+			api.deleteGroupMember(group, user.getId());
+			api.addGroupMember(group, user.getId(), DEVELOPER);
+		} else {
+			LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
+					user.getUsername(), group.getName());
+		}
 	}
-	else {
-	    LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
-		    user.getUsername(), group.getName());
-	}
-    }
 
 }

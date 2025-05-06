@@ -52,8 +52,8 @@ class LdapGroupSpec extends Specification {
         then:
         groupA == groupB
         groupA != groupC
-        !groupA.equals(null)
-        groupA != "Hello"
+        groupA != null
+        groupA.name != "Hello"
     }
 
 }

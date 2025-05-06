@@ -23,74 +23,70 @@ import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.CreateGroupRequest;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabUser;
-import org.gitlab.api.models.GitlabVisibility;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.GroupParams;
+import org.gitlab4j.api.models.Visibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service for GitLab operations.
  */
 public class GitlabService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitlabService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabService.class);
 
-    /**
-     * Constructs the in-memory GitLab tree (groups and users) from the specified LDAP tree.
-     *
-     * @return the GitLab tree, <b>restricted to the elements that come from the LDAP server</b>.
-     */
-    public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
-        // log on to GitLab
-        LOGGER.info("Logging on to the GitLab server");
-        GitlabAPIWrapper api = new GitlabAPIWrapper(GitlabAPI.connect(hostname, apiToken));
+	/**
+	 * Constructs the in-memory GitLab tree (groups and users) from the specified LDAP tree.
+	 *
+	 * @return the GitLab tree, <b>restricted to the elements that come from the LDAP server</b>.
+	 */
+	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
+		// log on to GitLab
+		LOGGER.info("Logging on to the GitLab server");
+		GitlabAPIWrapper api = new GitlabAPIWrapper(new GitLabApi(hostname, apiToken));
 
-        // create the missing groups on GitLab
-        LOGGER.info("Creating the missing GitLab groups");
-        ldapTree.getGroups().stream()
-                .filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
-                .filter(ldapGroup -> MissionUtils.validateGroupnameCompliantStandardGroups(ldapGroup))
-                .filter(ldapGroup -> !MissionUtils.validateGitlabGroupExistence(ldapGroup, api))
-                .forEach(ldapGroup -> {
-                    LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
-                    createGroup(ldapGroup, api);
-                });
+		// create the missing groups on GitLab
+		LOGGER.info("Creating the missing GitLab groups");
+		ldapTree.getGroups().stream()
+				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
+				.filter(MissionUtils::validateGroupNameCompliantStandardGroups)
+				.filter(ldapGroup -> !MissionUtils.validateGitlabGroupExistence(ldapGroup, api))
+				.forEach(ldapGroup -> {
+					LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
+					createGroup(ldapGroup, api);
+				});
 
-        // retrieve the GitLab groups
-        LOGGER.info("Retrieving the GitLab groups");
-        List<GitlabGroup> groups;
-        groups = api.getGroups();
+		// retrieve the GitLab groups
+		LOGGER.info("Retrieving the GitLab groups");
+		List<Group> groups = api.getGroups();
 
-        // check and store the GitLab groups in memory, including their users
-        LOGGER.info("Constructing the tree of GitLab groups and users");
-        Map<GitlabGroup, Map<String, GitlabUser>> tree = new HashMap<>();
-        groups.stream()
-                // exclude the groups created independently of LDAP
-                .filter(gitlabGroup -> MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree))
-                .forEach(gitlabGroup -> {
-                    tree.put(gitlabGroup, new HashMap<>());
-                    api.getGroupMembers(gitlabGroup)
-                            .forEach(user -> tree.get(gitlabGroup).put(user.getUsername(), user));
-                });
+		// check and store the GitLab groups in memory
+		LOGGER.info("Constructing la liste des groupes");
 
-        return new Gitlab(tree, hostname, apiToken);
-    }
+		Set<Group> groupsInLdap = groups.stream()
+				// exclude the groups created independently of LDAP
+				.filter(gitlabGroup -> MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree))
+				.collect(Collectors.toSet());
 
-    private void createGroup(LdapGroup ldapGroup, GitlabAPIWrapper api) {
-        CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
-        createGroupRequest.setVisibility(GitlabVisibility.PRIVATE);
-        api.createGroup(createGroupRequest, api.getUser());
-    }
+		return new Gitlab(groupsInLdap, hostname, apiToken);
+	}
 
-    private static boolean isLdapGroupAdmin(LdapGroup group) {
-        return group.getName().equals(MissionUtils.getAdministratorGroup());
-    }
+	private void createGroup(LdapGroup ldapGroup, GitlabAPIWrapper api) {
+		GroupParams groupParams = new GroupParams()
+				.withName(ldapGroup.getName())
+				.withPath(ldapGroup.getName())
+				.withVisibility(Visibility.PRIVATE.toValue());
+		api.createGroup(groupParams);
+	}
+
+	private static boolean isLdapGroupAdmin(LdapGroup group) {
+		return group.getName().equals(MissionUtils.getAdministratorGroup());
+	}
 
 }

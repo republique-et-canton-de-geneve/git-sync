@@ -19,15 +19,14 @@
 package ch.ge.cti_composant.gitsync.missions;
 
 import ch.ge.cti_composant.gitsync.GitSync;
+import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class CheckMinimumUserCount implements Mission {
@@ -45,10 +44,7 @@ public class CheckMinimumUserCount implements Mission {
 		LOGGER.info("Precondition: check that the LDAP tree is not empty or almost empty");
 
 		// A hashset is used to ensure a user is not added more than once
-		Set<LdapUser> users = new HashSet<>();
-		for (LdapGroup group : ldapTree.getGroups()) {
-			users.addAll(ldapTree.getUsers(group).values());
-		}
+		Set<LdapUser> users = MissionUtils.getLdapUsers(ldapTree);
 
 		// Make sure the minimal count of users has been found
 		LOGGER.info("Total number of groups = {}", ldapTree.getGroups().size());
@@ -67,7 +63,7 @@ public class CheckMinimumUserCount implements Mission {
 
 	private int getMinimumUserCount() {
 		String prop = GitSync.getProperty("minimum-user-count");
-		return prop == null ? DEFAULT_MINIMUM_USER_COUNT : new Integer(prop);
+		return prop == null ? DEFAULT_MINIMUM_USER_COUNT : Integer.parseInt(prop);
 	}
 
 }

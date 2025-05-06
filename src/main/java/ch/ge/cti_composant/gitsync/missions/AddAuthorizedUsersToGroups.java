@@ -22,20 +22,19 @@ import ch.ge.cti_composant.gitsync.util.MissionUtils;
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static ch.ge.cti_composant.gitsync.util.MissionUtils.isUserCompliant;
+import static org.gitlab4j.api.models.AccessLevel.MAINTAINER;
 
 /**
  * Adds the authorized users to GitLab (BR2).
@@ -49,47 +48,52 @@ public class AddAuthorizedUsersToGroups implements Mission {
 		LOGGER.info("Mapping: adding the users to the authorized groups");
 		GitlabAPIWrapper api = gitlab.getApi();
 
-		LOGGER.info("Total number of GitLab users: {}", api.getUsers().size());
-		Map<String, GitlabUser> allUsers = MissionUtils.getAllGitlabUsers(api);
+		Map<String, User> allGitlabUsers = MissionUtils.getAllGitlabUsers(api);
+		LOGGER.info("Total number of GitLab users: {}", allGitlabUsers.size());
 
-		for (GitlabGroup group : gitlab.getGroups()) {
-			List<GitlabGroupMember> memberList = api.getGroupMembers(group);
-			LOGGER.info("    Processing the users of group [{}]", group.getName());
-
-			Set<String> userNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
-			for (String username : userNames) {
-				GitlabUser user = allUsers.get(username);
-
-				boolean isUserAlreadyMemberOfGroup = memberList.stream()
-						.filter(member -> member.getUsername().equals(username))
-						.count() >= 1;
-
-				if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
-					// the user exists in GitLab and it has not been added to the group
-					if (isUserCompliant(username)) {
-						LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
-						api.addGroupMember(group, user, GitlabAccessLevel.Master);
-					} else {
-						LOGGER.info("        Not adding user [{}] to group [{}], because it is banned", username, group.getName());
-					}
-
-				} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
-					if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username,
-					    GitlabAccessLevel.Master)) {
-						LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
-						api.deleteGroupMember(group, user);
-						api.addGroupMember(group, user, GitlabAccessLevel.Master);
-					} else {
-						// the user exists in GitLab and it has already been added to the group
-						LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
-					}
-				} else {
-					// the user does not exist in GitLab
-					LOGGER.info("        User [{}] does not exist in GitLab (handling of group [{}])", username, group.getName());
-				}
-			}
-		}
+		gitlab.getGroups()
+				.forEach(group -> processGroup(group, ldapTree, api, allGitlabUsers));
 		LOGGER.info("Mapping completed");
 	}
 
+	private void processGroup(Group group, LdapTree ldapTree, GitlabAPIWrapper api, Map<String, User> allGitlabUsers) {
+		List<Member> memberList = api.getGroupMembers(group);
+		LOGGER.info("    Processing the users of group [{}]", group.getName());
+
+		Set<String> ldapUserNames = new TreeSet<>(ldapTree.getUsers(group.getName()).keySet());
+		for (String ldapUserName : ldapUserNames) {
+			User user = allGitlabUsers.get(ldapUserName);
+			boolean isUserAlreadyMemberOfGroup = MissionUtils.isGitlabUserMemberOfGroup(memberList, ldapUserName);
+
+			if (!allGitlabUsers.containsKey(ldapUserName)) {
+				LOGGER.info("        User [{}] does not exist in GitLab (handling of group [{}])", ldapUserName, group.getName());
+				continue;
+			}
+
+			if (isUserAlreadyMemberOfGroup) {
+				handleExistingMember(memberList, ldapUserName, group, api, user);
+			} else {
+				handleNewMember(ldapUserName, group, api, user);
+			}
+		}
+	}
+
+	private void handleExistingMember(List<Member> memberList, String username, Group group, GitlabAPIWrapper api, User user) {
+		if (MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username, MAINTAINER)) {
+			LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
+		} else {
+			LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
+			api.deleteGroupMember(group, user.getId());
+			api.addGroupMember(group, user.getId(), MAINTAINER);
+		}
+	}
+
+	private void handleNewMember(String username, Group group, GitlabAPIWrapper api, User user) {
+		if (isUserCompliant(username)) {
+			LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
+			api.addGroupMember(group, user.getId(), MAINTAINER);
+		} else {
+			LOGGER.info("        Not adding user [{}] to group [{}], because it is banned", username, group.getName());
+		}
+	}
 }
