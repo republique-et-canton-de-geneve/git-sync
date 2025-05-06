@@ -46,7 +46,7 @@ public class LdapTreeSupport implements LdapTree {
 		this.tree = tree;
 	}
 
-	public List<LdapGroup> getGroups(){
+	public List<LdapGroup> getGroups() {
 		return new ArrayList<>(tree.keySet()).stream()
 				.sorted(Comparator.comparing(LdapGroup::getName))
 				.collect(Collectors.toList());

@@ -58,14 +58,14 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		if (StringUtils.isNotBlank(ownerGroup) && ldapTree.getGroups().contains(new LdapGroup(ownerGroup))) {
 			owners.putAll(ldapTree.getUsers(ownerGroup));
 		}
-		
+
 		// for every group...
 		gitlab.getGroups().stream()
 				.sorted(Comparator.comparing(GitlabGroup::getName))
 				.forEach(gitlabGroup -> {
 					LOGGER.info("    Processing group [{}]", gitlabGroup.getName());
 					handleGroup(gitlabGroup, ldapTree, gitlab, owners);
-			});
+				});
 
 		LOGGER.info("Mapping completed");
 	}
@@ -81,7 +81,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 				.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 				.filter(member -> !owners.containsKey(member.getUsername()))
 				.filter(member -> (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())
-						 && member.getAccessLevel().accessValue == GitlabAccessLevel.Master.accessValue)
+						&& member.getAccessLevel().accessValue == GitlabAccessLevel.Master.accessValue)
 						|| member.getAccessLevel().accessValue == GitlabAccessLevel.Master.accessValue)
 				.filter(member -> !member.getUsername().contains("_bot"))
 				.forEach(member -> removeUser(member, gitlabGroup, api, ""));

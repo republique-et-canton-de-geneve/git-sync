@@ -67,7 +67,7 @@ public class CheckMinimumUserCount implements Mission {
 
 	private int getMinimumUserCount() {
 		String prop = GitSync.getProperty("minimum-user-count");
-		return prop == null ? DEFAULT_MINIMUM_USER_COUNT : new Integer(prop);
+		return prop == null ? DEFAULT_MINIMUM_USER_COUNT : Integer.parseInt(prop);
 	}
 
 }

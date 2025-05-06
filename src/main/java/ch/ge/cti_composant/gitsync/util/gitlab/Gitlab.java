@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
  */
 public class Gitlab {
 
-	private GitlabAPIWrapper api;
+	private final GitlabAPIWrapper api;
 
-	private Map<GitlabGroup, Map<String, GitlabUser>> tree;
+	private final Map<GitlabGroup, Map<String, GitlabUser>> tree;
 
-	public Gitlab(Map<GitlabGroup, Map<String, GitlabUser>> tree, String url, String apiKey){
+	public Gitlab(Map<GitlabGroup, Map<String, GitlabUser>> tree, String url, String apiKey) {
 		this.tree = Objects.requireNonNull(tree);
 		this.api = new GitlabAPIWrapper(GitlabAPI.connect(url, apiKey));
 	}
@@ -64,6 +64,7 @@ public class Gitlab {
 
 	/**
 	 * Returns all users of the specified GitLab group.
+	 *
 	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers(GitlabGroup group) {
@@ -72,6 +73,7 @@ public class Gitlab {
 
 	/**
 	 * Returns all users.
+	 *
 	 * @return a map where every key is a user name and every value is a GitLab user with that name
 	 */
 	public Map<String, GitlabUser> getUsers() {

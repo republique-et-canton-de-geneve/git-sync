@@ -41,102 +41,102 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
  */
 public class BlockOrUnblockUsers implements Mission {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlockOrUnblockUsers.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BlockOrUnblockUsers.class);
 
-    @Override
-    public void start(LdapTree ldapTree, Gitlab gitlab) {
-	LOGGER.info("Block or unblock users in GitLab");
+	private static final String PROVIDER = "ldapmain";
 
-	GitlabAPIWrapper api = gitlab.getApi();
+	@Override
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Block or unblock users in GitLab");
 
-	// Gitlab users
-	Map<String, GitlabUser> gitlabUsers = new HashMap<>();
-	api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+		GitlabAPIWrapper api = gitlab.getApi();
 
-	// Ldap users
-	Map<String, LdapUser> ldapUsers = new HashMap<>();
-	for (LdapGroup group : ldapTree.getGroups()) {
-	    ldapUsers.putAll(ldapTree.getUsers(group));
+		// Gitlab users
+		Map<String, GitlabUser> gitlabUsers = new HashMap<>();
+		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+
+		// Ldap users
+		Map<String, LdapUser> ldapUsers = new HashMap<>();
+		for (LdapGroup group : ldapTree.getGroups()) {
+			ldapUsers.putAll(ldapTree.getUsers(group));
+		}
+
+		gitlabUsers.values().stream()
+				.filter(user -> !MissionUtils.getWideAccessUsers().contains(user.getUsername()))
+				.filter(user -> !MissionUtils.getNotToCleanUsers().contains(user.getUsername()))
+				.sorted(Comparator.comparing(GitlabUser::getUsername))
+				.forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
+
+		LOGGER.info("Block or unblock users in GitLab completed");
 	}
 
-	gitlabUsers.values().stream()
-	    .filter(user -> !MissionUtils.getWideAccessUsers().contains(user.getUsername()))
-	    .filter(user -> !MissionUtils.getNotToCleanUsers().contains(user.getUsername()))
-	    .sorted(Comparator.comparing(GitlabUser::getUsername))
-	    .forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
-	    
-	LOGGER.info("Block or unblock users in GitLab completed");
-    }
-
-    private boolean fromLdap(final GitlabUser gitlabUser) {
-	boolean result = false;
-	for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
-	    if ("ldapmain".equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
-		result = true;
-		break;
-	    }
-	}
-	return result;
-    }
-
-    private String getCnFromLdapIdentity(final GitlabUser gitlabUser) {
-	String result = gitlabUser.getUsername();
-	for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
-	    if ("ldapmain".equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
-		String ldapUid = ident.getExternUid().replace("cn=", "");
-		ldapUid = ldapUid.substring(0, ldapUid.indexOf(","));
-		result = ldapUid;
-		break;
-	    }
-	}
-	return result;
-    }
-
-    private void blockOrUnblockUser(GitlabAPIWrapper api, final GitlabUser gitlabUser,
-	    Map<String, LdapUser> ldapUsers) {
-	if (gitlabUser == null || !fromLdap(gitlabUser)) {
-	    // Do nothing
-	    return;
+	private boolean fromLdap(final GitlabUser gitlabUser) {
+		boolean result = false;
+		for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
+			if (PROVIDER.equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
-	// User state in gitlab
-	String gitlabUserState = gitlabUser.getState();
-	if("ldap_blocked".equals(gitlabUserState)) {
-	    // Do nothing, impossible to change state via api
-	    return;
+	private String getCnFromLdapIdentity(final GitlabUser gitlabUser) {
+		String result = gitlabUser.getUsername();
+		for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
+			if (PROVIDER.equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
+				String ldapUid = ident.getExternUid().replace("cn=", "");
+				ldapUid = ldapUid.substring(0, ldapUid.indexOf(","));
+				result = ldapUid;
+				break;
+			}
+		}
+		return result;
 	}
-	boolean isActiveGitlab = !"blocked".equals(gitlabUserState);
 
-	// User state in ldap
-	LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase(Locale.FRANCE));
-	if(currentLdapUser == null) {
-	    String cnFromLdapIdentity = getCnFromLdapIdentity(gitlabUser);
-	    currentLdapUser = ldapUsers.get(cnFromLdapIdentity.toUpperCase(Locale.FRANCE));
-	}
-	String loginDisabled;
-	if (currentLdapUser != null) {
-	    try {
-		loginDisabled = currentLdapUser.getAttribute("loginDisabled");
-	    }
-	    catch (Exception e) {
-		loginDisabled = Boolean.TRUE.toString();
-	    }
-	}
-	else {
-	    loginDisabled = Boolean.TRUE.toString();
-	}
-	boolean isActiveLdap = Boolean.FALSE.toString().equalsIgnoreCase(loginDisabled);
+	private void blockOrUnblockUser(GitlabAPIWrapper api, final GitlabUser gitlabUser,
+									Map<String, LdapUser> ldapUsers) {
+		if (gitlabUser == null || !fromLdap(gitlabUser)) {
+			// Do nothing
+			return;
+		}
 
-	// Active in ldap but blocked in gitlab => unblock user
-	if (isActiveLdap && !isActiveGitlab) {
-	    LOGGER.info("    Unblock user [{}]", gitlabUser.getUsername());
-	    api.unblockUser(gitlabUser.getId());
+		// User state in gitlab
+		String gitlabUserState = gitlabUser.getState();
+		if ("ldap_blocked".equals(gitlabUserState)) {
+			// Do nothing, impossible to change state via api
+			return;
+		}
+		boolean isActiveGitlab = !"blocked".equals(gitlabUserState);
+
+		// User state in ldap
+		LdapUser currentLdapUser = ldapUsers.get(gitlabUser.getUsername().toUpperCase(Locale.FRANCE));
+		if (currentLdapUser == null) {
+			String cnFromLdapIdentity = getCnFromLdapIdentity(gitlabUser);
+			currentLdapUser = ldapUsers.get(cnFromLdapIdentity.toUpperCase(Locale.FRANCE));
+		}
+		String loginDisabled;
+		if (currentLdapUser != null) {
+			try {
+				loginDisabled = currentLdapUser.getAttribute("loginDisabled");
+			} catch (Exception e) {
+				loginDisabled = Boolean.TRUE.toString();
+			}
+		} else {
+			loginDisabled = Boolean.TRUE.toString();
+		}
+		boolean isActiveLdap = Boolean.FALSE.toString().equalsIgnoreCase(loginDisabled);
+
+		// Active in ldap but blocked in gitlab => unblock user
+		if (isActiveLdap && !isActiveGitlab) {
+			LOGGER.info("    Unblock user [{}]", gitlabUser.getUsername());
+			api.unblockUser(gitlabUser.getId());
+		}
+		// Blocked in ldap but active in gitlab => block user
+		else if (!isActiveLdap && isActiveGitlab) {
+			LOGGER.info("    Block user [{}]", gitlabUser.getUsername());
+			api.blockUser(gitlabUser.getId());
+		}
 	}
-	// Blocked in ldap but active in gitlab => block user
-	else if (!isActiveLdap && isActiveGitlab) {
-	    LOGGER.info("    Block user [{}]", gitlabUser.getUsername());
-	    api.blockUser(gitlabUser.getId());
-	}
-    }
 
 }

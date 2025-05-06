@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 public class LdapUser {
 
-	private HashMap<String, String> attributes;
+	private final HashMap<String, String> attributes;
 
 	public LdapUser(Map<String, String> attributes) {
 		this.attributes = new HashMap<>(attributes);

@@ -20,16 +20,16 @@ package ch.ge.cti_composant.gitsync.util.exception;
 
 public class GitSyncException extends RuntimeException {
 
-    public GitSyncException(Exception cause) {
+	public GitSyncException(Exception cause) {
         super(cause);
     }
 
-    public GitSyncException(String msg) {
-        super(msg);
-    }
+	public GitSyncException(String msg) {
+		super(msg);
+	}
 
-    public GitSyncException(String msg, Exception cause) {
-        super(msg, cause);
-    }
+	public GitSyncException(String msg, Exception cause) {
+		super(msg, cause);
+	}
 
 }

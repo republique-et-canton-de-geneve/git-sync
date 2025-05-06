@@ -44,61 +44,59 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
  */
 public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PromoteUsersAsDeveloperToAllGroups.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PromoteUsersAsDeveloperToAllGroups.class);
 
-    @Override
-    public void start(LdapTree ldapTree, Gitlab gitlab) {
-	LOGGER.info("Promoting users as developer to all groups");
-	GitlabAPIWrapper api = gitlab.getApi();
+	@Override
+	public void start(LdapTree ldapTree, Gitlab gitlab) {
+		LOGGER.info("Promoting users as developer to all groups");
+		GitlabAPIWrapper api = gitlab.getApi();
 
-	// GitLab users
-	Map<String, GitlabUser> gitlabUsers = new TreeMap<>();
-	api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+		// GitLab users
+		Map<String, GitlabUser> gitlabUsers = new TreeMap<>();
+		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-	// Ldap users
-	Set<LdapUser> ldapUsers = new HashSet<>();
-	for (LdapGroup group : ldapTree.getGroups()) {
-	    ldapUsers.addAll(ldapTree.getUsers(group).values());
+		// Ldap users
+		Set<LdapUser> ldapUsers = new HashSet<>();
+		for (LdapGroup group : ldapTree.getGroups()) {
+			ldapUsers.addAll(ldapTree.getUsers(group).values());
+		}
+
+		gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
+				.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
+				// for each gitlab group
+				.forEach(group -> {
+					LOGGER.info("Promoting users as developer to group [{}]", group.getName());
+					manageGroup(api, group, gitlabUsers, ldapUsers);
+				});
+
+		LOGGER.info("Promoting users as developer completed");
 	}
 
-	gitlab.getGroups().stream().filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
-		.filter(group -> MissionUtils.validateGroupnameCompliantStandardGroups(group.getName()))
-		// for each gitlab group
-		.forEach(group -> {
-		    LOGGER.info("Promoting users as developer to group [{}]", group.getName());
-		    manageGroup(api, group, gitlabUsers, ldapUsers);
-		});
-
-	LOGGER.info("Promoting users as developer completed");
-    }
-
-    private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> gitlabUsers, Set<LdapUser> ldapUsers) {
-	List<GitlabGroupMember> members = api.getGroupMembers(group);
-	ldapUsers.stream()
-		.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only LDAP users existing in GitLab
-		.filter(user -> MissionUtils.isUserCompliant(user.getName()))
-		.sorted(Comparator.comparing(LdapUser::getName))
-		.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
-    }
-
-    private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, LdapUser ldapUser,
-	    List<GitlabGroupMember> members, Map<String, GitlabUser> gitlabUsers) {
-	GitlabUser user = gitlabUsers.get(ldapUser.getName());
-	if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
-	    LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(),
-		    group.getName());
-	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+	private void manageGroup(GitlabAPIWrapper api, GitlabGroup group, Map<String, GitlabUser> gitlabUsers, Set<LdapUser> ldapUsers) {
+		List<GitlabGroupMember> members = api.getGroupMembers(group);
+		ldapUsers.stream()
+				.filter(user -> gitlabUsers.containsKey(user.getName())) // Keep only LDAP users existing in GitLab
+				.filter(user -> MissionUtils.isUserCompliant(user.getName()))
+				.sorted(Comparator.comparing(LdapUser::getName))
+				.forEach(user -> promoteUserAsDeveloper(api, group, user, members, gitlabUsers));
 	}
-	else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(),
-		GitlabAccessLevel.Developer)) {
-	    LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
-	    api.deleteGroupMember(group, user);
-	    api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+
+	private void promoteUserAsDeveloper(GitlabAPIWrapper api, GitlabGroup group, LdapUser ldapUser,
+										List<GitlabGroupMember> members, Map<String, GitlabUser> gitlabUsers) {
+		GitlabUser user = gitlabUsers.get(ldapUser.getName());
+		if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
+			LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(),
+					group.getName());
+			api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+		} else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(),
+				GitlabAccessLevel.Developer)) {
+			LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
+			api.deleteGroupMember(group, user);
+			api.addGroupMember(group, user, GitlabAccessLevel.Developer);
+		} else {
+			LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
+					user.getUsername(), group.getName());
+		}
 	}
-	else {
-	    LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
-		    user.getUsername(), group.getName());
-	}
-    }
 
 }

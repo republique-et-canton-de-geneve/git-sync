@@ -32,6 +32,7 @@ public interface LdapTree {
 
 	/**
 	 * Returns the users of the specified LDAP group.
+	 *
 	 * @param groupName LDAP group name. Can be blank
 	 * @return a map of users, possibly empty
 	 */

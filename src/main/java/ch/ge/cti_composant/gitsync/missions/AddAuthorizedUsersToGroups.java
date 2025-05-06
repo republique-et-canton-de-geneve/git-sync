@@ -29,7 +29,6 @@ import org.gitlab.api.models.GitlabUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,11 +60,10 @@ public class AddAuthorizedUsersToGroups implements Mission {
 				GitlabUser user = allUsers.get(username);
 
 				boolean isUserAlreadyMemberOfGroup = memberList.stream()
-						.filter(member -> member.getUsername().equals(username))
-						.count() >= 1;
+						.anyMatch(member -> member.getUsername().equals(username));
 
 				if (allUsers.containsKey(username) && !isUserAlreadyMemberOfGroup) {
-					// the user exists in GitLab and it has not been added to the group
+					// the user exists in GitLab, and it has not been added to the group
 					if (isUserCompliant(username)) {
 						LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
 						api.addGroupMember(group, user, GitlabAccessLevel.Master);
@@ -75,12 +73,12 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 				} else if (allUsers.containsKey(username) && isUserAlreadyMemberOfGroup) {
 					if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username,
-					    GitlabAccessLevel.Master)) {
+							GitlabAccessLevel.Master)) {
 						LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
 						api.deleteGroupMember(group, user);
 						api.addGroupMember(group, user, GitlabAccessLevel.Master);
 					} else {
-						// the user exists in GitLab and it has already been added to the group
+						// the user exists in GitLab, and it has already been added to the group
 						LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
 					}
 				} else {
