@@ -68,6 +68,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
   variables:
     GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
     SONARQUBE_QUALITYGATE_WAIT: 'true'
+    SONAR_DOCKER_IMAGE_MAVEN: oci-snapshot.devops.etat-ge.ch/ch/ge/cti/build/ubi-jdk-maven-node:U9.4-J21-M3.9.9-N20.19.1
   before_script:
     - !reference [.sonarqube_print_conf, script]
     - !reference [.sonarqube_before_script_custom, script]
