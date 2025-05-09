@@ -81,7 +81,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
     - |
-      if [[ "$MESURE1" -gt 0]]
+      if [ "$MESURE1" -gt "0" ]
       then
         echo "x is not equal to y!"
       else
