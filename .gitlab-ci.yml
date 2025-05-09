@@ -76,7 +76,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - |
       VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
     - echo $VAL1
-    - jq '.component.measures.period.value' <<< $VAL1
+    - jq '.component.measures[].period.value' <<< $VAL1
   interruptible: true
   dependencies: []
   rules:
