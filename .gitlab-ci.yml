@@ -59,3 +59,30 @@ sonarqube_2: &sonarqube_maven_no_dependency
     when: 
       - runner_system_failure
       - scheduler_failure
+
+
+
+sonarqube_3: &sonarqube_maven_no_dependency
+  stage: build
+  image: $SONAR_DOCKER_IMAGE_MAVEN
+  variables:
+    GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
+    SONARQUBE_QUALITYGATE_WAIT: 'true'
+  before_script:
+    - !reference [.sonarqube_print_conf, script]
+    - !reference [.sonarqube_before_script_custom, script]
+  script:
+    - |
+      VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
+    - echo $VAL1
+    - jq '.component.measures.period.value' <<< $VAL1
+  interruptible: true
+  dependencies: []
+  rules:
+    - !reference [.sonarqube_rules_sonar_enabled, rules]
+    - !reference [.sonarqube_rules_custom, rules]
+  retry:
+    max: 2
+    when: 
+      - runner_system_failure
+      - scheduler_failure
