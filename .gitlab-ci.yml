@@ -28,6 +28,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
   image: $SONAR_DOCKER_IMAGE_MAVEN
   variables:
     GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
+    SONARQUBE_QUALITYGATE_WAIT: 'true'
   before_script:
     - !reference [.sonarqube_print_conf, script]
     - !reference [.sonarqube_before_script_custom, script]
@@ -44,6 +45,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
       -Dsonar.projectName=$SONAR_PROJECT_NAME 
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
+    - curl -k -v --request GET 'https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating' --header 'Authorization: Bearer $SON AR_TOKEN'
   interruptible: true
   dependencies: []
   rules:
