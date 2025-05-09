@@ -21,3 +21,36 @@ default:
     - 'host:restricted-container'
     - 'net:soca4-dev'
 
+# Analyse SonarQube du code avec Maven sans dépendance sur d'autres jobs.
+# Le projet est donc buildé avant l'analyse.
+sonarqube_2: &sonarqube_maven_no_dependency
+  stage: build
+  image: $SONAR_DOCKER_IMAGE_MAVEN
+  variables:
+    GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
+  before_script:
+    - !reference [.sonarqube_print_conf, script]
+    - !reference [.sonarqube_before_script_custom, script]
+  script:
+    - mvn -s $MAVEN_SETTINGS_FILE $MAVEN_CLI_OPTS $MAVEN_CLI_OPTS_CUSTOM clean package $MAVEN_SKIP_TESTS
+    - mvn -s $MAVEN_SETTINGS_FILE $MAVEN_CLI_OPTS $MAVEN_CLI_OPTS_CUSTOM 
+      $SONAR_MAVEN_GOAL 
+      -Dsonar.gitlab.project_id=$CI_PROJECT_PATH 
+      -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA 
+      -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME 
+      -Dsonar.qualitygate.wait=$SONARQUBE_QUALITYGATE_WAIT 
+      -Dsonar.java.binaries=$SONAR_JAVA_BINARIES 
+      -Dsonar.log.level=$SONARQUBE_LOG_LEVEL 
+      -Dsonar.projectName=$SONAR_PROJECT_NAME 
+      ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
+      ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
+  interruptible: true
+  dependencies: []
+  rules:
+    - !reference [.sonarqube_rules_sonar_enabled, rules]
+    - !reference [.sonarqube_rules_custom, rules]
+  retry:
+    max: 2
+    when: 
+      - runner_system_failure
+      - scheduler_failure
