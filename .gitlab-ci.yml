@@ -80,6 +80,8 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - echo $VAL1
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
+    - MESURE1_NUMBER=$(($MESURE1+0))
+    - echo $MESURE1_NUMBER
   interruptible: true
   dependencies: []
   rules:
