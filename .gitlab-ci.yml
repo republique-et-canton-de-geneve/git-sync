@@ -83,7 +83,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - MESURE2=`expr $MESURE1`
     - echo $MESURE2 
     - LIMIT1="1" 
-    - echo | awk '{if ($MESURE1 > $LIMIT1) {print "True"} else {print "False"} }' 
+    - echo | awk '{if ($MESURE1 >= $LIMIT1) {print "True"} else {print "False"} }' 
     - |
       if [[ $(MESURE1 | bc) -gt $((LIMIT1 + 0)) ]];
       then
