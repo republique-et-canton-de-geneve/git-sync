@@ -81,7 +81,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
     - MESURE2=`expr $MESURE1`
-    - echo $MESURE2
+    - echo $MESURE2 
     - LIMIT1="1"
     - |
       if [[ $(MESURE1 | bc) -gt $((LIMIT1 + 0)) ]];
