@@ -82,22 +82,16 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - echo $MESURE1
     - MESURE2=`expr $MESURE1`
     - echo $MESURE2 
-    - LIMIT1="1" 
+    - LIMIT1="0" 
     - ASSERT1=`echo | awk '{if ($MESURE1 > $LIMIT1) {print "True"} else {print "False"} }'`
     - echo $ASSERT1
     - |
       if [[ $ASSERT1 == 'True' ]]
       then
         echo "true"
+        exit 1
       else
         echo "false"
-      fi
-    - |
-      if [[ $(MESURE1 | bc) -gt $((LIMIT1 + 0)) ]];
-      then
-        echo "x is not equal to y!"
-      else
-        echo "x is equal to y!"
       fi
   interruptible: true
   dependencies: []
