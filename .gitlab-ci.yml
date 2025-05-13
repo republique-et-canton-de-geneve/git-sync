@@ -86,7 +86,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - ASSERT1=`echo | awk '{if ($MESURE1 >= $LIMIT1) {print "True"} else {print "False"} }'`
     - echo $ASSERT1
     - |
-      if $ASSERT1
+      if [[ $ASSERT1 == 'True' ]]
       then
         echo "true"
       else
