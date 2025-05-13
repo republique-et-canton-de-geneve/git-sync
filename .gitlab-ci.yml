@@ -84,7 +84,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - echo $MESURE2
     - LIMIT1="1"
     - |
-      if [[ $MESURE1 -gt $LIMIT1 ]]
+      if [[ "$MESURE1" -gt "$LIMIT1" ]];
       then
         echo "x is not equal to y!"
       else
