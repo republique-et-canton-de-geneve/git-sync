@@ -76,6 +76,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - !reference [.sonarqube_before_script_custom, script]
   script:
     - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`
+    - echo $PID
     - |
       VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
     - echo $VAL1
