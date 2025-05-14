@@ -46,7 +46,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
     - |
-      VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
+      VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
     - echo $VAL1
     - VAL1_STRING=`jq '.component.measures.period.value' <<< $VAL1`
     - VAL1_NUMBER=$(($VAL1+0))
