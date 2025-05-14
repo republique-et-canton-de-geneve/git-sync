@@ -81,18 +81,8 @@ sonarqube_3: &sonarqube_maven_no_dependency
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
     - MESURE1_NUMBER=${MESURE1//\"}
-    - echo $v
+    - echo $MESURE1_NUMBER
     - LIMIT1=0
-    - ASSERT1=`echo | awk '{if ($MESURE1_NUMBER > 0) {print "True"} else {print "False"} }'`
-    - echo $ASSERT1
-    - |
-      if [[ $ASSERT1 == 'True' ]]
-      then
-        echo "true"
-        exit 1
-      else
-        echo "false"
-      fi
     - |
       if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 > $2)}') )); then
         echo "true"
