@@ -94,7 +94,7 @@ sonarqube_3: &sonarqube_maven_no_dependency
         echo "false"
       fi
     - |
-      if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 > $2)}') )); then
+      if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 < $2)}') )); then
         echo "true"
         exit 1
       else
