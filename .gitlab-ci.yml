@@ -39,18 +39,38 @@ sonarqube_2: &sonarqube_maven_no_dependency
       -Dsonar.gitlab.project_id=$CI_PROJECT_PATH 
       -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA 
       -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME 
-      -Dsonar.qualitygate.wait=$SONARQUBE_QUALITYGATE_WAIT 
+      -Dsonar.qualitygate.wait=false 
       -Dsonar.java.binaries=$SONAR_JAVA_BINARIES 
       -Dsonar.log.level=$SONARQUBE_LOG_LEVEL 
       -Dsonar.projectName=$SONAR_PROJECT_NAME 
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
+    - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`
+    - echo $PID
+
+
     - |
-      VAL1=`curl -k -v --request GET "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=ch.ge.cti.composant%3AgitSync&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
+      TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID" --header "Authorization: Bearer $SONAR_TOKEN"`
+    - echo $TASKS1
+    - QUEUE1=`jq '.queue[].status' <<< $TASKS1`
+    - echo $QUEUE1
+
+
+    - |
+      VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=new_security_review_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
     - echo $VAL1
-    - VAL1_STRING=`jq '.component.measures.period.value' <<< $VAL1`
-    - VAL1_NUMBER=$(($VAL1+0))
-    - echo $VAL1_NUMBER
+    - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
+    - echo $MESURE1
+    - MESURE1_NUMBER=${MESURE1//\"}
+    - echo $MESURE1_NUMBER
+    - LIMIT1=0
+    - |
+      if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 > $2)}') )); then
+        echo "true"
+        exit 1
+      else
+        echo "false"
+      fi
   interruptible: true
   dependencies: []
   rules:
