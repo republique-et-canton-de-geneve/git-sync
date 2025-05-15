@@ -54,7 +54,7 @@ public class GitSync {
 
 	private LdapTree ldapTree;
 
-	private Gitlab gitlab = null;
+	private Gitlab gitlab;
 
 	/**
 	 * Performs all operations.
@@ -85,10 +85,12 @@ public class GitSync {
 			props.load(inputStream);
 		}
 
-		LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
-				sanitize(getVersion()),
-				sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
-				sanitize((String) props.get("gitlab.hostname")));
+		if (LoggerFactory.getLogger(GitSync.class).isInfoEnabled()) {
+			LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
+					sanitize(getVersion()),
+					sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
+					sanitize((String) props.get("gitlab.hostname")));
+		}
 
 		if (isDryRun()) {
 			LOGGER.info("");

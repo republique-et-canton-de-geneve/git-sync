@@ -18,32 +18,29 @@
  */
 package ch.ge.cti_composant.gitsync.util.gitlab;
 
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabUser;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.models.Group;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * The GitLab context.
- * Consists mainly in the GitLab tree (groups and users), usually restricted to the elements that come from
+ * Consists mainly in the GitLab tree (groups and members), usually restricted to the elements that come from
  * the LDAP server.
  */
 public class Gitlab {
 
 	private final GitlabAPIWrapper api;
 
-	private final Map<GitlabGroup, Map<String, GitlabUser>> tree;
+	private final Set<Group> tree;
 
-	public Gitlab(Map<GitlabGroup, Map<String, GitlabUser>> tree, String url, String apiKey) {
+	public Gitlab(Set<Group> tree, String url, String apiKey) {
 		this.tree = Objects.requireNonNull(tree);
-		this.api = new GitlabAPIWrapper(GitlabAPI.connect(url, apiKey));
+		this.api = new GitlabAPIWrapper(new GitLabApi(url, apiKey));
 	}
 
 	/**
@@ -56,30 +53,10 @@ public class Gitlab {
 	/**
 	 * Returns all GitLab groups, sorted by names.
 	 */
-	public List<GitlabGroup> getGroups() {
-		return new ArrayList<>(tree.keySet()).stream()
-				.sorted(Comparator.comparing(GitlabGroup::getName))
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Returns all users of the specified GitLab group.
-	 *
-	 * @return a map where every key is a user name and every value is a GitLab user with that name
-	 */
-	public Map<String, GitlabUser> getUsers(GitlabGroup group) {
-		return new HashMap<>(tree.getOrDefault(group, new HashMap<>()));
-	}
-
-	/**
-	 * Returns all users.
-	 *
-	 * @return a map where every key is a user name and every value is a GitLab user with that name
-	 */
-	public Map<String, GitlabUser> getUsers() {
-		HashMap<String, GitlabUser> output = new HashMap<>();
-		tree.forEach((group, users) -> output.putAll(new HashMap<>(users)));
-		return output;
+	public Set<Group> getGroups() {
+		return tree.stream()
+				.sorted(Comparator.comparing(Group::getName))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 }

@@ -24,7 +24,7 @@ import org.apache.commons.lang3.Validate;
  * A group in the LDAP server.
  * Will be matched to a group in the GitLab server.
  */
-public class LdapGroup {
+public class LdapGroup implements Comparable<LdapGroup> {
 
 	private final String name;
 
@@ -59,4 +59,12 @@ public class LdapGroup {
 		return name;
 	}
 
+	@Override
+	public int compareTo(LdapGroup o) {
+		if (o == null) {
+			return 1;
+		} else {
+			return name.compareTo(o.name);
+		}
+	}
 }

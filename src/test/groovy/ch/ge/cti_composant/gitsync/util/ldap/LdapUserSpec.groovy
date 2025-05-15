@@ -112,7 +112,7 @@ class LdapUserSpec extends Specification {
         then:
         userA == userB
         userA != userC
-        !userA.equals(null)
+        userA != null
         userA != "Jean Dupont"
     }
 

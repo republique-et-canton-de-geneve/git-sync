@@ -51,7 +51,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GinaLdapTreeBuilder.class);
 
 	/**
-	 * Name of the Gina domain in the LDEP server.
+	 * Name of the Gina domain in the LDAP server.
 	 */
 	private static final String DOMAIN = "CTI";
 
@@ -65,11 +65,13 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 	 */
 	private static final String DOMAIN_APPLICATION = DOMAIN + "." + APPLICATION;
 
+	private static final String CN = "cn";
+
 	/**
 	 * Names of the LDAP attributes to be retrieved from the LDAP server.
 	 * We are only interested in attribute "cn".
 	 */
-	private static final String[] ATTRIBUTES = {"cn", "loginDisabled"};
+	private static final String[] ATTRIBUTES = {CN, "loginDisabled"};
 
 	@Override
 	public LdapTree createTree() {
@@ -90,21 +92,21 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 			// get the LDAP groups
 			app.getAppRoles(DOMAIN_APPLICATION)
 					.stream()
-					.filter(role -> MissionUtils.validateGroupnameCompliantStandardGroups(role) || role.equals(MissionUtils.getAdministratorGroup()) || role.equals(MissionUtils.getOwnerGroup()))
+					.filter(role -> MissionUtils.validateGroupNameCompliantStandardGroups(role) || role.equals(MissionUtils.getAdministratorGroup()) || role.equals(MissionUtils.getOwnerGroup()))
 					.forEach(role -> tree.put(new LdapGroup(role), new TreeMap<>()));
 
 			// get the LDAP users
 			tree.forEach((ldapGroup, ldapUsers) -> {
 				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				try {
-					Comparator<Map<String, String>> userComparator = (user1, user2) -> user1.containsKey("cn") ? user1.get("cn").compareTo(user2.get("cn")) : 0;
+					Comparator<Map<String, String>> userComparator = (user1, user2) -> user1.containsKey(CN) ? user1.get(CN).compareTo(user2.get(CN)) : 0;
 
 					app.getUsers(DOMAIN_APPLICATION, ldapGroup.getName(), ATTRIBUTES).stream()
 							.sorted(userComparator)
 							.forEach(user -> {
-								if (user.containsKey("cn")) {
-									LOGGER.info("\t{} is user of LDAP group [{}]", user.get("cn"), ldapGroup.getName());
-									ldapUsers.put(user.get("cn"), new LdapUser(new HashMap<>(user)));
+								if (user.containsKey(CN)) {
+									LOGGER.info("\t{} is user of LDAP group [{}]", user.get(CN), ldapGroup.getName());
+									ldapUsers.put(user.get(CN), new LdapUser(new HashMap<>(user)));
 								}
 							});
 				} catch (RemoteException e) {

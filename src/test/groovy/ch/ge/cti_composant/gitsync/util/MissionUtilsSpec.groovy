@@ -19,7 +19,7 @@
 package ch.ge.cti_composant.gitsync.util
 
 import ch.ge.cti_composant.gitsync.data.DataProvider
-import org.gitlab.api.models.GitlabGroup
+import org.gitlab4j.api.models.Group
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,10 +31,10 @@ class MissionUtilsSpec extends Specification {
 
     def "#validateLdapGroupExistence should find a matching LDAP group for a GitLab group"() {
         given:
-        def ldapTree = new DataProvider().setupLdapTree()
+        def ldapTree = DataProvider.setupLdapTree()
 
         expect:
-        def gitlabGroup = new GitlabGroup()
+        def gitlabGroup = new Group()
         gitlabGroup.setName(groupName)
         found == MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree)
 

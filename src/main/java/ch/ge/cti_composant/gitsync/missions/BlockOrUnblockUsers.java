@@ -24,8 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabUser;
-import org.gitlab.api.models.GitlabUserIdentity;
+import org.gitlab4j.api.models.Identity;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class BlockOrUnblockUsers implements Mission {
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		// Gitlab users
-		Map<String, GitlabUser> gitlabUsers = new HashMap<>();
+		Map<String, User> gitlabUsers = new HashMap<>();
 		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
 
 		// Ldap users
@@ -64,26 +64,23 @@ public class BlockOrUnblockUsers implements Mission {
 		gitlabUsers.values().stream()
 				.filter(user -> !MissionUtils.getWideAccessUsers().contains(user.getUsername()))
 				.filter(user -> !MissionUtils.getNotToCleanUsers().contains(user.getUsername()))
-				.sorted(Comparator.comparing(GitlabUser::getUsername))
+				.sorted(Comparator.comparing(User::getUsername))
 				.forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
 
 		LOGGER.info("Block or unblock users in GitLab completed");
 	}
 
-	private boolean fromLdap(final GitlabUser gitlabUser) {
-		boolean result = false;
-		for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
-			if (PROVIDER.equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
-				result = true;
-				break;
-			}
-		}
-		return result;
+	private boolean fromLdap(final User gitlabUser) {
+		return gitlabUser.getIdentities().stream()
+				.anyMatch(
+						identity -> PROVIDER.equals(identity.getProvider())
+								&& StringUtils.isNotBlank(identity.getExternUid())
+				);
 	}
 
-	private String getCnFromLdapIdentity(final GitlabUser gitlabUser) {
+	private String getCnFromLdapIdentity(final User gitlabUser) {
 		String result = gitlabUser.getUsername();
-		for (GitlabUserIdentity ident : gitlabUser.getIdentities()) {
+		for (Identity ident : gitlabUser.getIdentities()) {
 			if (PROVIDER.equals(ident.getProvider()) && StringUtils.isNotBlank(ident.getExternUid())) {
 				String ldapUid = ident.getExternUid().replace("cn=", "");
 				ldapUid = ldapUid.substring(0, ldapUid.indexOf(","));
@@ -94,7 +91,7 @@ public class BlockOrUnblockUsers implements Mission {
 		return result;
 	}
 
-	private void blockOrUnblockUser(GitlabAPIWrapper api, final GitlabUser gitlabUser,
+	private void blockOrUnblockUser(GitlabAPIWrapper api, final User gitlabUser,
 									Map<String, LdapUser> ldapUsers) {
 		if (gitlabUser == null || !fromLdap(gitlabUser)) {
 			// Do nothing

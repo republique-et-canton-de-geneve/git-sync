@@ -23,17 +23,16 @@ import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
 import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.CreateGroupRequest;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabUser;
-import org.gitlab.api.models.GitlabVisibility;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.GroupParams;
+import org.gitlab4j.api.models.Visibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Service for GitLab operations.
@@ -50,13 +49,13 @@ public class GitlabService {
 	public Gitlab buildGitlabContext(String hostname, String apiToken, LdapTree ldapTree) {
 		// log on to GitLab
 		LOGGER.info("Logging on to the GitLab server");
-		GitlabAPIWrapper api = new GitlabAPIWrapper(GitlabAPI.connect(hostname, apiToken));
+		GitlabAPIWrapper api = new GitlabAPIWrapper(new GitLabApi(hostname, apiToken));
 
 		// create the missing groups on GitLab
 		LOGGER.info("Creating the missing GitLab groups");
 		ldapTree.getGroups().stream()
 				.filter(ldapGroup -> !isLdapGroupAdmin(ldapGroup))
-				.filter(MissionUtils::validateGroupnameCompliantStandardGroups)
+				.filter(MissionUtils::validateGroupNameCompliantStandardGroups)
 				.filter(ldapGroup -> !MissionUtils.validateGitlabGroupExistence(ldapGroup, api))
 				.forEach(ldapGroup -> {
 					LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
@@ -65,28 +64,25 @@ public class GitlabService {
 
 		// retrieve the GitLab groups
 		LOGGER.info("Retrieving the GitLab groups");
-		List<GitlabGroup> groups;
-		groups = api.getGroups();
+		List<Group> groups = api.getGroups();
 
 		// check and store the GitLab groups in memory, including their users
 		LOGGER.info("Constructing the tree of GitLab groups and users");
-		Map<GitlabGroup, Map<String, GitlabUser>> tree = new HashMap<>();
+		Set<Group> tree = new LinkedHashSet<>();
 		groups.stream()
 				// exclude the groups created independently of LDAP
 				.filter(gitlabGroup -> MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree))
-				.forEach(gitlabGroup -> {
-					tree.put(gitlabGroup, new HashMap<>());
-					api.getGroupMembers(gitlabGroup)
-							.forEach(user -> tree.get(gitlabGroup).put(user.getUsername(), user));
-				});
+				.forEach(tree::add);
 
 		return new Gitlab(tree, hostname, apiToken);
 	}
 
 	private void createGroup(LdapGroup ldapGroup, GitlabAPIWrapper api) {
-		CreateGroupRequest createGroupRequest = new CreateGroupRequest(ldapGroup.getName(), ldapGroup.getName());
-		createGroupRequest.setVisibility(GitlabVisibility.PRIVATE);
-		api.createGroup(createGroupRequest, api.getUser());
+		GroupParams groupParams = new GroupParams()
+				.withName(ldapGroup.getName())
+				.withPath(ldapGroup.getName())
+				.withVisibility(Visibility.PRIVATE.toValue());
+		api.createGroup(groupParams);
 	}
 
 	private static boolean isLdapGroupAdmin(LdapGroup group) {

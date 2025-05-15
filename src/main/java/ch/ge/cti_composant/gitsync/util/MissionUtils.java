@@ -25,14 +25,16 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
+import org.gitlab4j.api.models.AccessLevel;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +54,7 @@ public class MissionUtils {
 	/**
 	 * Checks that the specified GitLab group exists also in the LDAP tree.
 	 */
-	public static boolean validateLdapGroupExistence(GitlabGroup gitlabGroup, LdapTree ldapTree) {
+	public static boolean validateLdapGroupExistence(Group gitlabGroup, LdapTree ldapTree) {
 		return ldapTree.getGroups().contains(new LdapGroup(gitlabGroup.getName()));
 	}
 
@@ -66,14 +68,14 @@ public class MissionUtils {
 	/**
 	 * Checks that the specified ldap group is compliant with standard groups regex.
 	 */
-	public static boolean validateGroupnameCompliantStandardGroups(LdapGroup ldapGroup) {
-		return validateGroupnameCompliantStandardGroups(ldapGroup.getName());
+	public static boolean validateGroupNameCompliantStandardGroups(LdapGroup ldapGroup) {
+		return validateGroupNameCompliantStandardGroups(ldapGroup.getName());
 	}
 
 	/**
 	 * Checks that the specified ldap group name is compliant with standard groups regex.
 	 */
-	public static boolean validateGroupnameCompliantStandardGroups(String ldapGroup) {
+	public static boolean validateGroupNameCompliantStandardGroups(String ldapGroup) {
 		return getStandardGroupsPattern().matcher(ldapGroup).lookingAt();
 	}
 
@@ -87,50 +89,43 @@ public class MissionUtils {
 	/**
 	 * Checks that the specified user exists in GitLab.
 	 */
-	public static boolean validateGitlabUserExistence(LdapUser user, List<GitlabUser> users) {
+	public static boolean validateGitlabUserExistence(LdapUser user, List<User> users) {
 		long usersCount = users.stream()
-				.filter(gitlabUser -> gitlabUser.getUsername().equals(user.getName()))
+				.filter(gitlabUser -> Objects.equals(gitlabUser.getUsername(), user.getName()))
 				.count();
-		switch ((int) usersCount) {
-			case 1:
-				return true;
-			case 0:
-				return false;
-			default:
-				throw new GitSyncException("More than one user with name [" + user.getName() + "] has been found");
+
+		if (usersCount > 1) {
+			throw new GitSyncException("More than one user with name [" + user.getName() + "] has been found");
 		}
+
+		return usersCount == 1;
 	}
+
 
 	/**
 	 * Checks whether the specified GitLab user has admin rights.
 	 */
-	public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPIWrapper api, LdapTree ldapTree) {
+	public static boolean isGitlabUserAdmin(User user, GitlabAPIWrapper api, LdapTree ldapTree) {
 		// is it "me"?
 		boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
-		boolean isTrivialAdmin = user.isAdmin();
+		boolean isTrivialAdmin = user.getIsAdmin();
 		// is it in the LDAP admin group?
 		boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
 		return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
 	}
 
-	public static Map<String, GitlabUser> getAllGitlabUsers(GitlabAPIWrapper api) {
-		Map<String, GitlabUser> allUsers = new HashMap<>();
-		api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
-		return allUsers;
+	public static Map<String, User> getAllGitlabUsers(GitlabAPIWrapper api) {
+		return api.getUsers().stream().collect(Collectors.toMap(User::getUsername, user -> user));
 	}
 
-	public static boolean isGitlabUserMemberOfGroup(List<GitlabGroupMember> members, String user) {
-		return members.stream().anyMatch(member -> member.getUsername().equals(user));
+	public static boolean isGitlabUserMemberOfGroup(List<Member> members, String username) {
+		return members.stream().anyMatch(member -> Objects.equals(member.getUsername(), username));
 	}
 
-	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<GitlabGroupMember> members, String user, GitlabAccessLevel accesslevel) {
+	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<Member> members, String user, AccessLevel accesslevel) {
 		return members.stream()
 				.filter(member -> member.getUsername().equals(user))
-				.anyMatch(member -> member.isAdmin() || member.getAccessLevel().accessValue >= accesslevel.accessValue);
-	}
-
-	public static GitlabUser getGitlabUser(GitlabAPIWrapper api, String username) {
-		return getAllGitlabUsers(api).get(username);
+				.anyMatch(member -> AccessLevel.ADMIN == member.getAccessLevel() || member.getAccessLevel().value >= accesslevel.value);
 	}
 
 	/**
@@ -209,6 +204,14 @@ public class MissionUtils {
 		return Stream.of(userNames.split(","))
 				.filter(StringUtils::isNotBlank)
 				.collect(Collectors.toList());
+	}
+
+	public static Set<LdapUser> getLdapUsers(LdapTree ldapTree) {
+		Set<LdapUser> ldapUsers = new HashSet<>();
+		for (LdapGroup group : ldapTree.getGroups()) {
+			ldapUsers.addAll(ldapTree.getUsers(group).values());
+		}
+		return ldapUsers;
 	}
 
 	private static Pattern getStandardGroupsPattern() {
