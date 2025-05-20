@@ -101,30 +101,34 @@ public class MissionUtils {
 		return usersCount == 1;
 	}
 
-
 	/**
 	 * Checks whether the specified GitLab user has admin rights.
 	 */
 	public static boolean isGitlabUserAdmin(User user, GitlabAPIWrapper api, LdapTree ldapTree) {
-		// is it "me"?
-		boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
-		boolean isTrivialAdmin = user.getIsAdmin();
-		// is it in the LDAP admin group?
-		boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
-		return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
+		return Boolean.TRUE.equals(user.getIsAdmin()) || isIsLdapAdmin(user, ldapTree) || isTechnicalAccount(user, api);
 	}
 
+	/**
+	 * Gets all the gitlab users and returns them in a map.
+	 */
 	public static Map<String, User> getAllGitlabUsers(GitlabAPIWrapper api) {
-		return api.getUsers().stream().collect(Collectors.toMap(User::getUsername, user -> user));
+		return api.getUsers().stream().collect(
+				Collectors.toMap(User::getUsername, user -> user, (existing, replacement) -> existing));
 	}
 
+	/**
+	 * Checks whether the specified GitLab user is in the members list.
+	 */
 	public static boolean isGitlabUserMemberOfGroup(List<Member> members, String username) {
 		return members.stream().anyMatch(member -> Objects.equals(member.getUsername(), username));
 	}
 
+	/**
+	 * Checks whether the specified GitLab user has at least the specified access level.
+	 */
 	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<Member> members, String user, AccessLevel accesslevel) {
 		return members.stream()
-				.filter(member -> member.getUsername().equals(user))
+				.filter(member -> Objects.equals(member.getUsername(), user))
 				.anyMatch(member -> AccessLevel.ADMIN == member.getAccessLevel() || member.getAccessLevel().value >= accesslevel.value);
 	}
 
@@ -212,6 +216,14 @@ public class MissionUtils {
 			ldapUsers.addAll(ldapTree.getUsers(group).values());
 		}
 		return ldapUsers;
+	}
+
+	private static boolean isTechnicalAccount(User user, GitlabAPIWrapper api) {
+		return user.getUsername().equals(api.getUser().getUsername());
+	}
+
+	private static boolean isIsLdapAdmin(User user, LdapTree ldapTree) {
+		return ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
 	}
 
 	private static Pattern getStandardGroupsPattern() {

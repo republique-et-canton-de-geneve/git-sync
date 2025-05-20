@@ -24,7 +24,6 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapUser
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTreeSupport
 import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab
 import org.gitlab4j.api.models.Group
-import org.gitlab4j.api.models.User
 
 /**
  * Class to provide data used by several Spec classes.

@@ -81,7 +81,7 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 		boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
 		if (userExists) {
 			// user is admin, do nothing
-			boolean isAdmin = allUsers.get(username).getIsAdmin();
+			boolean isAdmin = Boolean.TRUE.equals(allUsers.get(username).getIsAdmin());
 			if (isAdmin) {
 				LOGGER.info("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
 						username, group.getName());
