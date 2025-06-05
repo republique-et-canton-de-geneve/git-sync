@@ -81,7 +81,7 @@ public class GitlabService {
 		GroupParams groupParams = new GroupParams()
 				.withName(ldapGroup.getName())
 				.withPath(ldapGroup.getName())
-				.withVisibility(Visibility.PRIVATE.toValue());
+				.withVisibility(Visibility.INTERNAL.toValue());
 		api.createGroup(groupParams);
 	}
 
