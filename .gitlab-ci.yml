@@ -8,7 +8,7 @@ include:
 # --------------------------------------
 variables:
   # Docker
-  DOCKER_IMAGE: $DOCKER_URL/maven:3.8.6-openjdk-11
+  DOCKER_IMAGE: $DOCKER_URL/maven:3.9.7-eclipse-temurin-21
   SONARQUBE_QUALITYGATE_WAIT: 'true'
   SECURITY_MONITORING: 'true'
 
