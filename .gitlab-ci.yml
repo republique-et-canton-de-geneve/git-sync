@@ -94,7 +94,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
 
 
 
-sonarqube_3: &sonarqube_maven_no_dependency
+.sonarqube_3: &sonarqube_maven_no_dependency
   stage: build
   image: $SONAR_DOCKER_IMAGE_MAVEN
   variables:
