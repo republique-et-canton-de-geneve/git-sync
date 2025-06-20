@@ -67,7 +67,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
 
 
     - |
-      VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=security_rating" --header "Authorization: Bearer $SONAR_TOKEN"`
+      VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=software_quality_security_issues" --header "Authorization: Bearer $SONAR_TOKEN"`
     - echo $VAL1
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
