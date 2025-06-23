@@ -61,15 +61,16 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - VAR_IN_PROGRESS="IN_PROGRESS"
     - echo $VAR_IN_PROGRESS
     - |
-      if [[ $QUEUE1 == $VAR_IN_PROGRESS ]]; then
+      if [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]]; then
         echo 'fffffffffffffffffff';
       fi
-    - while [[ "$QUEUE1" == "IN_PROGRESS" ]]; do
+    - while [[ "$QUEUE1_ESC" == "IN_PROGRESS" ]]; do
         echo "while";
         TASKS1=`curl -k https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID --header 'Authorization:Bearer $SONAR_TOKEN'`;
         echo $TASKS1;
         QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
         echo $QUEUE1;
+        QUEUE1_ESC=${QUEUE1//\"};
       done
     - |
       VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=software_quality_security_issues" --header "Authorization: Bearer $SONAR_TOKEN"`
