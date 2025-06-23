@@ -25,6 +25,7 @@ default:
 
 .toto: &toto |-
   function call_sonar() {
+    sleep 5
     TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$1" --header "Authorization:Bearer $SONAR_TOKEN"`;
     QUEUE1=`jq '.queue | length' <<< $TASKS1`;
     echo $QUEUE1;
