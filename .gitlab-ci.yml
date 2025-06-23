@@ -59,12 +59,13 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo $QUEUE1_ESC
     - line=0
     - VAR_IN_PROGRESS="IN_PROGRESS"
+    - VAR_PENDING="PENDING"
     - echo $VAR_IN_PROGRESS
     - |
       if [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]]; then
         echo 'fffffffffffffffffff';
       fi
-    - while [[ "$QUEUE1_ESC" == "IN_PROGRESS" ]]; do
+    - while [[ $QUEUE1_ESC == $VAR_IN_PROGRESS -o $QUEUE1_ESC == $VAR_PENDING ]]; do
         echo "while";
         TASKS1=`curl -k https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID --header 'Authorization:Bearer $SONAR_TOKEN'`;
         echo $TASKS1;
