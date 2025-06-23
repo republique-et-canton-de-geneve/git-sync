@@ -55,6 +55,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo $TASKS1
     - QUEUE1=`jq '.queue[0].status' <<< $TASKS1`
     - echo $QUEUE1
+    - echo ${QUEUE1}
     - line=0
     - while [[ '$QUEUE1' == "IN_PROGRESS" -o '$QUEUE1' == "PENDING" ]]; do
         echo "while";
