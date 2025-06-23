@@ -35,6 +35,7 @@ default:
     QUEUE1_ESC=${QUEUE1//\"};
     echo $QUEUE1_ESC;
     echo "fin call_sonar";
+    return $QUEUE1_ESC;
   }
 
 
@@ -67,22 +68,9 @@ sonarqube_2: &sonarqube_maven_no_dependency
       -Dsonar.projectName=$SONAR_PROJECT_NAME 
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
-    - call_sonar
-    - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`
-    - echo $PID
-
-
-    - |
-      TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID" --header "Authorization:Bearer $SONAR_TOKEN"`
-    - echo $TASKS1
-    - QUEUE1=`jq '.queue[0].status' <<< $TASKS1`
-    - echo $QUEUE1
-    - QUEUE1_ESC=${QUEUE1//\"}
-    - echo $QUEUE1_ESC
-    - line=0
+    - QUEUE1_ESC=`call_sonar`
     - VAR_IN_PROGRESS="IN_PROGRESS"
     - VAR_PENDING="PENDING"
-    - echo $VAR_IN_PROGRESS
     - |
       if [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]]; then
         echo 'fffffffffffffffffff';
@@ -90,12 +78,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - |
       while [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]] || [[ $QUEUE1_ESC == $VAR_PENDING ]]; do
         echo "while";
-        TASKS1=`curl -k https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID --header 'Authorization:Bearer $SONAR_TOKEN'`;
-        echo $TASKS1;
-        QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
-        echo $QUEUE1;
-        QUEUE1_ESC=${QUEUE1//\"};
-        echo $QUEUE1_ESC;
+        QUEUE1_ESC=`call_sonar`
         echo "fin while";
       done
     - echo $QUEUE1_ESC
