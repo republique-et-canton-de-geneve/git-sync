@@ -58,7 +58,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo ${QUEUE1}
     - line=0
     - |
-      if (($QUEUE1 == "IN_PROGRESS")); then
+      if (( ${QUEUE1} == "IN_PROGRESS" )); then
         echo 'fffffffffffffffffff';
       fi
     - while [[ "$QUEUE1" == "IN_PROGRESS" ]]; do
