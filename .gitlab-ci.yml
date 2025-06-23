@@ -26,8 +26,8 @@ default:
 .toto: &toto |-
   function call_sonar() {
     echo "call_sonar";
-    PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`
-    echo $PID
+    PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
+    echo $PID;
     curl -k --max-time 60 https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID --header 'Authorization:Bearer $SONAR_TOKEN' >> TASKS1;
     echo $TASKS1;
     QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
