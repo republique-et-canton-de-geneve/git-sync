@@ -30,7 +30,7 @@ default:
     QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
     QUEUE1_ESC=${QUEUE1//\"};
     QUEUE1=`jq '.queue[] | length' <<< $TASKS1`;
-    echo ($QUEUE1 > 0);
+    echo ($QUEUE1);
   }
 
 
