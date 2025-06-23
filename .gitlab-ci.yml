@@ -25,8 +25,7 @@ default:
 
 .toto: &toto |-
   function call_sonar() {
-    PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
-    TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID" --header "Authorization:Bearer $SONAR_TOKEN"`;
+    TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$1" --header "Authorization:Bearer $SONAR_TOKEN"`;
     QUEUE1=`jq '.queue | length' <<< $TASKS1`;
     echo $QUEUE1;
   }
@@ -61,7 +60,8 @@ sonarqube_2: &sonarqube_maven_no_dependency
       -Dsonar.projectName=$SONAR_PROJECT_NAME 
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
-    - QUEUE1_ESC=`call_sonar`
+    - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
+    - QUEUE1_ESC=`call_sonar $PID`
     - echo 'apres';
     - echo $QUEUE1_ESC;
     - |
