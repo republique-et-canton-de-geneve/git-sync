@@ -26,12 +26,12 @@ default:
 .sonar_functions: &sonar_functions |-
   function sonar_get_report() {
     sleep 5
-    TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$1" --header "Authorization:Bearer $SONAR_TOKEN"`;
+    TASKS1=`curl -k "$SONAR_HOST_URL/api/ce/component?component=$1" --header "Authorization:Bearer $SONAR_TOKEN"`;
     QUEUE1=`jq '.queue | length' <<< $TASKS1`;
     echo $QUEUE1;
   }
   function sonar_check_metric() {
-    VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=$PID&branch=$CI_COMMIT_REF_NAME&metricKeys=$1" --header "Authorization:Bearer $SONAR_TOKEN"`
+    VAL1=`curl -k "$SONAR_HOST_URL/api/measures/component?component=$PID&branch=$CI_COMMIT_REF_NAME&metricKeys=$1" --header "Authorization:Bearer $SONAR_TOKEN"`
     MESURE1=`jq '.component.measures[0].value' <<< $VAL1`
     MESURE1_NUMBER=${MESURE1//\"}
     LIMIT1=0
