@@ -55,9 +55,9 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo $TASKS1
     - QUEUE1=`jq '.queue[0].status' <<< $TASKS1`
     - echo $QUEUE1
-    - echo ${QUEUE1}
     - line=0
     - VAR_IN_PROGRESS="IN_PROGRESS"
+    - echo $VAR_IN_PROGRESS
     - |
       if [[ $QUEUE1 == $VAR_IN_PROGRESS ]]; then
         echo 'fffffffffffffffffff';
