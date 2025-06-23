@@ -68,13 +68,9 @@ sonarqube_2: &sonarqube_maven_no_dependency
       -Dsonar.projectName=$SONAR_PROJECT_NAME 
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
-    - QUEUE1_ESC=`call_sonar`
     - VAR_IN_PROGRESS="IN_PROGRESS"
     - VAR_PENDING="PENDING"
-    - |
-      if [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]]; then
-        echo 'fffffffffffffffffff';
-      fi
+    - QUEUE1_ESC=`call_sonar`
     - |
       while [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]] || [[ $QUEUE1_ESC == $VAR_PENDING ]]; do
         echo "while";
