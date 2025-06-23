@@ -67,9 +67,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo $QUEUE1_ESC;
     - |
       while [[ $QUEUE1_ESC == $VAR_IN_PROGRESS ]] || [[ $QUEUE1_ESC == $VAR_PENDING ]]; do
-        echo "while";
         QUEUE1_ESC=`call_sonar`
-        echo "fin while";
       done
     - echo $QUEUE1_ESC
     - |
