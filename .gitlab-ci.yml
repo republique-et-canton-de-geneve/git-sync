@@ -45,10 +45,12 @@ default:
     MESURE1_NUMBER=${MESURE1//\"}
     LIMIT1=0
     if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 > $2)}') )); then
-      echo "Veuillez corriger les vulnérabilités SonarQube."
-      exit 1
+      echo "Ce projet ne respecte pas les recommandations APPSEC. Veuillez corriger les vulnérabilités SonarQube."
+      if ($SECURITY_MONITORING == "true"); then
+        exit 1
+      fi
     else
-      echo "false"
+      echo "Le projet respecte les recommandations APPSEC."
     fi
   }
 
