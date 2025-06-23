@@ -72,6 +72,8 @@ sonarqube_2: &sonarqube_maven_no_dependency
         QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
         echo $QUEUE1;
         QUEUE1_ESC=${QUEUE1//\"};
+        echo $QUEUE1_ESC;
+        echo "fin while";
       done
     - |
       VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=software_quality_security_issues" --header "Authorization: Bearer $SONAR_TOKEN"`
