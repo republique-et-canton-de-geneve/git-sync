@@ -34,7 +34,7 @@ default:
     VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=$PID&branch=$CI_COMMIT_REF_NAME&metricKeys=$1" --header "Authorization:Bearer $SONAR_TOKEN"`
     MESURE1=`jq '.component.measures[0].value' <<< $VAL1`
     MESURE1_NUMBER=${MESURE1//\"}
-    LIMIT1=0
+    LIMIT1=-1
     if (( $(echo "$MESURE1_NUMBER $LIMIT1" | awk '{print ($1 > $2)}') )); then
       echo "true"
       exit 1
