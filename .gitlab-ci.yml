@@ -65,7 +65,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - echo 'apres';
     - echo $QUEUE1_ESC;
     - |
-      while [[ $QUEUE1_ESC ]]; do
+      while [[ $QUEUE1_ESC -gt 0 ]]; do
         QUEUE1_ESC=`call_sonar`
       done
     - echo $QUEUE1_ESC
