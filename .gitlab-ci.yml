@@ -1,6 +1,6 @@
 include:
   - project: $PROJECT_TEMPLATES_GITLABCI_PATH
-    ref: develop
+    ref: 'IC-1288'
     file: '.gitlab-ci-java-basic.yml'
 
 # --------------------------------------
