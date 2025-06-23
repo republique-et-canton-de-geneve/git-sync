@@ -61,6 +61,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
     - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
+    - echo $PID;
     - QUEUE1_ESC=`call_sonar $PID`
     - echo 'apres';
     - echo $QUEUE1_ESC;
@@ -69,8 +70,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
         QUEUE1_ESC=`call_sonar`
       done
     - echo $QUEUE1_ESC
-    - |
-      VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=software_quality_security_issues" --header "Authorization: Bearer $SONAR_TOKEN"`
+    - VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?branch=$CI_COMMIT_REF_NAME&component=$PID&metricKeys=software_quality_security_issues" --header "Authorization:Bearer $SONAR_TOKEN"`
     - echo $VAL1
     - MESURE1=`jq '.component.measures[].period.value' <<< $VAL1`
     - echo $MESURE1
