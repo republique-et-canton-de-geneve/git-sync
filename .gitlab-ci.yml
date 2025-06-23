@@ -27,7 +27,7 @@ default:
   function call_sonar() {
     PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
     TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID" --header "Authorization:Bearer $SONAR_TOKEN"`;
-    QUEUE1=`jq '.queue[].status' <<< $TASKS1`;
+    QUEUE1=`jq '.queue[] | length' <<< $TASKS1`;
     echo $QUEUE1;
   }
 
