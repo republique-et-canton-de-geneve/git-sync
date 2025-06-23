@@ -56,7 +56,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
     - QUEUE1=`jq '.queue[0].status' <<< $TASKS1`
     - echo $QUEUE1
     - line=0
-    - while [ '$QUEUE1' == "IN_PROGRESS" -o '$QUEUE1' == "PENDING" ]; do
+    - while [[ '$QUEUE1' == "IN_PROGRESS" -o '$QUEUE1' == "PENDING" ]]; do
         echo "while";
         TASKS1=`curl -k https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$PID --header 'Authorization:Bearer $SONAR_TOKEN'`;
         echo $TASKS1;
