@@ -23,14 +23,14 @@ default:
 
 
 
-.toto: &toto |-
-  function call_sonar() {
+.sonar_functions: &sonar_functions |-
+  function sonar_get_report() {
     sleep 5
     TASKS1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/ce/component?component=$1" --header "Authorization:Bearer $SONAR_TOKEN"`;
     QUEUE1=`jq '.queue | length' <<< $TASKS1`;
     echo $QUEUE1;
   }
-  function check_metric() {
+  function sonar_check_metric() {
     VAL1=`curl -k "https://sonarqube.devops.etat-ge.ch/sonarqube/api/measures/component?component=$PID&branch=$CI_COMMIT_REF_NAME&metricKeys=$1" --header "Authorization:Bearer $SONAR_TOKEN"`
     MESURE1=`jq '.component.measures[0].value' <<< $VAL1`
     MESURE1_NUMBER=${MESURE1//\"}
@@ -58,7 +58,7 @@ sonarqube_2: &sonarqube_maven_no_dependency
   before_script:
     - !reference [.sonarqube_print_conf, script]
     - !reference [.sonarqube_before_script_custom, script]
-    - *toto
+    - *sonar_functions
   script:
     - mvn -s $MAVEN_SETTINGS_FILE $MAVEN_CLI_OPTS $MAVEN_CLI_OPTS_CUSTOM clean package $MAVEN_SKIP_TESTS
     - mvn -s $MAVEN_SETTINGS_FILE $MAVEN_CLI_OPTS $MAVEN_CLI_OPTS_CUSTOM 
@@ -73,16 +73,13 @@ sonarqube_2: &sonarqube_maven_no_dependency
       ${SONAR_PROJECT_KEY:+-Dsonar.projectKey=$SONAR_PROJECT_KEY} 
       ${SONAR_NODEJS_EXECUTABLE_PATH:+-Dsonar.nodejs.executable=$SONAR_NODEJS_EXECUTABLE_PATH} 
     - PID=`echo '${project.groupId}:${project.artifactId}' | mvn -N -q -DforceStdout help:evaluate`;
-    - QUEUE1_ESC=`call_sonar $PID`
+    - QUEUE1_ESC=`sonar_get_report $PID`
     - |
       while [[ $QUEUE1_ESC -gt 0 ]]; do
-        QUEUE1_ESC=`call_sonar $PID`
+        QUEUE1_ESC=`sonar_get_report $PID`
       done
-
-    - check_metric "software_quality_security_issues"
-    - check_metric "security_hotspots"
-
-
+    - sonar_check_metric "software_quality_security_issues"
+    - sonar_check_metric "security_hotspots"
   interruptible: true
   dependencies: []
   rules:
