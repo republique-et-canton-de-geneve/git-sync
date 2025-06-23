@@ -35,7 +35,7 @@ default:
     QUEUE1_ESC=${QUEUE1//\"};
     echo $QUEUE1_ESC;
     echo "fin call_sonar";
-    return $QUEUE1;
+    return "$QUEUE1";
   }
 
 
