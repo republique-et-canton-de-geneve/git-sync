@@ -168,7 +168,7 @@ public class MissionUtils {
 		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
 		return Stream.of(groupNames.split(","))
 				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -182,7 +182,7 @@ public class MissionUtils {
 		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
 		return Stream.of(groupNames.split(","))
 				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class MissionUtils {
 		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
 		return Stream.of(userNames.split(","))
 				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class MissionUtils {
 		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
 		return Stream.of(userNames.split(","))
 				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	public static Set<LdapUser> getLdapUsers(LdapTree ldapTree) {

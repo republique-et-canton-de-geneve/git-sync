@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * Simple implementation of {@link LdapTree}.
@@ -49,7 +48,7 @@ public class LdapTreeSupport implements LdapTree {
 	public List<LdapGroup> getGroups() {
 		return new ArrayList<>(tree.keySet()).stream()
 				.sorted(Comparator.comparing(LdapGroup::getName))
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	public Map<String, LdapUser> getUsers(LdapGroup group) {
