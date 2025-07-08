@@ -59,10 +59,10 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 		Set<LdapUser> ldapUsers = MissionUtils.getLdapUsers(ldapTree);
 
 		// Keep only compliant LDAP users existing in GitLab
-		Stream<LdapUser> filteredUsersStream = ldapUsers.stream()
+		List<LdapUser> filteredUsers = ldapUsers.stream()
 				.filter(user -> gitlabUsers.containsKey(user.getName()))
 				.filter(user -> MissionUtils.isUserCompliant(user.getName()))
-				.sorted(Comparator.comparing(LdapUser::getName));
+				.sorted(Comparator.comparing(LdapUser::getName)).toList();
 
 		gitlab.getGroups().stream()
 				.filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
@@ -70,13 +70,13 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 				// for each gitlab group
 				.forEach(group -> {
 					LOGGER.info("Promoting users as developer to group [{}]", group.getName());
-					manageGroup(api, group, gitlabUsers, filteredUsersStream);
+					manageGroup(api, group, gitlabUsers, filteredUsers);
 				});
 
 		LOGGER.info("Promoting users as developer completed");
 	}
 
-	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> gitlabUsers, Stream<LdapUser> ldapUsers) {
+	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> gitlabUsers, List<LdapUser> ldapUsers) {
 		List<Member> members = api.getGroupMembers(group);
 		ldapUsers.forEach(user -> promoteUserAsDeveloper(api, group, members, gitlabUsers.get(user.getName())));
 	}
