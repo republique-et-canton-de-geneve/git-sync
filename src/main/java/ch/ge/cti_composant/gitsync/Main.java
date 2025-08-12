@@ -31,15 +31,15 @@ public class Main {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-	public static void main(String[] args){
-	        MDC.put("threadid", UUID.randomUUID().toString());
+	public static void main(String[] args) {
+		MDC.put("threadid", UUID.randomUUID().toString());
 		if (args.length != 1) {
 			LOGGER.error("1 argument expected: the path to configuration file, such as configuration.properties");
 		} else {
 			new GitSync().run(args[0]);
 			LOGGER.info("GitSync completed");
 		}
-	        MDC.clear();
+		MDC.clear();
 	}
 
 }

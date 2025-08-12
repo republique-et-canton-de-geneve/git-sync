@@ -25,215 +25,230 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
+import org.gitlab4j.api.models.AccessLevel;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.gitlab4j.api.models.AccessLevel.ADMIN;
 
 /**
  * Helper methods for the missions.
  */
 public class MissionUtils {
 
-    private static Pattern standardGroupsPattern;
+	private static Pattern standardGroupsPattern;
 
-    private static Pattern standardGroupUsersPattern;
+	private static Pattern standardGroupUsersPattern;
 
-    private MissionUtils() {
-    }
+	private MissionUtils() {
+	}
 
-    /**
-     * Checks that the specified GitLab group exists also in the LDAP tree.
-     */
-    public static boolean validateLdapGroupExistence(GitlabGroup gitlabGroup, LdapTree ldapTree) {
-        return ldapTree.getGroups().contains(new LdapGroup(gitlabGroup.getName()));
-    }
+	/**
+	 * Checks that the specified GitLab group exists also in the LDAP tree.
+	 */
+	public static boolean validateLdapGroupExistence(Group gitlabGroup, LdapTree ldapTree) {
+		return ldapTree.getGroups().contains(new LdapGroup(gitlabGroup.getName()));
+	}
 
-    /**
-     * Checks that the specified group exists in GitLab.
-     */
-    public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPIWrapper api) {
-        return api.getGroup(ldapGroup.getName()) != null;
-    }
+	/**
+	 * Checks that the specified group exists in GitLab.
+	 */
+	public static boolean validateGitlabGroupExistence(LdapGroup ldapGroup, GitlabAPIWrapper api) {
+		return api.getGroup(ldapGroup.getName()) != null;
+	}
 
-    /**
-     * Checks that the specified ldap group is compliant with standard groups regex.
-     */
-    public static boolean validateGroupnameCompliantStandardGroups(LdapGroup ldapGroup) {
-        return validateGroupnameCompliantStandardGroups(ldapGroup.getName());
-    }
+	/**
+	 * Checks that the specified ldap group is compliant with standard groups regex.
+	 */
+	public static boolean validateGroupNameCompliantStandardGroups(LdapGroup ldapGroup) {
+		return validateGroupNameCompliantStandardGroups(ldapGroup.getName());
+	}
 
-    /**
-     * Checks that the specified ldap group name is compliant with standard groups regex.
-     */
-    public static boolean validateGroupnameCompliantStandardGroups(String ldapGroup) {
-        return getStandardGroupsPattern().matcher(ldapGroup).lookingAt();
-    }
+	/**
+	 * Checks that the specified ldap group name is compliant with standard groups regex.
+	 */
+	public static boolean validateGroupNameCompliantStandardGroups(String ldapGroup) {
+		return getStandardGroupsPattern().matcher(ldapGroup).lookingAt();
+	}
 
-    /**
-     * Checks that the specified user name complies with the regex given in parameter "standard-group-users".
-     */
-    public static boolean isUserCompliant(String username) {
-        return getStandardGroupUsersPattern().matcher(username).lookingAt();
-    }
+	/**
+	 * Checks that the specified user name complies with the regex given in parameter "standard-group-users".
+	 */
+	public static boolean isUserCompliant(String username) {
+		return getStandardGroupUsersPattern().matcher(username).lookingAt();
+	}
 
-    /**
-     * Checks that the specified user exists in GitLab.
-     */
-    public static boolean validateGitlabUserExistence(LdapUser user, List<GitlabUser> users) {
-        long usersCount = users.stream()
-                .filter(gitlabUser -> gitlabUser.getUsername().equals(user.getName()))
-                .count();
-        switch ((int) usersCount) {
-            case 1:
-                return true;
-            case 0:
-                return false;
-            default:
-                throw new GitSyncException("More than one user with name [" + user.getName() + "] has been found");
-        }
-    }
+	/**
+	 * Checks that the specified user exists in GitLab.
+	 */
+	public static boolean validateGitlabUserExistence(LdapUser user, List<User> users) {
+		long usersCount = users.stream()
+				.filter(gitlabUser -> Objects.equals(gitlabUser.getUsername(), user.getName()))
+				.count();
 
-    /**
-     * Checks whether the specified GitLab user has admin rights.
-     */
-    public static boolean isGitlabUserAdmin(GitlabUser user, GitlabAPIWrapper api, LdapTree ldapTree) {
-        // is it "me"?
-        boolean isTechnicalAccount = user.getUsername().equals(api.getUser().getUsername());
-        boolean isTrivialAdmin = user.isAdmin();
-        // is it in the LDAP admin group?
-        boolean isLdapAdmin = ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
-        return isLdapAdmin || isTechnicalAccount || isTrivialAdmin;
-    }
+		if (usersCount > 1) {
+			throw new GitSyncException("More than one user with name [" + user.getName() + "] has been found");
+		}
 
-    public static Map<String, GitlabUser> getAllGitlabUsers(GitlabAPIWrapper api) {
-        Map<String, GitlabUser> allUsers = new HashMap<>();
-        api.getUsers().forEach(gitlabUser -> allUsers.put(gitlabUser.getUsername(), gitlabUser));
-        return allUsers;
-    }
+		return usersCount == 1;
+	}
 
-    public static boolean isGitlabUserMemberOfGroup(List<GitlabGroupMember> members, String user) {
-        return members.stream()
-                .filter(member -> member.getUsername().equals(user))
-                .count() >= 1;
-    }
+	/**
+	 * Checks whether the specified GitLab user has admin rights.
+	 */
+	public static boolean isGitlabUserAdmin(User user, GitlabAPIWrapper api, LdapTree ldapTree) {
+		return Boolean.TRUE.equals(user.getIsAdmin()) || isIsLdapAdmin(user, ldapTree) || isTechnicalAccount(user, api);
+	}
 
-    public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<GitlabGroupMember> members, String user, GitlabAccessLevel accesslevel) {
-        return members.stream()
-                .filter(member -> member.getUsername().equals(user))
-                .filter(member -> member.isAdmin() || member.getAccessLevel().accessValue >= accesslevel.accessValue)
-                .count() >= 1;
-    }
+	/**
+	 * Gets all the gitlab users and returns them in a map.
+	 */
+	public static Map<String, User> getAllGitlabUsers(GitlabAPIWrapper api) {
+		return api.getUsers().stream().collect(
+				Collectors.toMap(User::getUsername, user -> user, (v1, v2) -> v2));
+	}
 
-    public static GitlabUser getGitlabUser(GitlabAPIWrapper api, String username) {
-        return getAllGitlabUsers(api).get(username);
-    }
+	/**
+	 * Checks whether the specified GitLab user is in the members list.
+	 */
+	public static boolean isGitlabUserMemberOfGroup(List<Member> members, String username) {
+		return members.stream()
+				.anyMatch(member -> Objects.equals(member.getUsername(), username));
+	}
 
-    /**
-     * Gets the name of the LDAP group considered as the administrator group.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a group name, or null if no administrator group is defined in the configuration file.
-     */
-    public static String getAdministratorGroup() {
-        String groupName = GitSync.getProperty("admin-group");
-        return StringUtils.isBlank(groupName) ? null : groupName;
-    }
+	/**
+	 * Checks whether the specified GitLab user has at least the specified access level.
+	 */
+	public static boolean validateGitlabGroupMemberHasMinimumAccessLevel(List<Member> members, String user, AccessLevel accesslevel) {
+		return members.stream()
+				.filter(member -> Objects.equals(member.getUsername(), user))
+				.anyMatch(member -> member.getAccessLevel() == ADMIN || member.getAccessLevel().value >= accesslevel.value);
+	}
 
-    /**
-     * Gets the name of the LDAP group considered as the owner group.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a group name, or null if no owner group is defined in the configuration file.
-     */
-    public static String getOwnerGroup() {
-        String groupName = GitSync.getProperty("owner-group");
-        return StringUtils.isBlank(groupName) ? null : groupName;
-    }
+	/**
+	 * Gets the name of the LDAP group considered as the administrator group.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a group name, or null if no administrator group is defined in the configuration file.
+	 */
+	public static String getAdministratorGroup() {
+		String groupName = GitSync.getProperty("admin-group");
+		return StringUtils.isBlank(groupName) ? null : groupName;
+	}
 
-    /**
-     * Gets the list of black listed groups from the configuration file.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a list of user names. Can be empty
-     */
-    public static List<String> getBlackListedGroups() {
-        String groupNames = GitSync.getProperty("black-listed-groups");
-        groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
-        return Stream.of(groupNames.split(","))
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-    }
+	/**
+	 * Gets the name of the LDAP group considered as the owner group.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a group name, or null if no owner group is defined in the configuration file.
+	 */
+	public static String getOwnerGroup() {
+		String groupName = GitSync.getProperty("owner-group");
+		return StringUtils.isBlank(groupName) ? null : groupName;
+	}
 
-    /**
-     * Gets the list of limited access groups from the configuration file.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a list of user names. Can be empty
-     */
-    public static List<String> getLimitedAccessGroups() {
-        String groupNames = GitSync.getProperty("limited-access-groups");
-        groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
-        return Stream.of(groupNames.split(","))
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-    }
+	/**
+	 * Gets the list of black listed groups from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getBlackListedGroups() {
+		String groupNames = GitSync.getProperty("black-listed-groups");
+		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
+		return Stream.of(groupNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
 
-    /**
-     * Gets the list of the users to ignore in the cleaning process.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a list of GitLab user names. Can be empty
-     */
-    public static List<String> getNotToCleanUsers() {
-        String userNames = GitSync.getProperty("not-to-clean-users");
-        userNames = StringUtils.isBlank(userNames) ? "" : userNames;
-        return Stream.of(userNames.split(","))
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-    }
+	/**
+	 * Gets the list of limited access groups from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getLimitedAccessGroups() {
+		String groupNames = GitSync.getProperty("limited-access-groups");
+		groupNames = StringUtils.isBlank(groupNames) ? "" : groupNames;
+		return Stream.of(groupNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
 
-    /**
-     * Gets the list of wide access listed users from the configuration file.
-     * See more about this in the README file and in the configuration file.
-     *
-     * @return a list of user names. Can be empty
-     */
-    public static List<String> getWideAccessUsers() {
-        String userNames = GitSync.getProperty("wide-access-users");
-        userNames = StringUtils.isBlank(userNames) ? "" : userNames;
-        return Stream.of(userNames.split(","))
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-    }
+	/**
+	 * Gets the list of the users to ignore in the cleaning process.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a list of GitLab user names. Can be empty
+	 */
+	public static List<String> getNotToCleanUsers() {
+		String userNames = GitSync.getProperty("not-to-clean-users");
+		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
+		return Stream.of(userNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
 
-    private static Pattern getStandardGroupsPattern() {
-        if (standardGroupsPattern == null) {
-            String patternString = GitSync.getProperty("standard.groups");
-            if (StringUtils.isBlank(patternString)) {
-                patternString = "[A-Za-z0-9_-]";
-            }
-            standardGroupsPattern = Pattern.compile(patternString);
-        }
-        return standardGroupsPattern;
-    }
+	/**
+	 * Gets the list of wide access listed users from the configuration file.
+	 * See more about this in the README file and in the configuration file.
+	 *
+	 * @return a list of user names. Can be empty
+	 */
+	public static List<String> getWideAccessUsers() {
+		String userNames = GitSync.getProperty("wide-access-users");
+		userNames = StringUtils.isBlank(userNames) ? "" : userNames;
+		return Stream.of(userNames.split(","))
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
 
-    private static Pattern getStandardGroupUsersPattern() {
-        if (standardGroupUsersPattern == null) {
-            String patternString = GitSync.getProperty("standard-group-users");
-            if (StringUtils.isBlank(patternString)) {
-                patternString = "[A-Za-z0-9_-]";
-            }
-            standardGroupUsersPattern = Pattern.compile(patternString);
-        }
-        return standardGroupUsersPattern;
-    }
+	public static Set<LdapUser> getLdapUsers(LdapTree ldapTree) {
+		Set<LdapUser> ldapUsers = new HashSet<>();
+		for (LdapGroup group : ldapTree.getGroups()) {
+			ldapUsers.addAll(ldapTree.getUsers(group).values());
+		}
+		return ldapUsers;
+	}
+
+	private static boolean isTechnicalAccount(User user, GitlabAPIWrapper api) {
+		return user.getUsername().equals(api.getUser().getUsername());
+	}
+
+	private static boolean isIsLdapAdmin(User user, LdapTree ldapTree) {
+		return ldapTree.getUsers(getAdministratorGroup()).containsKey(user.getUsername());
+	}
+
+	private static Pattern getStandardGroupsPattern() {
+		if (standardGroupsPattern == null) {
+			String patternString = GitSync.getProperty("standard.groups");
+			if (StringUtils.isBlank(patternString)) {
+				patternString = "[A-Za-z0-9_-]";
+			}
+			standardGroupsPattern = Pattern.compile(patternString);
+		}
+		return standardGroupsPattern;
+	}
+
+	private static Pattern getStandardGroupUsersPattern() {
+		if (standardGroupUsersPattern == null) {
+			String patternString = GitSync.getProperty("standard-group-users");
+			if (StringUtils.isBlank(patternString)) {
+				patternString = "[A-Za-z0-9_-]";
+			}
+			standardGroupUsersPattern = Pattern.compile(patternString);
+		}
+		return standardGroupUsersPattern;
+	}
 
 }

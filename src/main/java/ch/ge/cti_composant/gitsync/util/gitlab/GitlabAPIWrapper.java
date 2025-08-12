@@ -18,25 +18,23 @@
  */
 package ch.ge.cti_composant.gitsync.util.gitlab;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.CreateGroupRequest;
-import org.gitlab.api.models.GitlabAbstractMember;
-import org.gitlab.api.models.GitlabAccessLevel;
-import org.gitlab.api.models.GitlabGroup;
-import org.gitlab.api.models.GitlabGroupMember;
-import org.gitlab.api.models.GitlabUser;
+import ch.ge.cti_composant.gitsync.GitSync;
+import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.AccessLevel;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.GroupParams;
+import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitsync.GitSync;
-import ch.ge.cti_composant.gitsync.util.exception.GitSyncException;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
- * A simple wrapper around a {@link GitlabAPI} object, to replace the checked exceptions with unchecked exceptions.
+ * A simple wrapper around a {@link GitLabApi} object, to replace the checked exceptions with unchecked exceptions.
  * Not all methods of class GitLabAPI are overridden - only those relevant to this application.
  */
 public class GitlabAPIWrapper {
@@ -44,269 +42,142 @@ public class GitlabAPIWrapper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GitlabAPIWrapper.class);
 
 	private static final String ERROR_MESSAGE = "Exception caught while interrogating GitLab";
-	
-	private int maxTries = GitSync.getPropertyAsInt("retry-nb-max-attempts", 3);
-	private long sleepTime = GitSync.getPropertyAsInt("retry-time-between-attemps", 5000);
+
+	private static final int HTTP_STATUS_NOT_FOUND = 404;
+
+	private final int maxTries = GitSync.getPropertyAsInt("retry-nb-max-attempts", 3);
+	private final long sleepTime = GitSync.getPropertyAsInt("retry-time-between-attemps", 5000);
 
 	/**
-	 * The wrapped GitlabAPI object.
+	 * The wrapped GitLabApi object.
 	 */
-	private GitlabAPI api;
+	private final GitLabApi api;
 
 	/**
 	 * Constructor.
 	 */
-	public GitlabAPIWrapper(GitlabAPI api) {
+	public GitlabAPIWrapper(GitLabApi api) {
 		this.api = api;
 	}
 
 	/**
-	 * Wrapper around {@link GitlabAPI#getGroups()} .
+	 * Wrapper around {@link GitLabApi#getGroupApi()#getGroups()} .
 	 * Removes the checked exception.
 	 */
-	public List<GitlabGroup> getGroups() {
-	    int count = 0;
-	    while(true) {
-		try {
-			return api.getGroups();
-		} catch (IOException e) {
-		    count++;
-		    handleException(e, count);
-		}
-	    }
+	public List<Group> getGroups() {
+		return run(() -> api.getGroupApi().getGroups());
 	}
 
 	/**
-	 * Wrapper around {@link GitlabAPI#getGroup(String)} .
+	 * Wrapper around {@link GitLabApi#getGroupApi()#getGroup(String)} .
 	 * Removes the checked exception and returns null (instead of throwing an exception) if the group is not found.
 	 */
-	public GitlabGroup getGroup(String path) {
-	    int count = 0;
-		GitlabGroup ret = null;
-		    while(true) {
+	public Group getGroup(String path) {
+		return run(() -> {
+			try {
+				return api.getGroupApi().getGroup(path);
+			} catch (GitLabApiException e) {
+				if (e.getHttpStatus() == HTTP_STATUS_NOT_FOUND) {
+					return null; // Group not found
+				}
+				throw e;
+			}
+		});
+	}
+
+	public Group createGroup(GroupParams groupParams) {
+		return runOnlyIfNotDryRun(() -> api.getGroupApi().createGroup(groupParams));
+	}
+
+	public List<Member> getGroupMembers(Group group) {
+		return run(() -> api.getGroupApi().getMembers(group.getId()));
+	}
+
+	public Member addGroupMember(Group group, Long userId, AccessLevel accessLevel) {
+		return runOnlyIfNotDryRun(() -> api.getGroupApi().addMember(group, userId, accessLevel));
+	}
+
+	public void deleteGroupMember(Group group, Long userId) {
+		runOnlyIfNotDryRun(() -> {
+			api.getGroupApi().removeMember(group.getId(), userId);
+			return null;
+		});
+	}
+
+	public User getUser() {
+		return run(() -> api.getUserApi().getCurrentUser());
+	}
+
+	/**
+	 * Wrapper around {@link GitLabApi#getUserApi()#getUsers()}.
+	 * Removes the checked exception.
+	 */
+	public List<User> getUsers() {
+		return run(() -> api.getUserApi().getUsers());
+	}
+
+	public void promoteToAdmin(Long targetUserId) {
+		runOnlyIfNotDryRun(() -> {
+			User user = api.getUserApi().getUser(targetUserId);
+			user.setIsAdmin(true);
+			api.getUserApi().updateUser(user, null);
+			return null;
+		});
+	}
+
+	public void blockUser(Long targetUserId) {
+		runOnlyIfNotDryRun(() -> {
+			api.getUserApi().blockUser(targetUserId);
+			return null;
+		});
+	}
+
+	public void unblockUser(Long targetUserId) {
+		runOnlyIfNotDryRun(() -> {
+			api.getUserApi().unblockUser(targetUserId);
+			return null;
+		});
+	}
+
+	private void sleep(int count) {
 		try {
-			ret = api.getGroup(path);
-			break;
-		} catch (FileNotFoundException e) {
-			// occurs when the group does not exist in GitLab
-		    break;
-		} catch (IOException e) {
-		    count++;
-		    handleException(e, count);
-		}
-		    }
-		return ret;
-	}
-
-	/**
-	 * Wrapper around {@link GitlabAPI#createGroup(CreateGroupRequest, GitlabUser)}.
-	 * Removes the checked exception.
-	 */
-	public GitlabGroup createGroup(CreateGroupRequest request, GitlabUser sudoUser) {
-	    int count = 0;
-		GitlabGroup ret = null;
-		if(!GitSync.isDryRun()) {
-		    while(true) {
-        		try {
-        			ret = api.createGroup(request, sudoUser);
-        			break;
-        		} catch (IOException e) {
-        		    count++;
-        		    handleException(e, count);
-        		}
-		    }
-		}
-		return ret;
-	}
-
-	/**
-	 * Wrapper around {@link GitlabAPI#getGroupMembers(GitlabGroup)}.
-	 * Removes the checked exception.
-	 */
-	public List<GitlabGroupMember> getGroupMembers(GitlabGroup group) {
-	    int count = 0;
-		List<GitlabGroupMember> ret;
-		    while(true) {
-		try {
-			ret = api.getGroupMembers(group);
-			break;
-		} catch (IOException e) {
-		    count++;
-		    handleException(e, count);
-		}
-		    }
-		return ret;
-	}
-
-	/**
-	 * Wrapper around {@link GitlabAPI#addGroupMember(GitlabGroup, GitlabUser, GitlabAccessLevel)}.
-	 * Removes the checked exception.
-	 */
-	public GitlabGroupMember addGroupMember(GitlabGroup group, GitlabUser user, GitlabAccessLevel accessLevel) {
-	    int count = 0;
-		GitlabGroupMember ret = null;
-		if(!GitSync.isDryRun()) {
-		    while(true) {
-        		try {
-        			ret = api.addGroupMember(group, user, accessLevel);
-        			break;
-        		} catch (IOException e) {
-        		    count++;
-        		    handleException(e, count);
-        		}
-		    }
-		}
-		return ret;
-	}
-
-	/**
-	 * Wrapper around {@link GitlabAPI#deleteGroupMember(GitlabGroup, GitlabUser)}.
-	 * Removes the checked exception.
-	 * Gitlab api bug : too many slash before members in api.deleteGroupMember(group, user);
-	 */
-	public void deleteGroupMember(GitlabGroup group, GitlabUser user) {
-	    int count = 0;
-		if(!GitSync.isDryRun()) {
-		    while(true) {
-        		try {
-        		        String tailUrl = GitlabGroup.URL + "/" + group.getId() + GitlabAbstractMember.URL + "/" + user.getId();
-        		        api.retrieve().method("DELETE").to(tailUrl, Void.class);
-        		        break;
-        		} catch (IOException e) {
-        		    count++;
-        		    handleException(e, count);
-        		}
-		    }
+			Thread.sleep(sleepTime * count);
+		} catch (InterruptedException e1) {
+			LOGGER.warn(e1.getMessage());
+			Thread.currentThread().interrupt();
 		}
 	}
 
-	/**
-	 * Wrapper around {@link GitlabAPI#getUser()}.
-	 * Removes the checked exception.
-	 */
-	public GitlabUser getUser() {
-	    int count = 0;
-		GitlabUser ret;
-		    while(true) {
-		try {
-			ret = api.getUser();
-			break;
-		} catch (IOException e) {
-		    count++;
-		    handleException(e, count);
+	private void handleException(GitLabApiException e, int count) throws GitSyncException {
+		if (count >= maxTries) {
+			LOGGER.warn("attempt {}/{} failed, throw exception", count, maxTries);
+			LOGGER.error(ERROR_MESSAGE, e);
+			throw new GitSyncException(e);
+		} else {
+			LOGGER.warn("attempt {}/{} failed, retry => {}", count, maxTries, e.getMessage());
+			sleep(count);
 		}
-		    }
-		return ret;
 	}
 
-	/**
-	 * Wrapper around {@link GitlabAPI#getUsers()}.
-	 * Removes the checked exception.
-	 */
-	public List<GitlabUser> getUsers() {
-	    int count = 0;
-		List<GitlabUser> ret;
-		    while(true) {
-		try {
-			ret = api.getUsers();
-			break;
-		} catch (IOException e) {
-		    count++;
-		    handleException(e, count);
+	private <T> T runOnlyIfNotDryRun(Callable<T> callable) {
+		if (!GitSync.isDryRun()) {
+			return run(callable);
 		}
-		    }
-		return ret;
+		return null;
 	}
 
-	/**
-	 * Wrapper around {@link GitlabAPI#updateUser(Integer, String, String, String, String, String, String, String, String, Integer, String, String, String, Boolean, Boolean)} getUser()}.
-	 * Removes the checked exception.
-	 */
-	public GitlabUser updateUser(
-			Integer targetUserId,
-			String email, String password, String username,
-			String fullName, String skypeId, String linkedIn,
-			String twitter, String websiteUrl, Integer projectsLimit,
-			String externUid, String externProviderName,
-			String bio, Boolean isAdmin, Boolean canCreateGroup) {
-	    int count = 0;
-		GitlabUser ret = null;
-		if(!GitSync.isDryRun()) {
-		    while(true) {
-        		try {
-        			ret = api.updateUser(targetUserId,
-        					email, password, username,
-        					fullName, skypeId, linkedIn,
-        					twitter, websiteUrl, projectsLimit,
-        					externUid, externProviderName,
-        					bio, isAdmin, canCreateGroup);
-        			break;
-        		} catch (IOException e) {
-        		    count++;
-        		    handleException(e, count);
-        		}
-		    }
+	private <T> T run(Callable<T> callable) {
+		int count = 0;
+		while (true) {
+			try {
+				return callable.call();
+			} catch (GitLabApiException e) {
+				count++;
+				handleException(e, count);
+			} catch (Exception e) {
+				throw new GitSyncException(e);
+			}
 		}
-		return ret;
 	}
 
-    /**
-     * Wrapper around {@link GitlabAPI#blockUser(Integer)}. Removes the checked exception.
-     */
-    public void blockUser(Integer targetUserId) {
-	    int count = 0;
-	if (!GitSync.isDryRun()) {
-	    while(true) {
-	    try {
-		api.blockUser(targetUserId);
-		break;
-	    }
-	    catch (IOException e) {
-		    count++;
-		    handleException(e, count);
-	    }
-	    }
-	}
-    }
-
-    /**
-     * Wrapper around {@link GitlabAPI#unblockUser(Integer)}. Removes the checked exception.
-     */
-    public void unblockUser(Integer targetUserId) {
-	    int count = 0;
-	if (!GitSync.isDryRun()) {
-	    while(true) {
-	    try {
-		api.unblockUser(targetUserId);
-		break;
-	    }
-	    catch (IOException e) {
-		    count++;
-		    handleException(e, count);
-	    }
-	    }
-	}
-    }
-
-    private void sleep(int count) {
-	try {
-	    Thread.sleep(sleepTime * count);
-	}
-	catch (InterruptedException e1) {
-	    LOGGER.warn(e1.getMessage());
-	}
-    }
-
-    private void handleException(IOException e, int count) throws GitSyncException {
-	if (count >= maxTries) {
-	    LOGGER.warn("attempt {}/{} failed, throw exception", count, maxTries);
-	    LOGGER.error(ERROR_MESSAGE, e);
-	    throw new GitSyncException(e);
-	}
-	else {
-	    LOGGER.warn("attempt {}/{} failed, retry => {}", count, maxTries, e.getMessage());
-	    sleep(count);
-	}
-    }
-    
 }

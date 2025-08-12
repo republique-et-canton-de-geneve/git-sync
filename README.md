@@ -132,7 +132,7 @@ For the administrator LDAP group (if any, defined by `admin-group`), retrieve th
 For the owner LDAP group (if any, defined by `owner-group`), retrieve the list of users. For every user in the list:
   * If the user does not exist in GitLab, do nothing
     (see section [GitLab authentication](#gitlab-authentication)).
-  * If the user exists in GitLab:
+  * If the user exists in GitLab and the user is not a GitLab administrator:
     * Assign it to all non-administrator groups (with Owner role permission), except the groups in a
       black list supplied as a parameter to the application.
 
@@ -176,8 +176,8 @@ configuration on the GitLab server by means of the following sequence of operati
    In response the GitLab displays a blank page, which leads the user to believe that connexion went wrong, but
    this weird behavior is expected.
    Behind the scenes GitLab creates a user with access level "Regular" (as opposed to "Admin").
-1. Next time the application is run, it loads the user's configuration into GitLab.
-1. When the user navigates again to the GitLab server, they readily see all projects they have access to.
+2. Next time the application is run, it loads the user's configuration into GitLab.
+3. When the user navigates again to the GitLab server, they readily see all projects they have access to.
    For example, if the user belongs to groups "GROUP-IT-DEV" and "GROUP-IT-NETWORK", they will have access
    to all Git projects defined in these 2 groups as well as in their sub-groups. 
 

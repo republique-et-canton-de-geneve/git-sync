@@ -26,14 +26,14 @@ import org.apache.commons.lang3.Validate;
  */
 public class LdapGroup {
 
-	private String name;
+	private final String name;
 
 	public LdapGroup(String name) {
 		Validate.notBlank(name, "Group name cannot be blank");
 		this.name = name;
 	}
 
-	public String getName(){
+	public String getName() {
 		return name;
 	}
 
@@ -58,5 +58,4 @@ public class LdapGroup {
 	public String toString() {
 		return name;
 	}
-
 }

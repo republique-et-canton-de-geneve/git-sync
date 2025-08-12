@@ -23,9 +23,9 @@ package ch.ge.cti_composant.gitsync.util.ldap;
  */
 public interface LdapTreeBuilder {
 
-    /**
-     * Creates and initializes an {@LdapTree}.
-     */
-    LdapTree createTree();
+	/**
+	 * Creates and initializes an {@LdapTree}.
+	 */
+	LdapTree createTree();
 
 }

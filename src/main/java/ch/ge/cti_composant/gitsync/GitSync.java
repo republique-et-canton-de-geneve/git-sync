@@ -48,153 +48,158 @@ import ch.ge.cti_composant.gitsync.util.ldap.gina.GinaLdapTreeBuilder;
  */
 public class GitSync {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitSync.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GitSync.class);
 
-    private static final Properties props = new Properties();
+	private static final Properties props = new Properties();
 
-    private LdapTree ldapTree;
+	private LdapTree ldapTree;
 
-    private Gitlab gitlab = null;
+	private Gitlab gitlab;
 
-    /**
-     * Performs all operations.
-     */
-    public void run(String path) {
-        try {
-            loadProperties(path);
+	GitSync() {
+		this.ldapTree = null;
+		this.gitlab = null;
+	}
 
-            LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
-            setupLdap();
+	/**
+	 * Performs all operations.
+	 */
+	public void run(String path) {
+		try {
+			loadProperties(path);
 
-            LOGGER.info("PHASE 2: Set up the in-memory GitLab tree");
-            setupGitLab();
+			LOGGER.info("PHASE 1: Set up the in-memory LDAP tree");
+			setupLdap();
 
-            LOGGER.info("PHASE 3: Apply the business rules");
-            applyRules();
+			LOGGER.info("PHASE 2: Set up the in-memory GitLab tree");
+			setupGitLab();
 
-        } catch (Exception e) {
-            LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
-        }
-    }
+			LOGGER.info("PHASE 3: Apply the business rules");
+			applyRules();
 
-    /**
-     * Loads the properties file.
-     */
-    private void loadProperties(String path) throws IOException {
-        try (InputStream inputStream = Files.newInputStream(Paths.get(path))) {
-            props.load(inputStream);
-        }
+		} catch (Exception e) {
+			LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
+		}
+	}
 
-        LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
-                sanitize(getVersion()),
-                sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
-                sanitize((String) props.get("gitlab.hostname")));
-        
-        if(isDryRun()) {
-            LOGGER.info("");
-            LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            LOGGER.info("DRY RUN ACTIVATED => NO MODIFICATION IN GITLAB, ONLY LOGS");
-            LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            LOGGER.info("");
-        }
-    }
+	/**
+	 * Loads the properties file.
+	 */
+	private void loadProperties(String path) throws IOException {
+		try (InputStream inputStream = Files.newInputStream(Paths.get(path))) {
+			props.load(inputStream);
+		}
 
-    /**
-     * Sets up the in-memory tree of LDAP groups and LDAP users.
-     */
-    private void setupLdap() {
-        // If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
-        // replace the treeBuilder below with a custom one. See file README.md.
-        LdapTreeBuilder treeBuilder = new GinaLdapTreeBuilder();
-        ldapTree = treeBuilder.createTree();
-    }
+		LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
+				sanitize(getVersion()),
+				sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
+				sanitize((String) props.get("gitlab.hostname")));
 
-    /**
-     * Sets up the in-memory tree of GitLab groups and GitLab users.
-     */
-    private void setupGitLab() {
-        gitlab = new GitlabService().buildGitlabContext(
-                props.getProperty("gitlab.hostname"),
-                props.getProperty("gitlab.account.token"),
-                ldapTree);
-    }
+		if (isDryRun()) {
+			LOGGER.info("");
+			LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			LOGGER.info("DRY RUN ACTIVATED => NO MODIFICATION IN GITLAB, ONLY LOGS");
+			LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			LOGGER.info("");
+		}
+	}
 
-    /**
-     * Performs the missions.
-     */
-    private void applyRules() {
-        // precaution: do not take the risk to clear up GitLab with an empty set of groups and users
-        new CheckMinimumUserCount().start(ldapTree, gitlab);
+	/**
+	 * Sets up the in-memory tree of LDAP groups and LDAP users.
+	 */
+	private void setupLdap() {
+		// If you need to load the data from another LDAP server than Etat de Geneve's LDAP server, you must
+		// replace the treeBuilder below with a custom one. See file README.md.
+		LdapTreeBuilder treeBuilder = new GinaLdapTreeBuilder();
+		ldapTree = treeBuilder.createTree();
+	}
 
-        // block or unblock users
-        new BlockOrUnblockUsers().start(ldapTree, gitlab);
+	/**
+	 * Sets up the in-memory tree of GitLab groups and GitLab users.
+	 */
+	private void setupGitLab() {
+		gitlab = new GitlabService().buildGitlabContext(
+				props.getProperty("gitlab.hostname"),
+				props.getProperty("gitlab.account.token"),
+				ldapTree);
+	}
 
-        // remove the non-authorized users
-        new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
+	/**
+	 * Performs the missions.
+	 */
+	private void applyRules() {
+		// precaution: do not take the risk to clear up GitLab with an empty set of groups and users
+		new CheckMinimumUserCount().start(ldapTree, gitlab);
 
-        // add the authorized users (new permissions)
-        new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
+		// block or unblock users
+		new BlockOrUnblockUsers().start(ldapTree, gitlab);
 
-        // add developer level to all users to all groups
-        new PromoteUsersAsDeveloperToAllGroups().start(ldapTree, gitlab);
+		// remove the non-authorized users
+		new CleanGroupsFromUnauthorizedUsers().start(ldapTree, gitlab);
 
-        // add the Admins
-        new PromoteAdminUsers().start(ldapTree, gitlab);
+		// add the authorized users (new permissions)
+		new AddAuthorizedUsersToGroups().start(ldapTree, gitlab);
 
-        // add the Owners to all groups
-        new PropagateOwnerUsersToAllGroups().start(ldapTree, gitlab);
-    }
+		// add developer level to all users to all groups
+		new PromoteUsersAsDeveloperToAllGroups().start(ldapTree, gitlab);
 
-    /**
-     * Returns the specified property, or null if not found.
-     */
-    public static String getProperty(String name) {
-        return props.getProperty(name);
-    }
+		// add the Admins
+		new PromoteAdminUsers().start(ldapTree, gitlab);
 
-    /**
-     * Returns the Maven version of the JAR.
-     */
-    private static String getVersion() {
-        Properties properties = new Properties();
-        String filePath = "/META-INF/maven/ch.ge.cti.composant/gitSync/pom.properties";
-        String versionName = "version";
-        String versionValue;
+		// add the Owners to all groups
+		new PropagateOwnerUsersToAllGroups().start(ldapTree, gitlab);
+	}
 
-        try {
-            properties.load(GitSync.class.getResourceAsStream(filePath));
-            versionValue = properties.getProperty(versionName);
-            if (StringUtils.isBlank(versionValue)) {
-                LOGGER.warn("No property [{}] in file [{}]", versionName, filePath);
-            }
-            return versionValue;
-        } catch (Exception e) {
-            LOGGER.warn("Could not read property [{}] in file [{}]", versionName, filePath, e);
-            return "";
-        }
-    }
+	/**
+	 * Returns the specified property, or null if not found.
+	 */
+	public static String getProperty(String name) {
+		return props.getProperty(name);
+	}
 
-    /**
-     * Check if dry run or not
-     */
-    public static boolean isDryRun() {
-	return "true".equals(GitSync.getProperty("dry-run"));
-    }
+	/**
+	 * Returns the Maven version of the JAR.
+	 */
+	private static String getVersion() {
+		Properties properties = new Properties();
+		String filePath = "/META-INF/maven/ch.ge.cti.composant/gitSync/pom.properties";
+		String versionName = "version";
+		String versionValue;
 
-    /**
-     * Returns the specified property, or default value if not found.
-     */
-    public static int getPropertyAsInt(String name, int defaultValue) {
-        int result = defaultValue;
-	String p = props.getProperty(name);
-        if(!StringUtils.isBlank(p) && p.matches("[0-9]+")) {
-            result = Integer.valueOf(p);
-        }
-        return result;
-    }
+		try {
+			properties.load(GitSync.class.getResourceAsStream(filePath));
+			versionValue = properties.getProperty(versionName);
+			if (StringUtils.isBlank(versionValue)) {
+				LOGGER.warn("No property [{}] in file [{}]", versionName, filePath);
+			}
+			return versionValue;
+		} catch (Exception e) {
+			LOGGER.warn("Could not read property [{}] in file [{}]", versionName, filePath, e);
+			return "";
+		}
+	}
 
-    private static String sanitize(String s) {
-        return StringEscapeUtils.escapeHtml4(s);
-    }
+	/**
+	 * Check if dry run or not
+	 */
+	public static boolean isDryRun() {
+		return "true".equals(GitSync.getProperty("dry-run"));
+	}
+
+	/**
+	 * Returns the specified property, or default value if not found.
+	 */
+	public static int getPropertyAsInt(String name, int defaultValue) {
+		int result = defaultValue;
+		String p = props.getProperty(name);
+		if (!StringUtils.isBlank(p) && p.matches("\\d")) {
+			result = Integer.parseInt(p);
+		}
+		return result;
+	}
+
+	private static String sanitize(String s) {
+		return StringEscapeUtils.escapeHtml4(s);
+	}
 
 }
