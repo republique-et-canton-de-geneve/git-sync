@@ -1,6 +1,6 @@
 include:
   - project: $PROJECT_TEMPLATES_GITLABCI_PATH
-    ref: test_mail
+    ref: nas
     file: '.gitlab-ci-java-basic.yml'
 
 # --------------------------------------
