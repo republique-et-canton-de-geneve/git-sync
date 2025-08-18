@@ -241,8 +241,9 @@ The mapping is carried out by running the application:
 java -jar target/gitSync-XXX-SNAPSHOT.jar configuration.properties
 ``
 
+Copy the file [configuration-base.properties](./configuration-base.properties) to configuration.properties and update it with the appropriate parameter values.
 The unique parameter is the path to the configuration file.
-The parameters in the supplied file [configuration.properties](./configuration.properties) must be adapted.
+The parameters in the supplied file configuration.properties must be adapted.
 
 Logging is performed by means of Logback. A basic configuration file `logback.xml` is included in the source
 tree and is present in the JAR file created by the `mvn install` command.
