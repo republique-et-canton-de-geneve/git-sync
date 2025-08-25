@@ -19,3 +19,5 @@ logs/
 
 # Application
 configuration-recette.properties
+
+configuration.properties
