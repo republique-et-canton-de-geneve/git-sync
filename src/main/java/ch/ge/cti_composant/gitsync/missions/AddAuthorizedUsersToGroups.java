@@ -28,6 +28,8 @@ import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +50,19 @@ public class AddAuthorizedUsersToGroups implements Mission {
 		LOGGER.info("Mapping: adding the users to the authorized groups");
 		GitlabAPIWrapper api = gitlab.getApi();
 
-		Map<String, User> allGitlabUsers = MissionUtils.getAllGitlabUsers(api);
+
+
+        // QC-514 : code bidon temp pour déclencher une faille Sonar java:S4426
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(1024); // Noncompliant
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.warn("error");
+        }
+
+
+
+        Map<String, User> allGitlabUsers = MissionUtils.getAllGitlabUsers(api);
 		LOGGER.info("Total number of GitLab users: {}", allGitlabUsers.size());
 
 		gitlab.getGroups()
