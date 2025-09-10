@@ -56,7 +56,78 @@ public class AddAuthorizedUsersToGroups implements Mission {
 		LOGGER.info("Mapping completed");
 	}
 
-	private void processGroup(Group group, LdapTree ldapTree, GitlabAPIWrapper api, Map<String, User> allGitlabUsers) {
+
+    public void doNothingComplicated() {
+        int counter = 0;
+        String message = "This is a useless method";
+
+        for (int i = 0; i < 100; i++) {
+            if (i % 2 == 0) {
+                counter += i;
+            } else {
+                counter -= i;
+            }
+        }
+
+        while (counter > 0) {
+            counter--;
+            if (counter % 5 == 0) {
+                System.out.println(message + " with counter: " + counter);
+            }
+        }
+
+        if (counter == 0) {
+            System.out.println("Counter has reached zero.");
+        } else {
+            System.out.println("Counter did not reach zero.");
+        }
+
+        switch (message.length()) {
+            case 10:
+                System.out.println("Message length is 10.");
+                break;
+            case 20:
+                System.out.println("Message length is 20.");
+                break;
+            default:
+                System.out.println("Message length is neither 10 nor 20.");
+                break;
+        }
+
+        try {
+            int result = 10 / counter;
+            System.out.println("Result of division: " + result);
+        } catch (ArithmeticException e) {
+            System.out.println("Attempted to divide by zero.");
+        } finally {
+            System.out.println("Finally block executed.");
+        }
+
+        for (String word : message.split(" ")) {
+            System.out.println("Word: " + word);
+        }
+
+        do {
+            System.out.println("Do-while loop iteration.");
+            counter++;
+        } while (counter < 5);
+
+        boolean flag = true;
+        while (flag) {
+            System.out.println("Infinite loop with flag.");
+            flag = false;
+        }
+
+        int[] numbers = {1, 2, 3, 4, 5};
+        for (int number : numbers) {
+            System.out.println("Number: " + number);
+        }
+
+        System.out.println("End of doNothingComplicated method.");
+    }
+
+
+    private void processGroup(Group group, LdapTree ldapTree, GitlabAPIWrapper api, Map<String, User> allGitlabUsers) {
 		List<Member> memberList = api.getGroupMembers(group);
 		LOGGER.info("    Processing the users of group [{}]", group.getName());
 
