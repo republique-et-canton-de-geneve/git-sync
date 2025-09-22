@@ -123,6 +123,9 @@ public class AddAuthorizedUsersToGroups implements Mission {
             System.out.println("Number: " + number);
         }
 
+        System.out.println("Du pipo");
+        int a = 13;
+
         System.out.println("End of doNothingComplicated method.");
     }
 
