@@ -1,23 +1,14 @@
 include:
-  - project: $PROJECT_TEMPLATES_GITLABCI_PATH
-    ref: develop
-    file: '.gitlab-ci-java-basic.yml'
+  - component: $CI_SERVER_FQDN/DEVELOPPEUR-EDG/gitlab-components/java/standard@main
 
-# --------------------------------------
-# Variables
-# --------------------------------------
 variables:
-  # Docker
-  DOCKER_IMAGE: $DOCKER_URL/maven:3.9.7-eclipse-temurin-21
+  MAVEN_BUILD_DOCKER_IMAGE: $DOCKER_URL/ch/ge/cti/build/ubi-jdk-maven-node:U9.6-20250609_104313-J21-M3.9.9-N20.19.3
+  MAVEN_CHECK_DEPENDENCIES_ENABLED: 'false'
   SONARQUBE_QUALITYGATE_WAIT: 'true'
   SECURITY_MONITORING: 'true'
 
-# --------------------------------------
-# Tags
-# --------------------------------------
 default:
   tags:
     - 'for:application-project'
     - 'host:restricted-container'
     - 'net:soca4-dev'
-
