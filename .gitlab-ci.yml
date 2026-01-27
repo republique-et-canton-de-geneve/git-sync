@@ -1,14 +1,28 @@
+---
+# --------------------------------------
+# Includes
+# --------------------------------------
 include:
-  - component: $CI_SERVER_FQDN/DEVELOPPEUR-EDG/gitlab-components/java/standard@main
+  - component: $COMPOSANTS_MOYENS_DEV_URL/maven/full-ci-java-standard@main
 
+
+# --------------------------------------
+# Variables
+# --------------------------------------
 variables:
-  MAVEN_BUILD_DOCKER_IMAGE: $DOCKER_URL/ch/ge/cti/build/ubi-jdk-maven-node:U9.6-20250609_104313-J21-M3.9.9-N20.19.3
+#  MAVEN_BUILD_DOCKER_IMAGE: $DOCKER_URL/ch/ge/cti/build/ubi-jdk-maven-node:U9.6-20250609_104313-J21-M3.9.9-N20.19.3
   MAVEN_CHECK_DEPENDENCIES_ENABLED: 'false'
-  SONARQUBE_QUALITYGATE_WAIT: 'true'
-  SECURITY_MONITORING: 'true'
+#  SONARQUBE_QUALITYGATE_WAIT: 'true'
+#  SECURITY_MONITORING: 'true'
 
+
+# --------------------------------------
+# Configuration
+# --------------------------------------
 default:
+  # Runners
   tags:
     - 'for:application-project'
     - 'host:restricted-container'
     - 'net:soca4-dev'
+...
