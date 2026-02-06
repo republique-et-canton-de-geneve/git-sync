@@ -14,7 +14,7 @@
 
 	<groupId>ch.ge.cti.composant</groupId>
 	<artifactId>gitSync</artifactId>
-	<version>5.3.8-SNAPSHOT</version>
+	<version>5.4.0-SNAPSHOT</version>
 
 	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
 
@@ -132,9 +132,32 @@
 		</dependency>
 
 		<!-- Runtime dependencies -->
+		<!-- optional dependency in logback-core 1.5.25, required for sending mails upon exceptions -->
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+			<version>2.1.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- required when sending mails upon exceptions -->
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>jakarta.mail</artifactId>
+			<version>2.0.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- required when sending mails upon exceptions -->
 		<dependency>
 			<groupId>jakarta.activation</groupId>
 			<artifactId>jakarta.activation-api</artifactId>
+			<version>2.1.4</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- required when sending mails upon exceptions -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
