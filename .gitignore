@@ -18,6 +18,6 @@ logs/
 .scannerwork/
 
 # Application
+configuration.properties
 configuration-recette.properties
 
-configuration.properties

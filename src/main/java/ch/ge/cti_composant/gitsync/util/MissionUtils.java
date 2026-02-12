@@ -29,12 +29,15 @@ import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Member;
 import org.gitlab4j.api.models.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,9 +49,13 @@ import static org.gitlab4j.api.models.AccessLevel.ADMIN;
  */
 public class MissionUtils {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MissionUtils.class);
+
 	private static Pattern standardGroupsPattern;
 
 	private static Pattern standardGroupUsersPattern;
+
+	private static List<String> usersWithUnknownInternalOrExternalStatus = new ArrayList<>();
 
 	private MissionUtils() {
 	}
@@ -111,11 +118,32 @@ public class MissionUtils {
 	}
 
 	/**
+	 * Checks whether the specified GitLab user is an external user.
+	 * If the user is a bot, it is considered as internal.
+	 */
+	public static boolean isGitlabUserExternal(User user) {
+		if (Boolean.TRUE.equals(user.getBot())) {
+			return false;
+		} else if (user.getExternal() == null) {
+			var username = user.getUsername();
+			if (!usersWithUnknownInternalOrExternalStatus.contains(username)) {
+				// log only once
+				LOGGER.info("Cannot determine whether user [{}] is external or not. Assuming it is internal",
+						username);
+				usersWithUnknownInternalOrExternalStatus.add(username);
+			}
+			return false;
+		} else {
+			return Boolean.TRUE.equals(user.getExternal());
+		}
+	}
+
+	/**
 	 * Gets all the gitlab users and returns them in a map.
 	 */
 	public static Map<String, User> getAllGitlabUsers(GitlabAPIWrapper api) {
-		return api.getUsers().stream().collect(
-				Collectors.toMap(User::getUsername, user -> user, (v1, v2) -> v2));
+		return api.getUsers().stream()
+				.collect(Collectors.toMap(User::getUsername, user -> user, (v1, v2) -> v2));
 	}
 
 	/**

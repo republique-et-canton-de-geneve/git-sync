@@ -66,7 +66,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 			boolean isUserAlreadyMemberOfGroup = MissionUtils.isGitlabUserMemberOfGroup(memberList, ldapUserName);
 
 			if (!allGitlabUsers.containsKey(ldapUserName)) {
-				LOGGER.info("        User [{}] does not exist in GitLab (handling of group [{}])", ldapUserName, group.getName());
+				LOGGER.debug("        User [{}] does not exist in GitLab (handling of group [{}])", ldapUserName, group.getName());
 				continue;
 			}
 
@@ -90,10 +90,14 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 	private void handleNewMember(String username, Group group, GitlabAPIWrapper api, User user) {
 		if (isUserCompliant(username)) {
-			LOGGER.info("        Adding user [{}] to group [{}]", username, group.getName());
+			if (MissionUtils.isGitlabUserExternal(user)) {
+				LOGGER.info("        Not adding user [{}] as maintainer to group [{}], because it is external", username, group.getName());
+			} else {
+				LOGGER.info("        Adding user [{}] as maintainer to group [{}]", username, group.getName());
 			api.addGroupMember(group, user.getId(), MAINTAINER);
+			}
 		} else {
-			LOGGER.info("        Not adding user [{}] to group [{}], because it is banned", username, group.getName());
+			LOGGER.info("        Not adding user [{}] as maintainer to group [{}], because it is banned", username, group.getName());
 		}
 	}
 }

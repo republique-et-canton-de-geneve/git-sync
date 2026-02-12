@@ -100,21 +100,28 @@ For every standard LDAP group, retrieve the list of users (LU).
   * For every user in list LU:
     * If the user does not exist in GitLab, do nothing
       (see section [GitLab authentication](#gitlab-authentication)).
-    * If the user already exists in GitLab and is not assigned to the matching GitLab group, 
+    * If the user already exists in GitLab,
+      is internal and is not assigned to the matching GitLab group, 
       assign it with the "Maintainer" GitLab role.
     * If the user already exists in GitLab and is already assigned to the matching GitLab group, do nothing.
   * Additionally:  
-    * If any user already exists in GitLab, is assigned to the matching GitLab group, has "Maintainer role",
+    * If any user already exists in GitLab, is assigned to the matching GitLab group, has "Maintainer" role,
       but is not in list LU, remove it from the GitLab group,
-      unless the user belongs to the list of not-to-be-cleaned users.
+      unless the user belongs to the list of not-to-be-cleaned users
+    * If any user already exists in GitLab, is assigned to the matching GitLab group,
+      has either "Maintainer" or "Developer" role"
+      and is external, remove it from the GitLab group.
 
 ### BR3 : set all others users are Developers
 
-Create Retrieve the list of users (LU) of all standard GitLab groups:
+Retrieve the list of users (LU) of all standard GitLab groups:
   * For every user in list LU:
     * For every GitLab group not in `limited-access-groups`:
-      * If the user is not assigned to the GitLab group, assign it with the "Developer" GitLab role.
-      * If the user is already assigned to the GitLab group with a role weaker than "Developer",
+      * If the user is not assigned to the GitLab group
+        and is an internal GitLab user,
+        assign it with the "Developer" GitLab role.
+      * If the user is already assigned to the GitLab group with a role weaker than "Developer"
+        and is an internal GitLab user,
         assign it with the "Developer" GitLab role.
       * If the user is already assigned to the GitLab group with a role stronger than or equal to "Developer",
         do nothing.

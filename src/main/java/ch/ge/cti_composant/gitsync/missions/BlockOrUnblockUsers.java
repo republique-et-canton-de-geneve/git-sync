@@ -18,23 +18,21 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ch.ge.cti_composant.gitsync.util.MissionUtils;
+import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
+import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
+import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab4j.api.models.Identity;
 import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ge.cti_composant.gitsync.util.MissionUtils;
-import ch.ge.cti_composant.gitsync.util.gitlab.Gitlab;
-import ch.ge.cti_composant.gitsync.util.gitlab.GitlabAPIWrapper;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
-import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Blocks or unblocks users in GitLab (BR5).
@@ -52,8 +50,7 @@ public class BlockOrUnblockUsers implements Mission {
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		// Gitlab users
-		Map<String, User> gitlabUsers = new HashMap<>();
-		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
+		Map<String, User> gitlabUsers = MissionUtils.getAllGitlabUsers(api);
 
 		// Ldap users
 		Map<String, LdapUser> ldapUsers = ldapTree.getGroups().stream()

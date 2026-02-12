@@ -55,37 +55,37 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 		Map<String, User> gitlabUsers = new TreeMap<>();
 		api.getUsers().forEach(gitlabUser -> gitlabUsers.put(gitlabUser.getUsername(), gitlabUser));
 
-		// Ldap users
+		// LDAP users
 		Set<LdapUser> ldapUsers = MissionUtils.getLdapUsers(ldapTree);
 
 		// Keep only compliant LDAP users existing in GitLab
 		List<LdapUser> filteredUsers = ldapUsers.stream()
 				.filter(user -> gitlabUsers.containsKey(user.getName()))
 				.filter(user -> MissionUtils.isUserCompliant(user.getName()))
-				.sorted(Comparator.comparing(LdapUser::getName)).toList();
+				.sorted(Comparator.comparing(LdapUser::getName))
+				.toList();
 
+		// Promote
 		gitlab.getGroups().stream()
 				.filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
 				.filter(group -> MissionUtils.validateGroupNameCompliantStandardGroups(group.getName()))
-				// for each gitlab group
 				.forEach(group -> {
-					LOGGER.info("Promoting users as developer to group [{}]", group.getName());
-					manageGroup(api, group, gitlabUsers, filteredUsers);
+					LOGGER.info("Promoting users as developers in group [{}]", group.getName());
+					List<Member> members = api.getGroupMembers(group);
+					filteredUsers.forEach(user -> promoteUserAsDeveloper(
+							api, group, members, gitlabUsers.get(user.getName())));
 				});
 
-		LOGGER.info("Promoting users as developer completed");
-	}
-
-	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> gitlabUsers, List<LdapUser> ldapUsers) {
-		List<Member> members = api.getGroupMembers(group);
-		ldapUsers.forEach(user -> promoteUserAsDeveloper(api, group, members, gitlabUsers.get(user.getName())));
+		LOGGER.info("Promoting users as developers completed");
 	}
 
 	private void promoteUserAsDeveloper(GitlabAPIWrapper api, Group group, List<Member> members, User user) {
-		if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())) {
+		if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())
+				&& !MissionUtils.isGitlabUserExternal(user)) {
 			LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(), group.getName());
 			api.addGroupMember(group, user.getId(), DEVELOPER);
-		} else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(), DEVELOPER)) {
+		} else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(), DEVELOPER)
+				&& !MissionUtils.isGitlabUserExternal(user)) {
 			LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
 			api.deleteGroupMember(group, user.getId());
 			api.addGroupMember(group, user.getId(), DEVELOPER);

@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Member;
+import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ import ch.ge.cti_composant.gitsync.util.ldap.LdapGroup;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapTree;
 import ch.ge.cti_composant.gitsync.util.ldap.LdapUser;
 
+import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
+import static org.gitlab4j.api.models.AccessLevel.DEVELOPER;
 import static org.gitlab4j.api.models.AccessLevel.MAINTAINER;
 
 /**
@@ -75,6 +78,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 		GitlabAPIWrapper api = gitlab.getApi();
 		List<Member> members = api.getGroupMembers(gitlabGroup);
+		Map<String, User> gitlabUsers = MissionUtils.getAllGitlabUsers(api);
 
 		members.stream()
 				.filter(member -> !ldapTree.getUsers(ldapGroup.getName()).containsKey(member.getUsername())
@@ -88,10 +92,16 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		members.stream()
 				.filter(member -> !MissionUtils.isUserCompliant(member.getUsername()))
 				.forEach(member -> removeUser(member, gitlabGroup, api, " (banned user)"));
+
+		members.stream()
+				.filter(member -> MissionUtils.isGitlabUserExternal(gitlabUsers.get(member.getUsername())))
+				.filter(member -> member.getAccessLevel() == MAINTAINER || member.getAccessLevel() == DEVELOPER)
+				.forEach(member -> removeUser(member, gitlabGroup, api, " (external user)"));
 	}
 
 	private void removeUser(Member member, Group group, GitlabAPIWrapper api, String cause) {
-		LOGGER.info("        Removing user [{}] from group [{}]{}", member.getUsername(), group.getName(), cause);
+		LOGGER.info("        Removing user [{}] ({}) from group [{}]{}",
+				member.getUsername(), toRootLowerCase(member.getAccessLevel().name()), group.getName(), cause);
 		api.deleteGroupMember(group, member.getId());
 	}
 
