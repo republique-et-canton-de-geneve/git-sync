@@ -67,7 +67,7 @@ public class PromoteAdminUsers implements Mission {
 		boolean userExists = MissionUtils.validateGitlabUserExistence(ldapUser, new ArrayList<>(allUsers.values()));
 
 		if (!userExists) {
-			LOGGER.info("    User [{}] won't be set as administrator as it does not exist in GitLab", username);
+			LOGGER.debug("    User [{}] won't be set as administrator as it does not exist in GitLab", username);
 			return;
 		}
 
@@ -76,7 +76,7 @@ public class PromoteAdminUsers implements Mission {
 			LOGGER.info("    Setting user [{}] as administrator", username);
 			api.promoteToAdmin(user.getId());
 		} else if (MissionUtils.isGitlabUserAdmin(user, api, ldapTree)) {
-			LOGGER.info("    User [{}] is already administrator", username);
+			LOGGER.debug("    User [{}] is already administrator", username);
 		}
 	}
 
