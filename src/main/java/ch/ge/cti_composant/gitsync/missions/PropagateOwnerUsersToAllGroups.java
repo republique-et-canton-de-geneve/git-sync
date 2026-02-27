@@ -86,26 +86,26 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 			// user is admin, do nothing
 			boolean isAdmin = TRUE.equals(allUsers.get(username).getIsAdmin());
 			if (isAdmin) {
-				LOGGER.debug("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
+				LOGGER.debug("        User [{}] won't be set as owner to group {} as he is already admin in GitLab",
 						username, group.getName());
 			}
 			// user is not member, add it
 			else if (!MissionUtils.isGitlabUserMemberOfGroup(members, username)) {
-				LOGGER.info("    Setting user [{}] as owner to group {}", username, group.getName());
+				LOGGER.info("        Setting user [{}] as owner to group {}", username, group.getName());
 				api.addGroupMember(group, allUsers.get(username).getId(), OWNER);
 			}
 			// user is member but not owner
 			else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, username, OWNER)) {
-				LOGGER.info("    Promoting user [{}] as owner to group {}", username, group.getName());
+				LOGGER.info("        Promoting user [{}] as owner to group {}", username, group.getName());
 				api.deleteGroupMember(group, allUsers.get(username).getId());
 				api.addGroupMember(group, allUsers.get(username).getId(), OWNER);
 			}
 			// user is already owner
 			else {
-				LOGGER.debug("    User [{}] is already owner of group {}", username, group.getName());
+				LOGGER.debug("        User [{}] is already owner of group {}", username, group.getName());
 			}
 		} else {
-			LOGGER.debug("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
+			LOGGER.debug("        User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
 					group.getName());
 		}
 	}
