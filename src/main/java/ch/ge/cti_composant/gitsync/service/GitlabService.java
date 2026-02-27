@@ -67,7 +67,7 @@ public class GitlabService {
 		List<Group> groups = api.getGroups();
 
 		// check and store the GitLab groups in memory
-		LOGGER.info("Constructing la liste des groupes");
+		LOGGER.info("Constructing the group list");
 
 		Set<Group> groupsInLdap = groups.stream()
 				// exclude the groups created independently of LDAP

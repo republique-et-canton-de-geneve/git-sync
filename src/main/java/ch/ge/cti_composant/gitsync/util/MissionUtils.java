@@ -128,7 +128,8 @@ public class MissionUtils {
 			var username = user.getUsername();
 			if (!usersWithUnknownInternalOrExternalStatus.contains(username)) {
 				// log only once
-				LOGGER.info("Cannot determine whether user [{}] is external or not. Assuming it is internal",
+				LOGGER.info("Cannot determine whether user [{}] is external or not. Assuming it is internal."
+								+ " Note: this is logged only once",
 						username);
 				usersWithUnknownInternalOrExternalStatus.add(username);
 			}

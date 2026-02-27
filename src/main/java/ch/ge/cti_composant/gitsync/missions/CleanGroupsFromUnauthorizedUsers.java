@@ -18,6 +18,7 @@
  */
 package ch.ge.cti_composant.gitsync.missions;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +78,9 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	private void handleGroup(Group gitlabGroup, LdapTree ldapTree, Gitlab gitlab, Map<String, LdapUser> owners) {
 		LdapGroup ldapGroup = new LdapGroup(gitlabGroup.getName());
 		GitlabAPIWrapper api = gitlab.getApi();
-		List<Member> members = api.getGroupMembers(gitlabGroup);
+		List<Member> members =  api.getGroupMembers(gitlabGroup).stream()
+				.sorted(Comparator.comparing(Member::getUsername))
+				.toList();
 		Map<String, User> gitlabUsers = MissionUtils.getAllGitlabUsers(api);
 
 		members.stream()
