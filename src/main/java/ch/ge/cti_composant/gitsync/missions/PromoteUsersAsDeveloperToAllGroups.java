@@ -70,7 +70,7 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 				.filter(group -> !MissionUtils.getLimitedAccessGroups().contains(group.getName()))
 				.filter(group -> MissionUtils.validateGroupNameCompliantStandardGroups(group.getName()))
 				.forEach(group -> {
-					LOGGER.info("Promoting users as developers in group [{}]", group.getName());
+					LOGGER.info("    Promoting users as developers in group [{}]", group.getName());
 					List<Member> members = api.getGroupMembers(group);
 					filteredUsers.forEach(user -> promoteUserAsDeveloper(
 							api, group, members, gitlabUsers.get(user.getName())));
@@ -82,15 +82,15 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 	private void promoteUserAsDeveloper(GitlabAPIWrapper api, Group group, List<Member> members, User user) {
 		if (!MissionUtils.isGitlabUserMemberOfGroup(members, user.getUsername())
 				&& !MissionUtils.isGitlabUserExternal(user)) {
-			LOGGER.info("    User [{}] not member, adding as developer to group [{}]", user.getUsername(), group.getName());
+			LOGGER.info("        User [{}] not member and internal, adding as developer to group [{}]", user.getUsername(), group.getName());
 			api.addGroupMember(group, user.getId(), DEVELOPER);
 		} else if (!MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(members, user.getUsername(), DEVELOPER)
 				&& !MissionUtils.isGitlabUserExternal(user)) {
-			LOGGER.info("    Promoting user [{}] as developer to group [{}]", user.getUsername(), group.getName());
+			LOGGER.info("        Promoting internal user [{}] as developer to group [{}]", user.getUsername(), group.getName());
 			api.deleteGroupMember(group, user.getId());
 			api.addGroupMember(group, user.getId(), DEVELOPER);
 		} else {
-			LOGGER.debug("    User [{}] has already an access level up or equal to developer to group [{}]",
+			LOGGER.debug("        User [{}] has already an access level up or equal to developer to group [{}]",
 					user.getUsername(), group.getName());
 		}
 	}

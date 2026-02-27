@@ -80,7 +80,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 	private void handleExistingMember(List<Member> memberList, String username, Group group, GitlabAPIWrapper api, User user) {
 		if (MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username, MAINTAINER)) {
-			LOGGER.info("        User [{}] is already in group [{}]", username, group.getName());
+			LOGGER.debug("        User [{}] is already in group [{}]", username, group.getName());
 		} else {
 			LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
 			api.deleteGroupMember(group, user.getId());
@@ -90,14 +90,11 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 	private void handleNewMember(String username, Group group, GitlabAPIWrapper api, User user) {
 		if (isUserCompliant(username)) {
-			if (MissionUtils.isGitlabUserExternal(user)) {
-				LOGGER.info("        Not adding user [{}] as maintainer to group [{}], because it is external", username, group.getName());
-			} else {
-				LOGGER.info("        Adding user [{}] as maintainer to group [{}]", username, group.getName());
+			LOGGER.info("        Adding user [{}] as maintainer to group [{}]", username, group.getName());
 			api.addGroupMember(group, user.getId(), MAINTAINER);
-			}
 		} else {
 			LOGGER.info("        Not adding user [{}] as maintainer to group [{}], because it is banned", username, group.getName());
 		}
 	}
+
 }

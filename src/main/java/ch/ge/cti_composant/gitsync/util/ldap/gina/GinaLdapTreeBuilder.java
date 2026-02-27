@@ -96,7 +96,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 
 			// get the LDAP users
 			tree.forEach((ldapGroup, ldapUsers) -> {
-				LOGGER.info("Retrieving the users of LDAP group [{}]", ldapGroup.getName());
+				LOGGER.info("    Retrieving the users of LDAP group [{}]", ldapGroup.getName());
 				getLdapUsersForGroup(ldapGroup, ldapUsers, app);
 			});
 			ldapTree = new LdapTreeSupport(tree);
@@ -116,7 +116,7 @@ public class GinaLdapTreeBuilder implements LdapTreeBuilder {
 					.sorted(userComparator)
 					.forEach(user -> {
 						if (user.containsKey(CN)) {
-							LOGGER.info("\t{} is user of LDAP group [{}]", user.get(CN), ldapGroup.getName());
+							LOGGER.debug("        {} is user of LDAP group [{}]", user.get(CN), ldapGroup.getName());
 							ldapUsers.put(user.get(CN), new LdapUser(user));
 						}
 					});

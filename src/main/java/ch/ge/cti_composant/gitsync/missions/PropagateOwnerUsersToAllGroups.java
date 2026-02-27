@@ -74,6 +74,7 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 
 	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> allUsers,
 							 Map<String, LdapUser> owners) {
+		LOGGER.info("    Propagating owner users to group {}", group.getName());
 		List<Member> members = api.getGroupMembers(group);
 		owners.forEach((username, ldapUser) -> setUserAsOwner(api, username, group, ldapUser, allUsers, members));
 	}
@@ -85,7 +86,7 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 			// user is admin, do nothing
 			boolean isAdmin = TRUE.equals(allUsers.get(username).getIsAdmin());
 			if (isAdmin) {
-				LOGGER.info("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
+				LOGGER.debug("    User [{}] won't be set as owner to group {} as he is already admin in GitLab",
 						username, group.getName());
 			}
 			// user is not member, add it
@@ -101,10 +102,10 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 			}
 			// user is already owner
 			else {
-				LOGGER.info("    User [{}] is already owner to group {}", username, group.getName());
+				LOGGER.debug("    User [{}] is already owner of group {}", username, group.getName());
 			}
 		} else {
-			LOGGER.info("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
+			LOGGER.debug("    User [{}] won't be set as owner to group {} as it does not exist in GitLab", username,
 					group.getName());
 		}
 	}

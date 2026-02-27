@@ -95,7 +95,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 		members.stream()
 				.filter(member -> MissionUtils.isGitlabUserExternal(gitlabUsers.get(member.getUsername())))
-				.filter(member -> member.getAccessLevel() == MAINTAINER || member.getAccessLevel() == DEVELOPER)
+				.filter(member -> member.getAccessLevel() == DEVELOPER)
 				.forEach(member -> removeUser(member, gitlabGroup, api, " (external user)"));
 	}
 
