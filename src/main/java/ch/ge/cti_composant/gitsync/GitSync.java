@@ -65,6 +65,7 @@ public class GitSync {
 	 * Performs all operations.
 	 */
 	public void run(String path) {
+		LOGGER.info("Running GitSync");
 		try {
 			loadProperties(path);
 
@@ -80,6 +81,7 @@ public class GitSync {
 		} catch (Exception e) {
 			LOGGER.error("Exception caught while processing the LDAP/GitLab trees", e);
 		}
+		LOGGER.info("Running GitSync - completed");
 	}
 
 	/**
@@ -90,7 +92,7 @@ public class GitSync {
 			props.load(inputStream);
 		}
 
-		LOGGER.info("Running GitSync {} with LDAP server [{}] and GitLab server [{}]",
+		LOGGER.info("GitSync {} with LDAP server [{}] and GitLab server [{}]",
 				sanitize(getVersion()),
 				sanitize((String) props.get("gina-ldap-client.ldap-server-url")),
 				sanitize((String) props.get("gitlab.hostname")));

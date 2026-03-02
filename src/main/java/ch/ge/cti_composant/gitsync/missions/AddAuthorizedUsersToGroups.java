@@ -49,7 +49,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		Map<String, User> allGitlabUsers = MissionUtils.getAllGitlabUsers(api);
-		LOGGER.info("Total number of GitLab users: {}", allGitlabUsers.size());
+		LOGGER.info("    Total number of GitLab users: {}", allGitlabUsers.size());
 
 		gitlab.getGroups()
 				.forEach(group -> processGroup(group, ldapTree, api, allGitlabUsers));
