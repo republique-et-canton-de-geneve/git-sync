@@ -32,7 +32,7 @@ import org.gitlab4j.api.models.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,9 +55,23 @@ public class MissionUtils {
 
 	private static Pattern standardGroupUsersPattern;
 
-	private static List<String> usersWithUnknownInternalOrExternalStatus = new ArrayList<>();
+	private static Map<String, User> gitLabUsers;
+
+	/**
+	 * Key = user name.
+	 * Value = True if external, else False.
+	 */
+	private static Map<String, Boolean> userExternalities = new HashMap<>();
 
 	private MissionUtils() {
+	}
+
+	/**
+	 * Clear caches, for unit tests.
+	 */
+	public static void clearCaches() {
+		gitLabUsers = null;
+		userExternalities = new HashMap<>();
 	}
 
 	/**
@@ -120,31 +134,36 @@ public class MissionUtils {
 	/**
 	 * Checks whether the specified GitLab user is an external user.
 	 * If the user is a bot, it is considered as internal.
+	 * If the user is neither internal nor external, it is considered as internal.
 	 */
 	public static boolean isGitlabUserExternal(User user) {
-		if (Boolean.TRUE.equals(user.getBot())) {
-			return false;
-		} else if (user.getExternal() == null) {
-			var username = user.getUsername();
-			if (!usersWithUnknownInternalOrExternalStatus.contains(username)) {
-				// log only once
+		var username = user.getUsername();
+		Boolean isExternal = userExternalities.get(username);
+		if (isExternal == null) {
+			if (Boolean.TRUE.equals(user.getBot())) {
+				isExternal = Boolean.FALSE;
+			} else if (user.getExternal() == null) {
 				LOGGER.info("Cannot determine whether user [{}] is external or not. Assuming it is internal."
-								+ " Note: this is logged only once",
+								+ " This is logged only once",
 						username);
-				usersWithUnknownInternalOrExternalStatus.add(username);
+				isExternal = Boolean.FALSE;
+			} else {
+				isExternal = user.getExternal();
 			}
-			return false;
-		} else {
-			return Boolean.TRUE.equals(user.getExternal());
+			userExternalities.put(username, isExternal);
 		}
+		return isExternal;
 	}
 
 	/**
 	 * Gets all the gitlab users and returns them in a map.
 	 */
 	public static Map<String, User> getAllGitlabUsers(GitlabAPIWrapper api) {
-		return api.getUsers().stream()
+		if (gitLabUsers == null) {
+			gitLabUsers = api.getUsers().stream()
 				.collect(Collectors.toMap(User::getUsername, user -> user, (v1, v2) -> v2));
+		}
+		return gitLabUsers;
 	}
 
 	/**

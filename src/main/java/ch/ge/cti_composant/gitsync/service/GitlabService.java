@@ -61,18 +61,20 @@ public class GitlabService {
 					LOGGER.info("    Group [{}] does not exist: creating it in GitLab", ldapGroup.getName());
 					createGroup(ldapGroup, api);
 				});
+		LOGGER.info("Creating the missing GitLab groups - completed");
 
 		// retrieve the GitLab groups
 		LOGGER.info("Retrieving the GitLab groups");
 		List<Group> groups = api.getGroups();
+		LOGGER.info("Retrieving the GitLab groups - completed");
 
 		// check and store the GitLab groups in memory
 		LOGGER.info("Constructing the group list");
-
 		Set<Group> groupsInLdap = groups.stream()
 				// exclude the groups created independently of LDAP
 				.filter(gitlabGroup -> MissionUtils.validateLdapGroupExistence(gitlabGroup, ldapTree))
 				.collect(Collectors.toSet());
+		LOGGER.info("Constructing the group list - completed");
 
 		return new Gitlab(groupsInLdap, hostname, apiToken);
 	}

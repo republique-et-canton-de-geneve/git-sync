@@ -45,7 +45,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping: adding the users to the authorized groups");
+		LOGGER.info("Adding the users to the authorized groups");
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		Map<String, User> allGitlabUsers = MissionUtils.getAllGitlabUsers(api);
@@ -53,7 +53,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 
 		gitlab.getGroups()
 				.forEach(group -> processGroup(group, ldapTree, api, allGitlabUsers));
-		LOGGER.info("Mapping completed");
+		LOGGER.info("Adding the users to the authorized groups - completed");
 	}
 
 	private void processGroup(Group group, LdapTree ldapTree, GitlabAPIWrapper api, Map<String, User> allGitlabUsers) {

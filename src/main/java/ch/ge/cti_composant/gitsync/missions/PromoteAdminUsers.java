@@ -44,7 +44,7 @@ public class PromoteAdminUsers implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping: adding admin users");
+		LOGGER.info("Adding admin users");
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		Map<String, User> allGitlabUsers = api.getUsers().stream()
@@ -58,7 +58,7 @@ public class PromoteAdminUsers implements Mission {
 					.forEach((username, ldapUser) ->
 							handlePromotionToAdmin(ldapTree, username, ldapUser, allGitlabUsers, api));
 		}
-		LOGGER.info("Mapping completed");
+		LOGGER.info("Adding admin users - completed");
 	}
 
 	private static void handlePromotionToAdmin(LdapTree ldapTree, String username, LdapUser ldapUser,

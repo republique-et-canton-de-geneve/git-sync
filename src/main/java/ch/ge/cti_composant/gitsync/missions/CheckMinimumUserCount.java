@@ -58,7 +58,7 @@ public class CheckMinimumUserCount implements Mission {
 			throw new GitSyncException(message);
 		}
 
-		LOGGER.info("Precondition OK");
+		LOGGER.info("Precondition OK: nb users ({}) >= min nb users ({})", users.size(), minimumUserCount);
 	}
 
 	private int getMinimumUserCount() {

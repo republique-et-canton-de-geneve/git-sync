@@ -39,6 +39,8 @@ class MissionUtilsSpec extends Specification {
     def standardGroupUsersPattern = MissionUtils.class.getDeclaredField("standardGroupUsersPattern")
 
     def setup() {
+        MissionUtils.clearCaches()
+
         standardGroupsPattern.setAccessible(true)
         standardGroupsPattern.set(null, ~/^[a-zA-Z_]+$/)
 

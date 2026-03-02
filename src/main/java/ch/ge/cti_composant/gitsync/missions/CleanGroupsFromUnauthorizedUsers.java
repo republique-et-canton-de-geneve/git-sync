@@ -53,7 +53,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Mapping: removing the user permissions in excess on GitLab");
+		LOGGER.info("Removing the user permissions in excess on GitLab");
 
 		String ownerGroup = MissionUtils.getOwnerGroup();
 		LOGGER.info("    Property owner-group is set to [{}]", ownerGroup);
@@ -72,7 +72,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 					handleGroup(gitlabGroup, ldapTree, gitlab, owners);
 				});
 
-		LOGGER.info("Mapping completed");
+		LOGGER.info("Removing the user permissions in excess on GitLab - completed");
 	}
 
 	private void handleGroup(Group gitlabGroup, LdapTree ldapTree, Gitlab gitlab, Map<String, LdapUser> owners) {

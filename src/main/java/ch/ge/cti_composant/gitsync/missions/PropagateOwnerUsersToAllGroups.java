@@ -69,7 +69,7 @@ public class PropagateOwnerUsersToAllGroups implements Mission {
 					.forEach(group -> manageGroup(api, group, allUsers, owners));
 		}
 
-		LOGGER.info("Propagating owner users completed");
+		LOGGER.info("Propagating owner users to all groups - completed");
 	}
 
 	private void manageGroup(GitlabAPIWrapper api, Group group, Map<String, User> allUsers,

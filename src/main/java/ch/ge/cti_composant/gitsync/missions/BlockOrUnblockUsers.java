@@ -68,7 +68,7 @@ public class BlockOrUnblockUsers implements Mission {
 				.sorted(Comparator.comparing(User::getUsername))
 				.forEach(user -> blockOrUnblockUser(api, user, ldapUsers));
 
-		LOGGER.info("Block or unblock users in GitLab completed");
+		LOGGER.info("Block or unblock users in GitLab - completed");
 	}
 
 	private boolean fromLdap(final User gitlabUser) {

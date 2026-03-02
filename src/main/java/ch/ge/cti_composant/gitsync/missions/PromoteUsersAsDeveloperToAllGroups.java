@@ -76,7 +76,7 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 							api, group, members, gitlabUsers.get(user.getName())));
 				});
 
-		LOGGER.info("Promoting users as developers completed");
+		LOGGER.info("Promoting users as developer to all groups - completed");
 	}
 
 	private void promoteUserAsDeveloper(GitlabAPIWrapper api, Group group, List<Member> members, User user) {
