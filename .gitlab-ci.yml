@@ -3,7 +3,7 @@
 # Includes
 # --------------------------------------
 include:
-  - component: $COMPOSANTS_MOYENS_DEV_URL/maven/full-ci-java-standard@main
+  - component: $COMPOSANTS_MOYENS_DEV_URL/maven/full-ci-java-standard@1.1
 
 
 # --------------------------------------
@@ -15,4 +15,9 @@ default:
     - 'for:application-project'
     - 'host:restricted-container'
     - 'net:soca4-dev'
+
+
+sonar:
+  variables:
+    SONAR_EXCLUSIONS: "**/test/**,**/docs/**"
 ...
