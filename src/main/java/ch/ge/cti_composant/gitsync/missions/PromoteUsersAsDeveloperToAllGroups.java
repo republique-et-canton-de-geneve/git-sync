@@ -48,7 +48,7 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 
 	@Override
 	public void start(LdapTree ldapTree, Gitlab gitlab) {
-		LOGGER.info("Promoting users as developer to all groups");
+		LOGGER.info("Promoting users as developers to all groups");
 		GitlabAPIWrapper api = gitlab.getApi();
 
 		// GitLab users
@@ -76,7 +76,7 @@ public class PromoteUsersAsDeveloperToAllGroups implements Mission {
 							api, group, members, gitlabUsers.get(user.getName())));
 				});
 
-		LOGGER.info("Promoting users as developer to all groups - completed");
+		LOGGER.info("Promoting users as developers to all groups - completed");
 	}
 
 	private void promoteUserAsDeveloper(GitlabAPIWrapper api, Group group, List<Member> members, User user) {
