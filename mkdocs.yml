@@ -1,0 +1,5 @@
+site_name: 10351-gitsync
+site_description: Gitsync
+docs_dir: docs
+plugins:
+  - techdocs-core

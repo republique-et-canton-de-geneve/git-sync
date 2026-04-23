@@ -1,8 +1,18 @@
+---
 # --------------------------------------
 # Includes
 # --------------------------------------
 include:
   - component: $COMPOSANTS_MOYENS_DEV_URL/filiere-java/full-ci-java-standard@main
+  - component: $COMPOSANTS_MOYENS_DEV_URL/techdocs/generate@main
+  - component: $COMPOSANTS_MOYENS_DEV_URL/techdocs/publish@main
+    inputs:
+      techdocs_entity: default/component/10351-gitSync
+      aws_s3_bucket: 11737-01-dev
+      stage: release
+
+variables:
+  CHECK_VARIABLES_ENABLED: false
 
 
 # --------------------------------------

@@ -1,0 +1,20 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+
+metadata:
+  name: 10351-gitSync
+  description: Application de synchronisation des droits entre Gina et GitLab.
+  annotations:
+    backstage.io/source-location: url:https://git.devops.etat-ge.ch/DEVELOPPEUR-CTI/appsec/projets/10351-gitsync
+    gitlab.com/project-slug: 'DEVELOPPEUR-CTI/appsec/projets/10351-gitsync'
+    gitlab.com/instance: git.devops.etat-ge.ch
+    sonarqube.org/project-key: ch.ge.cti.composant:gitSync
+    backstage.io/techdocs-ref: dir:.
+
+spec:
+  type: batch
+  lifecycle: production
+  owner: group:default/developpeur-cti
+  system: 10351-gitlab
+---
