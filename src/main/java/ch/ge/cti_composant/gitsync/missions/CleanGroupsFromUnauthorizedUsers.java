@@ -100,6 +100,12 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 				.filter(member -> MissionUtils.isGitlabUserExternal(gitlabUsers.get(member.getUsername())))
 				.filter(member -> member.getAccessLevel() == DEVELOPER)
 				.forEach(member -> removeUser(member, gitlabGroup, api, " (external user)"));
+
+		if (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())) {
+				members.stream()
+						.filter(member -> member.getAccessLevel() == DEVELOPER)
+						.forEach(member -> removeUser(member, gitlabGroup, api, " (limited-access group)"));
+		}
 	}
 
 	private void removeUser(Member member, Group group, GitlabAPIWrapper api, String cause) {

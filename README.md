@@ -101,6 +101,9 @@ Retrieve the list of users (LU) of all standard GitLab groups:
       * If the user is already assigned to the GitLab group with "Developer" role
         and is external,
         remove it from the GitLab group.
+    * For every GitLab group in `limited-access-groups`:
+      * If the user is already assigned to the GitLab group with "Developer" role,
+        remove it from the GitLab role. 
 
 ### BR4 : manage administrators
 
@@ -169,7 +172,7 @@ For each user, the hand-shake step 1 above occurs only once.
 # Technical facts
 
 The application is a standalone application. It performs the replication once and then exits.
-It requires Java 21 to build and run.
+It requires Java 21 (not 25) to build and run.
 
 Communication with the LDAP server is performed by means of a home-made Java library named
 [gina-ldap-client](https://github.com/republique-et-canton-de-geneve/gina-ldap-client)
