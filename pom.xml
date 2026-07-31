@@ -13,7 +13,7 @@
 	</parent>
 
 	<groupId>ch.ge.cti.composant</groupId>
-	<artifactId>gitSync</artifactId>
+	<artifactId>10351-gitsync</artifactId>
 	<version>6.4.2-SNAPSHOT</version>
 
 	<url>https://github.com/republique-et-canton-de-geneve/git-sync</url>
