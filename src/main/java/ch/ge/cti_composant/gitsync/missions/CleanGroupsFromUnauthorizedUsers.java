@@ -111,7 +111,12 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 	private void removeUser(Member member, Group group, GitlabAPIWrapper api, String cause) {
 		LOGGER.info("        Removing user [{}] ({}) from group [{}]{}",
 				member.getUsername(), toRootLowerCase(member.getAccessLevel().name()), group.getName(), cause);
-		api.deleteGroupMember(group, member.getId());
+		if (api.getGroupMembers(group).stream()
+				.noneMatch(m -> m.getUsername().equals(member.getUsername()))) {
+			LOGGER.info("        Not removing the user. It has probably already been removed");
+		} else {
+			api.deleteGroupMember(group, member.getId());
+		}
 	}
 
 }

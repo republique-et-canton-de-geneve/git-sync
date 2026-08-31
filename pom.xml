@@ -189,7 +189,6 @@
 	</dependencies>
 
 	<build>
-		<finalName>gitSync-${project.version}</finalName>
 		<resources>
 			<resource>
 				<filtering>false</filtering>
