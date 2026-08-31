@@ -164,7 +164,7 @@ public class GitSync {
 	 */
 	private static String getVersion() {
 		Properties properties = new Properties();
-		String filePath = "/META-INF/maven/ch.ge.cti.composant/gitSync/pom.properties";
+		String filePath = "/META-INF/maven/ch.ge.cti.composant/10351-gitsync/pom.properties";
 		String versionName = "version";
 		String versionValue;
 
