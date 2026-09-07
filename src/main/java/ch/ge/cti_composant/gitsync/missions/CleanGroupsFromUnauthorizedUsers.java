@@ -104,6 +104,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		if (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())) {
 				members.stream()
 						.filter(member -> member.getAccessLevel() == DEVELOPER)
+						.filter(member -> !isBot(member))
 						.forEach(member -> removeUser(member, gitlabGroup, api, " (limited-access group)"));
 		}
 	}
@@ -117,6 +118,14 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		} else {
 			api.deleteGroupMember(group, member.getId());
 		}
+	}
+
+	/**
+	 * SCM-1530 : dans GitLab, creer un jeton d'acces entraine la creation d'un utilisateur de type "Bot".
+	 * Chercher a supprimer l'utilisateur  du group produit une erreur 403.
+ 	 */
+	private boolean isBot(Member member) {
+		return member.getEmail().contains("@noreply");   // pas trouve' de meilleur critere pour distinguer les bots
 	}
 
 }
