@@ -104,6 +104,7 @@ public class CleanGroupsFromUnauthorizedUsers implements Mission {
 		if (MissionUtils.getLimitedAccessGroups().contains(gitlabGroup.getName())) {
 				members.stream()
 						.filter(member -> member.getAccessLevel() == DEVELOPER)
+						.filter(member -> !MissionUtils.getNotToCleanUsers().contains(member.getUsername()))
 						.filter(member -> !isBot(member))
 						.forEach(member -> removeUser(member, gitlabGroup, api, " (limited-access group)"));
 		}
