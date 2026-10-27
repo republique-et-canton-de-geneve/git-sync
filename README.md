@@ -86,7 +86,7 @@ For every standard LDAP group, retrieve the list of users (LU).
   * Additionally:  
     * If any user already exists in GitLab, is assigned to the matching GitLab group, has "Maintainer" role,
       but is not in list LU, remove it from the GitLab group,
-      unless the user belongs to the list of not-to-be-cleaned users.
+      unless the user is included in `not-to-clean-users`.
 
 ### BR3 : manage Developers (inner source)
 
@@ -103,7 +103,8 @@ Retrieve the list of users (LU) of all standard GitLab groups:
         remove it from the GitLab group.
     * For every GitLab group in `limited-access-groups`:
       * If the user is already assigned to the GitLab group with "Developer" role,
-        remove it from the GitLab role. 
+        remove it from the GitLab role,
+        unless the user is included in `not-to-clean-users`.
 
 ### BR4 : manage administrators
 
