@@ -82,7 +82,7 @@ public class AddAuthorizedUsersToGroups implements Mission {
 		if (MissionUtils.validateGitlabGroupMemberHasMinimumAccessLevel(memberList, username, MAINTAINER)) {
 			LOGGER.debug("        User [{}] is already in group [{}]", username, group.getName());
 		} else {
-			LOGGER.info("    Promoting user [{}] as maintainer to group {}", username, group.getName());
+			LOGGER.info("        Promoting user [{}] as maintainer to group {}", username, group.getName());
 			api.deleteGroupMember(group, user.getId());
 			api.addGroupMember(group, user.getId(), MAINTAINER);
 		}
