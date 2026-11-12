@@ -21,4 +21,8 @@ default:
 sonar:
   variables:
     SONAR_EXCLUSIONS: "**/test/**,**/docs/**"
+
+betterleaks:
+  variables:
+    BETTERLEAKS_PROJECT_TYPE: opensource
 ...
